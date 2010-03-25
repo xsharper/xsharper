@@ -1,0 +1,7 @@
+#define RT_MANIFEST 24
+#define APP_MANIFEST 1
+
+APP_MANIFEST RT_MANIFEST requireAdministrator.manifest
+
+#define IDI_XSH                         0
+IDI_XSH                 ICON            "xsh.ico"

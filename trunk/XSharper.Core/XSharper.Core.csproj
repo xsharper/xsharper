@@ -1,0 +1,198 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{B5B48BB6-87B2-4065-A327-96745D1B688D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>XSharper.Core</RootNamespace>
+    <AssemblyName>XSharper.Core</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkSubset>
+    </TargetFrameworkSubset>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <LangVersion>default</LangVersion>
+    <DocumentationFile>
+    </DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <DocumentationFile>bin\Release\XSharper.Core.XML</DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="ICSharpCode.SharpZipLib, Version=0.85.5.452, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\3rdParty\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.ServiceProcess" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Actions\ActionWithFilters.cs" />
+    <Compile Include="Actions\Call.cs" />
+    <Compile Include="Actions\CompiledCode.cs" />
+    <Compile Include="Actions\Eval.cs" />
+    <Compile Include="Actions\Exit.cs" />
+    <Compile Include="Actions\Dir.cs" />
+    <Compile Include="Actions\Download.cs">
+    </Compile>
+    <Compile Include="Actions\Embed.cs" />
+    <Compile Include="Actions\Exec.cs" />
+    <Compile Include="Actions\ForEach.cs" />
+    <Compile Include="Actions\If.cs" />
+    <Compile Include="Actions\Row.cs" />
+    <Compile Include="Actions\Transaction.cs" />
+    <Compile Include="Actions\While.cs" />
+    <Compile Include="Reusables\ConcatStream.cs" />
+    <Compile Include="Reusables\ConsoleWithColors.cs" />
+    <Compile Include="Reusables\Eval\Operations\OperationAs.cs" />
+    <Compile Include="Reusables\Eval\Operations\OperationCoalesce.cs" />
+    <Compile Include="Reusables\Eval\Operations\OperationHelper.cs" />
+    <Compile Include="Reusables\Eval\Operations\OperationIs.cs" />
+    <Compile Include="Reusables\Eval\Operations\OperationTypeof.cs" />
+    <Compile Include="Reusables\Eval\PrecompiledCache.cs" />
+    <Compile Include="Reusables\Utils\Utils.CreateInstance.cs" />
+    <Compile Include="Reusables\Utils\Utils.Csv.cs" />
+    <Compile Include="Reusables\Utils\Utils.Registry.cs" />
+    <Compile Include="Reusables\Utils\Utils.Environment.cs" />
+    <Compile Include="Reusables\Utils\Utils.Hex.cs" />
+    <Compile Include="Reusables\Utils\Utils.Types.cs" />
+    <Compile Include="Reusables\Eval\BasicEvaluationContext.cs" />
+    <Compile Include="Reusables\Utils\Utils.EvalHelper.cs" />
+    <Compile Include="Reusables\Eval\Operations\OperationCall.cs" />
+    <Compile Include="Reusables\Eval\Operations\OperationConditional.cs" />
+    <Compile Include="Reusables\Eval\Operations\OperationCreateBlock.cs" />
+    <Compile Include="Reusables\Eval\Operations\OperationExpression.cs" />
+    <Compile Include="Reusables\Eval\Operations\OperationNewObject.cs" />
+    <Compile Include="Reusables\Eval\Operations\OperationOperator.cs" />
+    <Compile Include="Reusables\Eval\Operations\OperationPop.cs" />
+    <Compile Include="Reusables\Eval\Operations\OperationPush.cs" />
+    <Compile Include="Reusables\Eval\Operations.cs" />
+    <Compile Include="Reusables\Eval\Operations\OperationTypeCast.cs" />
+    <Compile Include="Reusables\Eval\Operations\OperationVariableAccess.cs" />
+    <Compile Include="Reusables\Eval\Parser.cs" />
+    <Compile Include="Reusables\Eval\ParsingException.cs" />
+    <Compile Include="Reusables\Xml\XsXsdGenerator.cs" />
+    <Compile Include="Reusables\CtrlCInterceptor.cs" />
+    <Compile Include="ScriptContext.Signature.cs" />
+    <Compile Include="Reusables\ConsoleCtrl.cs" />
+    <Compile Include="ConsoleRedirector.cs" />
+    <Compile Include="Reusables\Utils\Utils.Convert.cs" />
+    <Compile Include="Reusables\Utils\Utils.CopyMove.cs" />
+    <Compile Include="Reusables\Utils\Utils.Text.cs" />
+    <Compile Include="Reusables\Utils\Utils.Table.cs" />
+    <Compile Include="Reusables\WaitableTimer.cs" />
+    <Compile Include="ScriptContext.Evaluator.cs" />
+    <Compile Include="ScriptContext.Main.cs" />
+    <Compile Include="ScriptContext.Udf.cs" />
+    <Compile Include="ScriptContextScope.Main.cs" />
+    <Compile Include="ScriptTerminateException.cs" />
+    <Compile Include="StateBag.cs" />
+    <Compile Include="TypeManager.cs" />
+    <Compile Include="VersionInfo.cs" />
+    <Compile Include="Reusables\IFileSystemInfo.cs" />
+    <Compile Include="ZipFSEntry.cs" />
+    <Compile Include="Reusables\KeepOpenStream.cs" />
+    <Compile Include="Actions\PathOperation.cs" />
+    <Compile Include="Actions\ReadText.cs" />
+    <Compile Include="Actions\Redirect.cs" />
+    <Compile Include="Actions\Rem.cs" />
+    <Compile Include="Actions\Return.cs" />
+    <Compile Include="Actions\RowSet.cs" />
+    <Compile Include="Actions\Sequence.cs" />
+    <Compile Include="Actions\SetAttr.cs" />
+    <Compile Include="Actions\SqlUtil.cs" />
+    <Compile Include="Reusables\Eval\ParsingReader.cs" />
+    <Compile Include="Reusables\StringFilter.cs" />
+    <Compile Include="Actions\Sub.cs" />
+    <Compile Include="Actions\ValueBase.cs" />
+    <Compile Include="Actions\Throw.cs" />
+    <Compile Include="CommandLineParameters.cs" />
+    <Compile Include="UsageGenerator.cs" />
+    <Compile Include="Reusables\WebClientEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Actions\WriteText.cs" />
+    <Compile Include="Actions\XmlDoc.cs" />
+    <Compile Include="Actions\Zip.cs" />
+    <Compile Include="Actions\ZipBase.cs" />
+    <Compile Include="Actions\Header.cs" />
+    <Compile Include="Actions\Include.cs" />
+    <Compile Include="Actions\Reference.cs" />
+    <Compile Include="Actions\RegularExpression.cs" />
+    <Compile Include="Actions\SqlInsert.cs" />
+    <Compile Include="CallStack.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Reusables\CSharpCompiler.cs" />
+    <Compile Include="CommandLine.cs" />
+    <Compile Include="ContextWriter.cs" />
+    <Compile Include="Reusables\Xml\CustomAttributeHelper.cs" />
+    <Compile Include="Reusables\Dump.cs" />
+    <Compile Include="ScriptExceptionWithStackTrace.cs" />
+    <Compile Include="Reusables\VarsTempl.cs" />
+    <Compile Include="Reusables\Xml\XsXml.cs" />
+    <Compile Include="Actions\UnZip.cs" />
+    <Compile Include="Actions\Print.cs" />
+    <Compile Include="Actions\ScriptActionBase.cs" />
+    <Compile Include="Actions\Set.cs" />
+    <Compile Include="Actions\Timer.cs" />
+    <Compile Include="Reusables\Xml\XsXmlElement.cs" />
+    <Compile Include="ScriptException.cs" />
+    <Compile Include="Reusables\Vars.cs" />
+    <Compile Include="Actions\Block.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Actions\Code.cs" />
+    <Compile Include="Actions\Copy.cs" />
+    <Compile Include="Actions\Database.cs" />
+    <Compile Include="Actions\Delete.cs" />
+    <Compile Include="Actions\Service.cs" />
+    <Compile Include="Actions\Shell.cs" />
+    <Compile Include="Actions\Sleep.cs" />
+    <Compile Include="Actions\Sql.cs" />
+    <Compile Include="Actions\Updater.Package.cs" />
+    <Compile Include="Actions\Script.cs" />
+    <Compile Include="Actions\Updater.cs" />
+    <Compile Include="Reusables\Utils\Utils.Various.cs" />
+    <Compile Include="Reusables\Var.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Reusables\templateExpander.xsh">
+    </None>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
