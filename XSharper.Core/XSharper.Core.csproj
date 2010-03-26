@@ -78,6 +78,7 @@
     <Compile Include="Reusables\Eval\Operations\OperationIs.cs" />
     <Compile Include="Reusables\Eval\Operations\OperationTypeof.cs" />
     <Compile Include="Reusables\Eval\PrecompiledCache.cs" />
+    <Compile Include="Reusables\Utils\CustomAttributeHelper.cs" />
     <Compile Include="Reusables\Utils\Utils.CreateInstance.cs" />
     <Compile Include="Reusables\Utils\Utils.Csv.cs" />
     <Compile Include="Reusables\Utils\Utils.Registry.cs" />
@@ -154,7 +155,6 @@
     <Compile Include="Reusables\CSharpCompiler.cs" />
     <Compile Include="CommandLine.cs" />
     <Compile Include="ContextWriter.cs" />
-    <Compile Include="Reusables\Xml\CustomAttributeHelper.cs" />
     <Compile Include="Reusables\Dump.cs" />
     <Compile Include="ScriptExceptionWithStackTrace.cs" />
     <Compile Include="Reusables\VarsTempl.cs" />

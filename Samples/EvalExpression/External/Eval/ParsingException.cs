@@ -24,44 +24,39 @@
 // ************************************************************************
 #endregion
 using System;
-using System.Collections.Generic;
+using System.Runtime.Serialization;
 
-namespace XSharper.Core.Operations
+namespace XSharper.Core
 {
-    ///<summary>Cast the object on top of the stack to the given type, then push it back</summary>
+    /// <summary>
+    /// Expression thrown when parsing script or expression
+    /// </summary>
     [Serializable]
-    public class OperationIs : IOperation
+    public class ParsingException : Exception
     {
-        readonly string _typeName;
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="typeName">Type name. May contain ? and/or suffix. For example, int[] or int? or int or System.Int32</param>
-        public OperationIs(string typeName)
+        /// Default constructor
+        public ParsingException()
         {
-            _typeName = typeName;
         }
 
-        /// Returns an number of entries added to stack by the operation. 0 in this case
-        public int StackBalance { get { return 0; } }
-
-        /// Evaluate the operation against stack
-        public void Eval(IEvaluationContext context, Stack<object> stack)
+        /// Constructor with message
+        public ParsingException(string message)
+            : base(message)
         {
-            var p = stack.Pop();
-            Type t = OperationHelper.ResolveType(context, _typeName);
-            if (t == null)
-                throw new TypeLoadException("Failed to resolve type '" + _typeName + "'");
-            if (p==null)
-                stack.Push(false);
-            else
-                stack.Push(t.IsAssignableFrom(p.GetType()));
         }
 
-        /// Returns a <see cref="T:System.String"/> that represents the current object.
-        public override string ToString()
+        /// Constructor with message and inner exception
+        public ParsingException(string message, Exception inner)
+            : base(message, inner)
         {
-            return "is(" + _typeName + ")";
+        }
+
+        /// Serialization constructor
+        protected ParsingException(
+            SerializationInfo info,
+            StreamingContext context)
+            : base(info, context)
+        {
         }
     }
 }

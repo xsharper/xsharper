@@ -28,40 +28,38 @@ using System.Collections.Generic;
 
 namespace XSharper.Core.Operations
 {
-    ///<summary>Cast the object on top of the stack to the given type, then push it back</summary>
+    ///<summary>Conditional operator. Get the top value from stack and execute the expression if the value is not null</summary>
     [Serializable]
-    public class OperationIs : IOperation
+    public class OperationCoalesce : IOperation
     {
-        readonly string _typeName;
+        readonly IOperation _ifNull;
+
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="typeName">Type name. May contain ? and/or suffix. For example, int[] or int? or int or System.Int32</param>
-        public OperationIs(string typeName)
+        /// <param name="ifNull">Expression to execute if the condition is null</param>
+        public OperationCoalesce(IOperation ifNull)
         {
-            _typeName = typeName;
+            _ifNull = ifNull;
         }
 
-        /// Returns an number of entries added to stack by the operation. 0 in this case
-        public int StackBalance { get { return 0; } }
+        /// Returns number of entries added to stack by the operation. 
+        public int StackBalance
+        {
+            get
+            {
+                return  1 - _ifNull.StackBalance;
+            }
+        }
 
         /// Evaluate the operation against stack
         public void Eval(IEvaluationContext context, Stack<object> stack)
         {
             var p = stack.Pop();
-            Type t = OperationHelper.ResolveType(context, _typeName);
-            if (t == null)
-                throw new TypeLoadException("Failed to resolve type '" + _typeName + "'");
-            if (p==null)
-                stack.Push(false);
+            if (p == null)
+                _ifNull.Eval(context, stack);
             else
-                stack.Push(t.IsAssignableFrom(p.GetType()));
-        }
-
-        /// Returns a <see cref="T:System.String"/> that represents the current object.
-        public override string ToString()
-        {
-            return "is(" + _typeName + ")";
+                stack.Push(p);
         }
     }
 }

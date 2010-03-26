@@ -23,45 +23,47 @@
 //  THE SOFTWARE.
 // ************************************************************************
 #endregion
-using System;
 using System.Collections.Generic;
 
-namespace XSharper.Core.Operations
+namespace XSharper.Core
 {
-    ///<summary>Cast the object on top of the stack to the given type, then push it back</summary>
-    [Serializable]
-    public class OperationIs : IOperation
+    /// Cache for precompiled expressions
+    public class PrecompiledCache
     {
-        readonly string _typeName;
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="typeName">Type name. May contain ? and/or suffix. For example, int[] or int? or int or System.Int32</param>
-        public OperationIs(string typeName)
+        private readonly string[] _expressions;
+        private readonly Dictionary<string, IOperation> _map;
+        private int _nextptr = 0;
+
+        /// Create cache with the specified number of entries
+        public PrecompiledCache(int cacheSize)
         {
-            _typeName = typeName;
+            _expressions = new string[cacheSize];
+            _map = new Dictionary<string, IOperation>(cacheSize);
         }
 
-        /// Returns an number of entries added to stack by the operation. 0 in this case
-        public int StackBalance { get { return 0; } }
-
-        /// Evaluate the operation against stack
-        public void Eval(IEvaluationContext context, Stack<object> stack)
+        /// Clear cache
+        public void Clear()
         {
-            var p = stack.Pop();
-            Type t = OperationHelper.ResolveType(context, _typeName);
-            if (t == null)
-                throw new TypeLoadException("Failed to resolve type '" + _typeName + "'");
-            if (p==null)
-                stack.Push(false);
-            else
-                stack.Push(t.IsAssignableFrom(p.GetType()));
+            _expressions.Initialize();
+            _map.Clear();
         }
 
-        /// Returns a <see cref="T:System.String"/> that represents the current object.
-        public override string ToString()
+        /// Access cache
+        public IOperation this[string expression]
         {
-            return "is(" + _typeName + ")";
+            get
+            {
+                IOperation v;
+                return _map.TryGetValue(expression, out v) ? v : null;
+            }
+            set
+            {
+                if (_expressions[_nextptr] != null)
+                    _map.Remove(_expressions[_nextptr]);
+                _expressions[_nextptr++] = expression;
+                _map[expression] = value;
+            }
         }
+
     }
 }
