@@ -28,40 +28,52 @@ using System.Collections.Generic;
 
 namespace XSharper.Core.Operations
 {
-    ///<summary>Cast the object on top of the stack to the given type, then push it back</summary>
+    ///<summary>Replace top N objects on top of the stack with a single collection object</summary>
     [Serializable]
-    public class OperationIs : IOperation
+    public class OperationCreateBlock : IOperation
     {
-        readonly string _typeName;
+        readonly int _paramCount;
+
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="typeName">Type name. May contain ? and/or suffix. For example, int[] or int? or int or System.Int32</param>
-        public OperationIs(string typeName)
+        /// <param name="paramCount">Number of objects to read from stack</param>
+        public OperationCreateBlock(int paramCount)
         {
-            _typeName = typeName;
+            _paramCount=paramCount;
         }
 
-        /// Returns an number of entries added to stack by the operation. 0 in this case
-        public int StackBalance { get { return 0; } }
+        /// Returns number of entries added to stack by the operation. 
+        public int StackBalance
+        {
+            get { return 1-_paramCount; }
+        }
 
         /// Evaluate the operation against stack
         public void Eval(IEvaluationContext context, Stack<object> stack)
         {
-            var p = stack.Pop();
-            Type t = OperationHelper.ResolveType(context, _typeName);
-            if (t == null)
-                throw new TypeLoadException("Failed to resolve type '" + _typeName + "'");
-            if (p==null)
-                stack.Push(false);
+            var o = OperationHelper.PopArray(stack, _paramCount);
+
+            // Find a general object type
+            Type parent = null;
+            foreach (var o1 in o)
+                parent = Utils.CommonBase(o1, parent);
+            
+            if (parent == null || parent == typeof(object))
+                stack.Push(o);
             else
-                stack.Push(t.IsAssignableFrom(p.GetType()));
+            {
+                Array a = (Array)Activator.CreateInstance(parent.MakeArrayType(), o.Length);
+                for (int i = 0; i < a.Length; ++i)
+                    a.SetValue(o[i], i);
+                stack.Push(a);
+            }
         }
 
-        /// Returns a <see cref="T:System.String"/> that represents the current object.
+        /// Return string representation of the expression
         public override string ToString()
         {
-            return "is(" + _typeName + ")";
+            return "block(" + _paramCount + ")";
         }
     }
 }

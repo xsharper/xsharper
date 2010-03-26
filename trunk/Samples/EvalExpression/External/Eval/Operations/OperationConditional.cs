@@ -25,43 +25,58 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace XSharper.Core.Operations
 {
-    ///<summary>Cast the object on top of the stack to the given type, then push it back</summary>
+    ///<summary>Conditional operator. Get the top value from stack, convert it to bool, and execute one of the expressions</summary>
     [Serializable]
-    public class OperationIs : IOperation
+    public class OperationConditional : IOperation
     {
-        readonly string _typeName;
+        readonly IOperation _ifTrue;
+        readonly IOperation _ifFalse;
+
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="typeName">Type name. May contain ? and/or suffix. For example, int[] or int? or int or System.Int32</param>
-        public OperationIs(string typeName)
+        /// <param name="ifTrue">Expression to execute if the condition is true</param>
+        /// <param name="ifFalse">Expression to execute if the condition is false</param>
+        public OperationConditional(IOperation ifTrue, IOperation ifFalse)
         {
-            _typeName = typeName;
+            _ifTrue = ifTrue;
+            _ifFalse = ifFalse;
         }
 
-        /// Returns an number of entries added to stack by the operation. 0 in this case
-        public int StackBalance { get { return 0; } }
+        /// Returns number of entries added to stack by the operation. 
+        public int StackBalance
+        {
+            get
+            {
+                return 1-Math.Max(_ifTrue.StackBalance,_ifFalse.StackBalance);
+            }
+        }
 
         /// Evaluate the operation against stack
         public void Eval(IEvaluationContext context, Stack<object> stack)
         {
-            var p = stack.Pop();
-            Type t = OperationHelper.ResolveType(context, _typeName);
-            if (t == null)
-                throw new TypeLoadException("Failed to resolve type '" + _typeName + "'");
-            if (p==null)
-                stack.Push(false);
+            var cond = Utils.To<bool>(stack.Pop());
+            if (cond)
+                _ifTrue.Eval(context,stack);
             else
-                stack.Push(t.IsAssignableFrom(p.GetType()));
+                _ifFalse.Eval(context, stack);
         }
 
-        /// Returns a <see cref="T:System.String"/> that represents the current object.
+        /// Returns a string representation of the current object
         public override string ToString()
         {
-            return "is(" + _typeName + ")";
+            StringBuilder sb = new StringBuilder("conditional(");
+            sb.Append(_ifTrue);
+            sb.Append(", ");
+            sb.Append(_ifFalse);
+            sb.Append(")");
+            return sb.ToString();
         }
+
     }
+
 }
