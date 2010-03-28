@@ -174,7 +174,7 @@ namespace XSharper.Core
                     writer.WriteVerbose("Loader> Successfully loaded " + a.FullName + " at " + a.Location);
                     return a;
                 }
-                throw new ScriptRuntimeException("Failed to load assembly " + Name + " from " + From);
+                throw new FileNotFoundException("Failed to load assembly " + Name+" or one of its dependencies",From);
             }
         }
         private readonly Dictionary<string, bool> _using;
@@ -560,7 +560,7 @@ namespace XSharper.Core
                         location = r.ForceLoad(_verboseWriter).Location;
                     }
                     if (string.IsNullOrEmpty(location))
-                        throw new ScriptRuntimeException(string.Format("Referenced assembly {0} could not be found", r));
+                        throw new FileNotFoundException(string.Format("Referenced assembly {0} could not be found", r));
 
                     param.ReferencedAssemblies.Add(location);
 

@@ -477,6 +477,8 @@ namespace XSharper.Core
         /// Parse command line into the list of arguments. Mimics .NET command line parsing logic where possible
         public static string[] SplitArgs(string commandLine)
         {
+            if (commandLine==null)
+                return null;
             bool quoted = false;
             List<string> args = new List<string>();
             StringBuilder sb = new StringBuilder();

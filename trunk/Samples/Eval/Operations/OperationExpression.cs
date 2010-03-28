@@ -24,47 +24,58 @@
 // ************************************************************************
 #endregion
 using System;
-using System.ComponentModel;
+using System.Collections.Generic;
+using System.Text;
 
-namespace XSharper.Core
+namespace XSharper.Core.Operations
 {
-    /// <summary>
-    /// Throw ScriptTerminateException with the exit code provided
-    /// </summary>
-    [XsType("exit", ScriptActionBase.XSharperNamespace)]
-    [Description("Throw ScriptTerminateException with the exit code provided and terminate script execution")]
-    public class Exit :ValueBase
+    ///<summary>Evaluate expression, as a sequence of operations</summary>
+    [Serializable]
+    public class OperationExpression : IOperation
     {
-        /// <summary>
-        /// Exit code
-        /// </summary>
-        public string ExitCode { get; set; }
+        private readonly IOperation[] _data;
+
+        /// Returns number of entries added to stack by the operation. 
+        public int StackBalance
+        {
+            get
+            {
+                int r = 0;
+                foreach (var element in _data)
+                {
+                    r += element.StackBalance;
+                }
+                return r;
+            }
+        }
 
         /// Constructor
-        public Exit()
+        public OperationExpression(params IOperation[] e)
         {
-            
+            _data = e;
         }
 
-        /// Constructor with exit code
-        public Exit(int exitCode)
+
+        /// Evaluate the operation against stack
+        public void Eval(IEvaluationContext context, Stack<object> stack)
         {
-            ExitCode = exitCode.ToString();
+            foreach (var element in _data)
+                element.Eval(context, stack);
         }
 
-        /// Constructor with exit code
-        public Exit(string exitCode)
+        /// Return string representation of the expression
+        public override string ToString()
         {
-            ExitCode = exitCode;
-        }
+            StringBuilder sb = new StringBuilder("expr {");
+            for (int i = 0; i < _data.Length; ++i)
+            {
+                if (i != 0)
+                    sb.Append(", ");
+                sb.Append(_data[i].ToString());
+            }
+            sb.Append("}");
+            return sb.ToString();
 
-        /// Execute action
-        public override object Execute()
-        {
-            string v = GetTransformedValueStr();
-            if (string.IsNullOrEmpty(v))
-                throw new ScriptTerminateException(Utils.To<int>(Context.Transform(ExitCode, Transform) ?? -1), null);
-            throw new ScriptTerminateException(Utils.To<int>(Context.Transform(ExitCode, Transform) ?? -1), new ApplicationException(v));
         }
     }
 }

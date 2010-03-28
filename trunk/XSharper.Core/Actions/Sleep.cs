@@ -37,27 +37,51 @@ namespace XSharper.Core
     [Description("Delay script execution")]
     public class Sleep : ScriptActionBase
     {
-        /// <summary>
+        /// Default constructor
+        public Sleep()
+        {
+            
+        }
+
+        /// Sleep for the specific period
+        public Sleep(string timespan)
+        {
+            Timeout = timespan;
+        }
+
+        /// Sleep for the specific period
+        public Sleep(TimeSpan timespan)
+        {
+            Timeout = timespan.ToString();
+        }
+
+        /// Sleep for the specific period, in milliseconds
+        public Sleep(long milliseconds)
+        {
+            Timeout = milliseconds.ToString();
+        }
+
         /// Timeout, can be specified as a number of milliseconds, or as timespan (00:00:00)
-        /// </summary>
         [XsRequired]
         public string Timeout { get; set;}
 
         /// Execute action
         public override object Execute()
         {
-            TimeSpan ts = Utils.ToTimeSpan(Context.TransformStr(Timeout, Transform)).Value;
-            if (ts.TotalMilliseconds==0)
+            TimeSpan? ts = Utils.ToTimeSpan(Context.TransformStr(Timeout, Transform));
+
+            if (!ts.HasValue || ts.Value.TotalMilliseconds==0)
                 return null;
 
             VerboseMessage("Sleeping for {0}", ts);
 
             
             Stopwatch w=Stopwatch.StartNew();
+            var totalMs = ts.Value.TotalMilliseconds;
             using (var s=new WaitableTimer(ts))
             {
                 while (!s.WaitHandle.WaitOne(200, false))
-                    Context.OnProgress((int) (w.ElapsedMilliseconds/ts.TotalMilliseconds*100));
+                    Context.OnProgress((int)(w.ElapsedMilliseconds / totalMs * 100));
             }
  
             return null;

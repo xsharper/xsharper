@@ -24,47 +24,28 @@
 // ************************************************************************
 #endregion
 using System;
-using System.ComponentModel;
+using System.Collections.Generic;
 
-namespace XSharper.Core
+namespace XSharper.Core.Operations
 {
     /// <summary>
-    /// Throw ScriptTerminateException with the exit code provided
+    /// Push value into stack
     /// </summary>
-    [XsType("exit", ScriptActionBase.XSharperNamespace)]
-    [Description("Throw ScriptTerminateException with the exit code provided and terminate script execution")]
-    public class Exit :ValueBase
+    [Serializable]
+    public class OperationPush : IOperation
     {
-        /// <summary>
-        /// Exit code
-        /// </summary>
-        public string ExitCode { get; set; }
+        readonly object _value;
 
         /// Constructor
-        public Exit()
-        {
-            
-        }
+        public OperationPush(object value)  {   _value = value;}
 
-        /// Constructor with exit code
-        public Exit(int exitCode)
-        {
-            ExitCode = exitCode.ToString();
-        }
+        /// Evaluate the operation against stack
+        public void Eval(IEvaluationContext context, Stack<object> stack) { stack.Push(_value); }
 
-        /// Constructor with exit code
-        public Exit(string exitCode)
-        {
-            ExitCode = exitCode;
-        }
+        /// Returns an number of entries added to stack by the operation. Returns 1, as value is pushed into stack
+        public int StackBalance { get { return 1; } }
 
-        /// Execute action
-        public override object Execute()
-        {
-            string v = GetTransformedValueStr();
-            if (string.IsNullOrEmpty(v))
-                throw new ScriptTerminateException(Utils.To<int>(Context.Transform(ExitCode, Transform) ?? -1), null);
-            throw new ScriptTerminateException(Utils.To<int>(Context.Transform(ExitCode, Transform) ?? -1), new ApplicationException(v));
-        }
+        /// Returns a <see cref="T:System.String"/> that represents the current object.
+        public override string ToString() { return "push(" + _value + ")"; }
     }
 }

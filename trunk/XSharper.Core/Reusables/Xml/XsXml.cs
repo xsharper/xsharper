@@ -246,7 +246,7 @@ namespace XSharper.Core
     
     ///<summary>XML exception</summary>
     [Serializable]
-    public class XsException : ScriptException
+    public class XsException : Exception
     {
         /// Constructor
         public XsException()

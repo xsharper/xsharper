@@ -24,47 +24,56 @@
 // ************************************************************************
 #endregion
 using System;
-using System.ComponentModel;
+using System.Collections.Generic;
 
-namespace XSharper.Core
+namespace XSharper.Core.Operations
 {
-    /// <summary>
-    /// Throw ScriptTerminateException with the exit code provided
-    /// </summary>
-    [XsType("exit", ScriptActionBase.XSharperNamespace)]
-    [Description("Throw ScriptTerminateException with the exit code provided and terminate script execution")]
-    public class Exit :ValueBase
+    ///<summary>Replace top N objects on top of the stack with a single collection object</summary>
+    [Serializable]
+    public class OperationCreateBlock : IOperation
     {
+        readonly int _paramCount;
+
         /// <summary>
-        /// Exit code
-        /// </summary>
-        public string ExitCode { get; set; }
-
         /// Constructor
-        public Exit()
+        /// </summary>
+        /// <param name="paramCount">Number of objects to read from stack</param>
+        public OperationCreateBlock(int paramCount)
         {
+            _paramCount=paramCount;
+        }
+
+        /// Returns number of entries added to stack by the operation. 
+        public int StackBalance
+        {
+            get { return 1-_paramCount; }
+        }
+
+        /// Evaluate the operation against stack
+        public void Eval(IEvaluationContext context, Stack<object> stack)
+        {
+            var o = OperationHelper.PopArray(stack, _paramCount);
+
+            // Find a general object type
+            Type parent = null;
+            foreach (var o1 in o)
+                parent = Utils.CommonBase(o1, parent);
             
+            if (parent == null || parent == typeof(object))
+                stack.Push(o);
+            else
+            {
+                Array a = (Array)Activator.CreateInstance(parent.MakeArrayType(), o.Length);
+                for (int i = 0; i < a.Length; ++i)
+                    a.SetValue(o[i], i);
+                stack.Push(a);
+            }
         }
 
-        /// Constructor with exit code
-        public Exit(int exitCode)
+        /// Return string representation of the expression
+        public override string ToString()
         {
-            ExitCode = exitCode.ToString();
-        }
-
-        /// Constructor with exit code
-        public Exit(string exitCode)
-        {
-            ExitCode = exitCode;
-        }
-
-        /// Execute action
-        public override object Execute()
-        {
-            string v = GetTransformedValueStr();
-            if (string.IsNullOrEmpty(v))
-                throw new ScriptTerminateException(Utils.To<int>(Context.Transform(ExitCode, Transform) ?? -1), null);
-            throw new ScriptTerminateException(Utils.To<int>(Context.Transform(ExitCode, Transform) ?? -1), new ApplicationException(v));
+            return "block(" + _paramCount + ")";
         }
     }
 }

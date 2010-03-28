@@ -29,7 +29,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using XS = XSharper.Core;
 using System.Diagnostics;
 
 namespace XSharper.Core
@@ -42,13 +41,13 @@ namespace XSharper.Core
     /// </summary>
     public class ConsoleWithColors : TextWriter
     {
-        private readonly Dictionary<XS.OutputType, ConsoleColor> _colors = new Dictionary<XS.OutputType, ConsoleColor>();
+        private readonly Dictionary<OutputType, ConsoleColor> _colors = new Dictionary<OutputType, ConsoleColor>();
         private readonly object _lock = new object();
         private TextWriter _log;
         private readonly TextWriter _out = Console.Out;
         private readonly TextWriter _error = Console.Error;
 
-        private XS.OutputType _prevType = XS.OutputType.Null;
+        private OutputType _prevType = OutputType.Null;
         private bool _unevenOutput;
         private string _logFile;
         private bool _useColors = true;
@@ -94,22 +93,22 @@ namespace XSharper.Core
         /// Constructor
         public ConsoleWithColors()
         {
-            Colors[XS.OutputType.Debug] = ConsoleColor.Cyan;
-            Colors[XS.OutputType.Out] = ConsoleColor.Gray;
-            Colors[XS.OutputType.Bold] = ConsoleColor.White;
-            Colors[XS.OutputType.Error] = ConsoleColor.Yellow;
-            Colors[XS.OutputType.Info] = ConsoleColor.Green;
+            Colors[OutputType.Debug] = ConsoleColor.Cyan;
+            Colors[OutputType.Out] = ConsoleColor.Gray;
+            Colors[OutputType.Bold] = ConsoleColor.White;
+            Colors[OutputType.Error] = ConsoleColor.Yellow;
+            Colors[OutputType.Info] = ConsoleColor.Green;
 
             try
             {
                 var b = Console.BackgroundColor;
                 if (b == ConsoleColor.White)
                 {
-                    Colors[XS.OutputType.Debug] = ConsoleColor.DarkCyan;
-                    Colors[XS.OutputType.Out] = Console.ForegroundColor;
-                    Colors[XS.OutputType.Bold] = (Console.ForegroundColor == ConsoleColor.Black) ? ConsoleColor.Blue : ConsoleColor.Black;
-                    Colors[XS.OutputType.Error] = ConsoleColor.DarkRed;
-                    Colors[XS.OutputType.Info] = ConsoleColor.DarkGreen;
+                    Colors[OutputType.Debug] = ConsoleColor.DarkCyan;
+                    Colors[OutputType.Out] = Console.ForegroundColor;
+                    Colors[OutputType.Bold] = (Console.ForegroundColor == ConsoleColor.Black) ? ConsoleColor.Blue : ConsoleColor.Black;
+                    Colors[OutputType.Error] = ConsoleColor.DarkRed;
+                    Colors[OutputType.Info] = ConsoleColor.DarkGreen;
                 }
                 else if (b != ConsoleColor.Black && b != ConsoleColor.Blue)
                 {
@@ -137,7 +136,7 @@ namespace XSharper.Core
                     {
                         try
                         {
-                            XS.OutputType ot = (XS.OutputType)Enum.Parse(typeof(XS.OutputType), c.Groups["var"].Value, true);
+                            OutputType ot = (OutputType)Enum.Parse(typeof(OutputType), c.Groups["var"].Value, true);
                             ConsoleColor cc = (ConsoleColor)Enum.Parse(typeof(ConsoleColor), c.Groups["value"].Value, true);
                             Colors[ot] = cc;
                             
@@ -152,7 +151,7 @@ namespace XSharper.Core
         }
 
         /// Colors
-        public Dictionary<XS.OutputType, ConsoleColor> Colors
+        public Dictionary<OutputType, ConsoleColor> Colors
         {
             get { return _colors; }
         }
@@ -208,7 +207,7 @@ namespace XSharper.Core
         ///                 </exception><filterpriority>1</filterpriority>
         public override void Write(char value)
         {
-            Write(XS.OutputType.Out, value.ToString());
+            Write(OutputType.Out, value.ToString());
         }
 
         /// <summary>
@@ -220,7 +219,7 @@ namespace XSharper.Core
         ///                 </exception><filterpriority>1</filterpriority>
         public override void Write(string value)
         {
-            Write(XS.OutputType.Out, value);
+            Write(OutputType.Out, value);
         }
 
         /// <summary>
@@ -232,32 +231,32 @@ namespace XSharper.Core
         ///                 </exception><filterpriority>1</filterpriority>
         public override void WriteLine(string value)
         {
-            WriteLine(XS.OutputType.Out, value);
+            WriteLine(OutputType.Out, value);
         }
 
         /// Output event handler
-        public void OnOutput(object s, XS.OutputEventArgs e)
+        public void OnOutput(object s, OutputEventArgs e)
         {
             Write(e.OutputType, e.Text);
         }
 
         /// Progress event handler
-        public void OnOutputProgress(object sender, XS.OperationProgressEventArgs e)
+        public void OnOutputProgress(object sender, OperationProgressEventArgs e)
         {
-            XS.ScriptContext ctx = (XS.ScriptContext)sender;
+            ScriptContext ctx = (ScriptContext)sender;
             if (e.PercentCompleted == 0)
-                ctx.WriteLine(XS.OutputType.Debug, "@ " + ctx.CallStack.StackTraceFlat);
+                ctx.WriteLine(OutputType.Debug, "@ " + ctx.CallStack.StackTraceFlat);
         }
 
 
         /// Write text followed by new line
-        public void WriteLine(XS.OutputType type, string text)
+        public void WriteLine(OutputType type, string text)
         {
             Write(type, (text ?? string.Empty) + Environment.NewLine);
         }
 
         /// Write text 
-        public void Write(XS.OutputType type, string text)
+        public void Write(OutputType type, string text)
         {
             if (string.IsNullOrEmpty(text))
                 return;
@@ -266,20 +265,20 @@ namespace XSharper.Core
                 bool _prevUneven = _unevenOutput;
                 if (_unevenOutput &&
                     _prevType != type &&
-                    _prevType != XS.OutputType.Null &&
-                    !(type == XS.OutputType.Out && _prevType == XS.OutputType.Bold) &&
-                    !(type == XS.OutputType.Bold && _prevType == XS.OutputType.Out))
+                    _prevType != OutputType.Null &&
+                    !(type == OutputType.Out && _prevType == OutputType.Bold) &&
+                    !(type == OutputType.Bold && _prevType == OutputType.Out))
                 {
                     outputInternal(_prevType, Environment.NewLine);
                     _unevenOutput = false;
                 }
-                if (type == XS.OutputType.Debug)
+                if (type == OutputType.Debug)
                 {
                     const string prefix = "# ";
                     if (_prevUneven)
-                        text = XS.Utils.PrefixEachLine("# ", text).Substring(prefix.Length);
+                        text = Utils.PrefixEachLine("# ", text).Substring(prefix.Length);
                     else
-                        text = XS.Utils.PrefixEachLine("# ", text);
+                        text = Utils.PrefixEachLine("# ", text);
                 }
                 outputInternal(type, text);
                 _prevType = type;
@@ -288,17 +287,17 @@ namespace XSharper.Core
         }
 
         
-        private void outputInternal(XS.OutputType type, string text)
+        private void outputInternal(OutputType type, string text)
         {
             ConsoleColor cOld = Console.ForegroundColor, cNew;
             if (UseColors && Colors.TryGetValue(type, out cNew))
                 Console.ForegroundColor = cNew;
-            if (type == XS.OutputType.Error)
+            if (type == OutputType.Error)
             {
                 if (_error != null)
                     _error.Write(text);
             }
-            else if (type != XS.OutputType.Debug || _debugToConsole)   // Debug only goes to debug output
+            else if (type != OutputType.Debug || _debugToConsole)   // Debug only goes to debug output
             {
                 if (_out != null)
                     _out.Write(text);

@@ -24,47 +24,40 @@
 // ************************************************************************
 #endregion
 using System;
-using System.ComponentModel;
+using System.Runtime.Serialization;
 
 namespace XSharper.Core
 {
     /// <summary>
-    /// Throw ScriptTerminateException with the exit code provided
+    /// Exception thrown by script runtime
     /// </summary>
-    [XsType("exit", ScriptActionBase.XSharperNamespace)]
-    [Description("Throw ScriptTerminateException with the exit code provided and terminate script execution")]
-    public class Exit :ValueBase
+    [Serializable]
+    public class ScriptRuntimeException : Exception
     {
-        /// <summary>
-        /// Exit code
-        /// </summary>
-        public string ExitCode { get; set; }
-
-        /// Constructor
-        public Exit()
+        /// Default constructor
+        public ScriptRuntimeException()
         {
-            
         }
 
-        /// Constructor with exit code
-        public Exit(int exitCode)
+        /// Constructor with message
+        public ScriptRuntimeException(string message)
+            : base(message)
         {
-            ExitCode = exitCode.ToString();
         }
 
-        /// Constructor with exit code
-        public Exit(string exitCode)
+        /// Constructor with message and inner exception
+        public ScriptRuntimeException(string message, Exception inner)
+            : base(message, inner)
         {
-            ExitCode = exitCode;
         }
 
-        /// Execute action
-        public override object Execute()
+
+        /// Serialization constructor
+        protected ScriptRuntimeException(
+            SerializationInfo info,
+            StreamingContext context)
+            : base(info, context)
         {
-            string v = GetTransformedValueStr();
-            if (string.IsNullOrEmpty(v))
-                throw new ScriptTerminateException(Utils.To<int>(Context.Transform(ExitCode, Transform) ?? -1), null);
-            throw new ScriptTerminateException(Utils.To<int>(Context.Transform(ExitCode, Transform) ?? -1), new ApplicationException(v));
         }
     }
-}
+}   

@@ -24,47 +24,44 @@
 // ************************************************************************
 #endregion
 using System;
-using System.ComponentModel;
+using System.Collections.Generic;
 
-namespace XSharper.Core
+namespace XSharper.Core.Operations
 {
-    /// <summary>
-    /// Throw ScriptTerminateException with the exit code provided
-    /// </summary>
-    [XsType("exit", ScriptActionBase.XSharperNamespace)]
-    [Description("Throw ScriptTerminateException with the exit code provided and terminate script execution")]
-    public class Exit :ValueBase
+    ///<summary>Cast the object on top of the stack to the given type, then push it back</summary>
+    [Serializable]
+    public class OperationAs : IOperation
     {
+        readonly string _typeName;
         /// <summary>
-        /// Exit code
-        /// </summary>
-        public string ExitCode { get; set; }
-
         /// Constructor
-        public Exit()
+        /// </summary>
+        /// <param name="typeName">Type name. May contain ? and/or suffix. For example, int[] or int? or int or System.Int32</param>
+        public OperationAs(string typeName)
         {
-            
+            _typeName = typeName;
         }
 
-        /// Constructor with exit code
-        public Exit(int exitCode)
+        /// Returns an number of entries added to stack by the operation. 0 in this case
+        public int StackBalance { get { return 0; } }
+
+        /// Evaluate the operation against stack
+        public void Eval(IEvaluationContext context, Stack<object> stack)
         {
-            ExitCode = exitCode.ToString();
+            var p = stack.Pop();
+            Type t = OperationHelper.ResolveType(context, _typeName);
+            if (t == null)
+                throw new TypeLoadException("Failed to resolve type '" + _typeName + "'");
+            if (p == null || !t.IsAssignableFrom(p.GetType()))
+                stack.Push(false);
+            else
+                stack.Push(p);
         }
 
-        /// Constructor with exit code
-        public Exit(string exitCode)
+        /// Returns a <see cref="T:System.String"/> that represents the current object.
+        public override string ToString()
         {
-            ExitCode = exitCode;
-        }
-
-        /// Execute action
-        public override object Execute()
-        {
-            string v = GetTransformedValueStr();
-            if (string.IsNullOrEmpty(v))
-                throw new ScriptTerminateException(Utils.To<int>(Context.Transform(ExitCode, Transform) ?? -1), null);
-            throw new ScriptTerminateException(Utils.To<int>(Context.Transform(ExitCode, Transform) ?? -1), new ApplicationException(v));
+            return "as(" + _typeName + ")";
         }
     }
 }

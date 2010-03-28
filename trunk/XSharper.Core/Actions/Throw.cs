@@ -35,19 +35,19 @@ namespace XSharper.Core
     [Description("Throw exception with the message provided")]
     public class Throw : ValueBase
     {
-        /// Exception class name to throw. By default ScriptUserException
+        /// Exception class name to throw. By default ApplicationException
         public string Class { get; set; }
 
         /// Execute action
         public override object Execute()
         {
             string cl = Context.TransformStr(Class, Transform);
-            Type t = typeof(ScriptUserException);
+            Type t = typeof(ApplicationException);
             if (!string.IsNullOrEmpty(cl))
             {
                 t = Context.FindType(cl);
                 if (t == null || !t.IsSubclassOf(typeof (Exception)))
-                    t = typeof (ScriptUserException);
+                    t = typeof(ApplicationException);
             }
             object s = GetTransformedValue();
             if (s!=null)

@@ -24,47 +24,21 @@
 // ************************************************************************
 #endregion
 using System;
-using System.ComponentModel;
+using System.Collections.Generic;
 
-namespace XSharper.Core
+namespace XSharper.Core.Operations
 {
-    /// <summary>
-    /// Throw ScriptTerminateException with the exit code provided
-    /// </summary>
-    [XsType("exit", ScriptActionBase.XSharperNamespace)]
-    [Description("Throw ScriptTerminateException with the exit code provided and terminate script execution")]
-    public class Exit :ValueBase
+    ///<summary>Pop a value from stack</summary>
+    [Serializable]
+    public class OperationPop : IOperation
     {
-        /// <summary>
-        /// Exit code
-        /// </summary>
-        public string ExitCode { get; set; }
+        /// Evaluate the operation against stack
+        public void Eval(IEvaluationContext context, Stack<object> stack) { stack.Pop(); }
 
-        /// Constructor
-        public Exit()
-        {
-            
-        }
+        /// Returns an number of entries added to stack by the operation. Returns -1, as value is removed from stack
+        public int StackBalance { get { return -1; } }
 
-        /// Constructor with exit code
-        public Exit(int exitCode)
-        {
-            ExitCode = exitCode.ToString();
-        }
-
-        /// Constructor with exit code
-        public Exit(string exitCode)
-        {
-            ExitCode = exitCode;
-        }
-
-        /// Execute action
-        public override object Execute()
-        {
-            string v = GetTransformedValueStr();
-            if (string.IsNullOrEmpty(v))
-                throw new ScriptTerminateException(Utils.To<int>(Context.Transform(ExitCode, Transform) ?? -1), null);
-            throw new ScriptTerminateException(Utils.To<int>(Context.Transform(ExitCode, Transform) ?? -1), new ApplicationException(v));
-        }
+        /// Returns a <see cref="T:System.String"/> that represents the current object.
+        public override string ToString() { return "pop()"; }
     }
 }

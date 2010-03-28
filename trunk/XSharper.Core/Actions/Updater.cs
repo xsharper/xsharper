@@ -259,10 +259,6 @@ namespace XSharper.Core
                     }
                 knownPackages = pinfo1;
             }
-            catch (ScriptException)
-            {
-                throw;
-            }
             catch (Exception e)
             {
                 throw new ScriptRuntimeException("An error occured while processing " + Utils.SecureUri(piUri) + " .", e);

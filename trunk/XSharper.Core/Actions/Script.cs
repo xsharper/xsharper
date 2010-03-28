@@ -151,6 +151,7 @@ namespace XSharper.Core
         }
 
 
+
         /// <summary>
         /// Read child element of the current node
         /// </summary>

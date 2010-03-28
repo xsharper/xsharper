@@ -33,7 +33,7 @@ namespace XSharper.Core
     /// This exception is thrown if script terminates by Die action. This exception is automatically rethrown at the end of all Catch Blocks.
     /// </summary>
     [Serializable]
-    public class ScriptTerminateException : ScriptException
+    public class ScriptTerminateException : Exception
     {
         /// <summary>
         /// Exit code. Default -1
