@@ -24,47 +24,26 @@
 // ************************************************************************
 #endregion
 using System;
-using System.ComponentModel;
+using System.Collections;
+using System.Collections.Generic;
+using System.Configuration;
+using System.IO;
+using System.IO.Compression;
+using System.Reflection;
+using System.Reflection.Emit;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Xml;
+using System.Security.Cryptography;
+using System.Diagnostics;
+
 
 namespace XSharper.Core
 {
-    /// <summary>
-    /// Throw ScriptTerminateException with the exit code provided
-    /// </summary>
-    [XsType("exit", ScriptActionBase.XSharperNamespace)]
-    [Description("Throw ScriptTerminateException with the exit code provided and terminate script execution")]
-    public class Exit :ValueBase
+    public partial class Utils
     {
-        /// <summary>
-        /// Exit code
-        /// </summary>
-        public string ExitCode { get; set; }
+     
 
-        /// Constructor
-        public Exit()
-        {
-            
-        }
 
-        /// Constructor with exit code
-        public Exit(int exitCode)
-        {
-            ExitCode = exitCode.ToString();
-        }
-
-        /// Constructor with exit code
-        public Exit(string exitCode)
-        {
-            ExitCode = exitCode;
-        }
-
-        /// Execute action
-        public override object Execute()
-        {
-            string v = GetTransformedValueStr();
-            if (string.IsNullOrEmpty(v))
-                throw new ScriptTerminateException(Utils.To<int>(Context.Transform(ExitCode, Transform) ?? -1), null);
-            throw new ScriptTerminateException(Utils.To<int>(Context.Transform(ExitCode, Transform) ?? -1), new ApplicationException(v));
-        }
-    }
+          }
 }

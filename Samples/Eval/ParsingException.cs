@@ -29,102 +29,34 @@ using System.Runtime.Serialization;
 namespace XSharper.Core
 {
     /// <summary>
-    /// Base exception class for exceptions thrown by the scripting engine.
+    /// Expression thrown when parsing script or expression
     /// </summary>
     [Serializable]
-    public class ScriptException : Exception
+    public class ParsingException : Exception
     {
         /// Default constructor
-        public ScriptException()
-        {
-        }
-
-        /// constructor with message
-        public ScriptException(string message)
-            : base(message)
-        {
-        }
-
-        /// constructor with message and inner exception
-        public ScriptException(string message, Exception inner)
-            : base(message, inner)
-        {
-        }
-
-        /// constructor for serialization
-        protected ScriptException(
-            SerializationInfo info,
-            StreamingContext context)
-            : base(info, context)
-        {
-        }
-    }
-
-    /// <summary>
-    /// Exception thrown by script runtime
-    /// </summary>
-    [Serializable]
-    public class ScriptRuntimeException : ScriptException
-    {
-        /// Default constructor
-        public ScriptRuntimeException()
+        public ParsingException()
         {
         }
 
         /// Constructor with message
-        public ScriptRuntimeException(string message)
+        public ParsingException(string message)
             : base(message)
         {
         }
 
         /// Constructor with message and inner exception
-        public ScriptRuntimeException(string message, Exception inner)
+        public ParsingException(string message, Exception inner)
             : base(message, inner)
         {
         }
 
-
         /// Serialization constructor
-        protected ScriptRuntimeException(
+        protected ParsingException(
             SerializationInfo info,
             StreamingContext context)
             : base(info, context)
         {
         }
     }
-
-    /// <summary>
-    /// Exception thrown by user script
-    /// </summary>
-    [Serializable]
-    public class ScriptUserException : ScriptException
-    {
-        /// Default constructor
-        public ScriptUserException()
-        {
-        }
-
-        /// Constructor with message
-        public ScriptUserException(string message)
-            : base(message)
-        {
-        }
-
-        /// Constructor with message and inner exception
-        public ScriptUserException(string message, Exception inner)
-            : base(message, inner)
-        {
-        }
-
-
-        /// Serialization constructor
-        protected ScriptUserException(
-            SerializationInfo info,
-            StreamingContext context)
-            : base(info, context)
-        {
-        }
-    }
-
-    
-}   
+}

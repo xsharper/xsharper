@@ -23,48 +23,47 @@
 //  THE SOFTWARE.
 // ************************************************************************
 #endregion
-using System;
-using System.ComponentModel;
+using System.Collections.Generic;
 
 namespace XSharper.Core
 {
-    /// <summary>
-    /// Throw ScriptTerminateException with the exit code provided
-    /// </summary>
-    [XsType("exit", ScriptActionBase.XSharperNamespace)]
-    [Description("Throw ScriptTerminateException with the exit code provided and terminate script execution")]
-    public class Exit :ValueBase
+    /// Cache for precompiled expressions
+    public class PrecompiledCache
     {
-        /// <summary>
-        /// Exit code
-        /// </summary>
-        public string ExitCode { get; set; }
+        private readonly string[] _expressions;
+        private readonly Dictionary<string, IOperation> _map;
+        private int _nextptr = 0;
 
-        /// Constructor
-        public Exit()
+        /// Create cache with the specified number of entries
+        public PrecompiledCache(int cacheSize)
         {
-            
+            _expressions = new string[cacheSize];
+            _map = new Dictionary<string, IOperation>(cacheSize);
         }
 
-        /// Constructor with exit code
-        public Exit(int exitCode)
+        /// Clear cache
+        public void Clear()
         {
-            ExitCode = exitCode.ToString();
+            _expressions.Initialize();
+            _map.Clear();
         }
 
-        /// Constructor with exit code
-        public Exit(string exitCode)
+        /// Access cache
+        public IOperation this[string expression]
         {
-            ExitCode = exitCode;
+            get
+            {
+                IOperation v;
+                return _map.TryGetValue(expression, out v) ? v : null;
+            }
+            set
+            {
+                if (_expressions[_nextptr] != null)
+                    _map.Remove(_expressions[_nextptr]);
+                _expressions[_nextptr++] = expression;
+                _map[expression] = value;
+            }
         }
 
-        /// Execute action
-        public override object Execute()
-        {
-            string v = GetTransformedValueStr();
-            if (string.IsNullOrEmpty(v))
-                throw new ScriptTerminateException(Utils.To<int>(Context.Transform(ExitCode, Transform) ?? -1), null);
-            throw new ScriptTerminateException(Utils.To<int>(Context.Transform(ExitCode, Transform) ?? -1), new ApplicationException(v));
-        }
     }
 }

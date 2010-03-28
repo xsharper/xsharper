@@ -165,7 +165,7 @@
     <Compile Include="Actions\Set.cs" />
     <Compile Include="Actions\Timer.cs" />
     <Compile Include="Reusables\Xml\XsXmlElement.cs" />
-    <Compile Include="ScriptException.cs" />
+    <Compile Include="ScriptRuntimeException.cs" />
     <Compile Include="Reusables\Vars.cs" />
     <Compile Include="Actions\Block.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{CBF0328B-FD3E-4D47-9B66-2DA8E9A18C4A}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <ProjectGuid>{3FA89D65-A03C-4D3D-8057-077B481A450D}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>EvalExpression</RootNamespace>
-    <AssemblyName>EvalExpression</AssemblyName>
+    <RootNamespace>Eval</RootNamespace>
+    <AssemblyName>Eval</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkSubset>
@@ -35,50 +35,37 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Form1.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Program.cs" />
+    <Compile Include="BasicEvaluationContext.cs" />
+    <Compile Include="CustomAttributeHelper.cs" />
+    <Compile Include="Dump.cs" />
+    <Compile Include="Operations.cs" />
+    <Compile Include="Operations\OperationAs.cs" />
+    <Compile Include="Operations\OperationCall.cs" />
+    <Compile Include="Operations\OperationCoalesce.cs" />
+    <Compile Include="Operations\OperationConditional.cs" />
+    <Compile Include="Operations\OperationCreateBlock.cs" />
+    <Compile Include="Operations\OperationExpression.cs" />
+    <Compile Include="Operations\OperationHelper.cs" />
+    <Compile Include="Operations\OperationIs.cs" />
+    <Compile Include="Operations\OperationNewObject.cs" />
+    <Compile Include="Operations\OperationOperator.cs" />
+    <Compile Include="Operations\OperationPop.cs" />
+    <Compile Include="Operations\OperationPush.cs" />
+    <Compile Include="Operations\OperationTypeCast.cs" />
+    <Compile Include="Operations\OperationTypeof.cs" />
+    <Compile Include="Operations\OperationVariableAccess.cs" />
+    <Compile Include="Parser.cs" />
+    <Compile Include="ParsingException.cs" />
+    <Compile Include="ParsingReader.cs" />
+    <Compile Include="PrecompiledCache.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <None Include="app.config" />
-    <None Include="Properties\DataSources\Variable.datasource" />
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
-    <Compile Include="Variable.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Eval\Eval.csproj">
-      <Project>{3FA89D65-A03C-4D3D-8057-077B481A450D}</Project>
-      <Name>Eval</Name>
-    </ProjectReference>
+    <Compile Include="Utils.Convert.cs" />
+    <Compile Include="Utils.CreateInstance.cs" />
+    <Compile Include="Utils.EvalHelper.cs" />
+    <Compile Include="Utils.Types.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

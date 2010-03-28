@@ -24,47 +24,42 @@
 // ************************************************************************
 #endregion
 using System;
-using System.ComponentModel;
+using System.Collections.Generic;
 
-namespace XSharper.Core
+namespace XSharper.Core.Operations
 {
-    /// <summary>
-    /// Throw ScriptTerminateException with the exit code provided
-    /// </summary>
-    [XsType("exit", ScriptActionBase.XSharperNamespace)]
-    [Description("Throw ScriptTerminateException with the exit code provided and terminate script execution")]
-    public class Exit :ValueBase
+    ///<summary>Conditional operator. Get the top value from stack and execute the expression if the value is not null</summary>
+    [Serializable]
+    public class OperationCoalesce : IOperation
     {
+        readonly IOperation _ifNull;
+
         /// <summary>
-        /// Exit code
-        /// </summary>
-        public string ExitCode { get; set; }
-
         /// Constructor
-        public Exit()
+        /// </summary>
+        /// <param name="ifNull">Expression to execute if the condition is null</param>
+        public OperationCoalesce(IOperation ifNull)
         {
-            
+            _ifNull = ifNull;
         }
 
-        /// Constructor with exit code
-        public Exit(int exitCode)
+        /// Returns number of entries added to stack by the operation. 
+        public int StackBalance
         {
-            ExitCode = exitCode.ToString();
+            get
+            {
+                return  1 - _ifNull.StackBalance;
+            }
         }
 
-        /// Constructor with exit code
-        public Exit(string exitCode)
+        /// Evaluate the operation against stack
+        public void Eval(IEvaluationContext context, Stack<object> stack)
         {
-            ExitCode = exitCode;
-        }
-
-        /// Execute action
-        public override object Execute()
-        {
-            string v = GetTransformedValueStr();
-            if (string.IsNullOrEmpty(v))
-                throw new ScriptTerminateException(Utils.To<int>(Context.Transform(ExitCode, Transform) ?? -1), null);
-            throw new ScriptTerminateException(Utils.To<int>(Context.Transform(ExitCode, Transform) ?? -1), new ApplicationException(v));
+            var p = stack.Pop();
+            if (p == null)
+                _ifNull.Eval(context, stack);
+            else
+                stack.Push(p);
         }
     }
 }

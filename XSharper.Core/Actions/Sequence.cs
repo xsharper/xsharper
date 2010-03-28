@@ -92,8 +92,27 @@ namespace XSharper.Core
         /// Add action to the list
         public virtual void Add(IScriptAction child)
         {
-            Items.Add(child);
+            if (child!=null)
+                Items.Add(child);
         }
+
+        /// Add multiple actions to the list
+        public virtual void AddRange(IEnumerable<IScriptAction> child)
+        {
+            if (child!=null)
+                foreach (var action in child)
+                    Items.Add(action);
+        }
+
+        /// Add multiple actions to the list
+        public virtual void AddRange(params IScriptAction[] child)
+        {
+            if (child != null)
+                foreach (var action in child)
+                    Items.Add(action);
+        }
+
+
 
         /// <summary>
         /// Returns an enumerator that iterates through the collection.

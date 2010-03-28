@@ -32,7 +32,7 @@ namespace XSharper.Core
     /// A class that wraps any thrown exception with a script location where it occurred
     /// </summary>
     [Serializable]
-    public class ScriptExceptionWithStackTrace : ScriptException
+    public class ScriptExceptionWithStackTrace : Exception
     {
         /// Constructor
         protected ScriptExceptionWithStackTrace(
