@@ -23,7 +23,7 @@ namespace RunScript
         public static JobStatus GetUpdate(string jobId)
         {
             var jg = new Guid(jobId);
-            var j = Global.JobManager.FindJob(jg);
+            var j = Global.JobManager.FindJob<RunScriptContext>(jg);
             if (j==null)
                 return null;
             var ret=new JobStatus
@@ -39,7 +39,7 @@ namespace RunScript
         [WebMethod]
         public static void Stop(string jobId)
         {
-            var j = Global.JobManager.FindJob(new Guid(jobId));
+            var j = Global.JobManager.FindJob<RunScriptContext>(new Guid(jobId));
             if (j != null)
                 j.Stop();
         }
@@ -47,7 +47,7 @@ namespace RunScript
         [WebMethod]
         public static string Start(string xml, string args, bool debug)
         {
-            return Global.JobManager.CreateJob(xml, args, debug).ToString();
+            return Global.JobManager.AddJob(new RunScriptContext(xml, args, debug)).ToString();
         }
         
         protected void Page_Load(object sender, EventArgs e)
@@ -64,7 +64,7 @@ namespace RunScript
                                         From = "${%TEMP%}",
                                         Filter = "*.*",
                                         Items = new List<XS.IScriptAction> {
-                                            new XS.Print(" > ${}") { OutTo = "^info"}
+                                            new XS.Print(" ${}") { OutTo = "^info"}
                                         }
                                     },
                         new XS.Print(),

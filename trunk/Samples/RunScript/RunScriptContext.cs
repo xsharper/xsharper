@@ -1,31 +1,26 @@
 using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Web;
-using System.Diagnostics;
 
 namespace RunScript
 {
     [Serializable]
-    public class JobContext
+    public class RunScriptContext : JobContext
     {
-        private readonly IAsyncResult _asyncResult;
         private readonly StringBuilder _currentHtml = new StringBuilder();
         private readonly XSharper.Core.ScriptContext _context = new XSharper.Core.ScriptContext();
-        private Stopwatch _sinceStopped;
-        private XSharper.Core.OutputType? _outputType ;
+        private XSharper.Core.OutputType? _outputType;
+        private readonly string _scriptText;
+        private readonly string _args;
+        private readonly bool _debug;
 
-        public JobContext(string scriptText, string args, bool debug)
+        public RunScriptContext(string scriptText, string args, bool debug)
         {
-            _asyncResult = new Action<string, string, bool>(execute).BeginInvoke(scriptText, args, debug, onCompleted, null);
-        }
-
-        public bool IsCompleted
-        {
-            get
-            {
-                return _asyncResult.IsCompleted;
-            }
+            _scriptText = scriptText;
+            _args = args;
+            _debug = debug;
+            Start();
         }
 
         public string GetHtmlUpdate()
@@ -38,26 +33,13 @@ namespace RunScript
             }
         }
 
+        public void Stop()
+        {
+            _context.Abort();
+        }
         
-        public bool IsOld
-        {
-            get
-            {
-                lock (_currentHtml)
-                {
-                    return _sinceStopped != null && _sinceStopped.ElapsedMilliseconds > 1000 * 10 * 60;
-                }
-            }
-        }
-
         #region -- Private stuff --
-        private void onCompleted(IAsyncResult ar)
-        {
-            lock (_currentHtml)
-                _sinceStopped = Stopwatch.StartNew();
-        }
-
-        private void execute(string scriptText, string args, bool debug)
+        protected override void Execute()
         {
             using (var xs = new XSharper.Core.ScriptContextScope(_context))
             {
@@ -66,20 +48,20 @@ namespace RunScript
                 {
                     _context.Clear();
                     _context.Output = output;
-                    if (debug)
+                    if (_debug)
                         _context.MinOutputType = XSharper.Core.OutputType.Nul;
                     else
                         _context.MinOutputType = XSharper.Core.OutputType.Info;
 
                     var script = _context.CreateNewScript("temp.xsh");
-                    script.Load(scriptText);
-                    var ret=_context.ExecuteScript(script, XSharper.Core.Utils.SplitArgs(args));
+                    script.Load(_scriptText);
+                    var ret = _context.ExecuteScript(script, XSharper.Core.Utils.SplitArgs(_args));
                     lock (_currentHtml)
                     {
                         _currentHtml.Append("<hr />");
                         _outputType = null;
                     }
-                    _context.Info.WriteLine("Execution completed in {0}. Exit code={1}",sw.Elapsed,ret??0);
+                    _context.Info.WriteLine("Execution completed in {0}. Exit code={1}", sw.Elapsed, ret ?? 0);
                 }
                 catch (Exception ee)
                 {
@@ -90,7 +72,7 @@ namespace RunScript
                     }
                     _context.WriteException(ee);
                 }
-                
+
             }
         }
 
@@ -113,7 +95,7 @@ namespace RunScript
                     if (otype != XSharper.Core.OutputType.Out)
                         _currentHtml.Append("<span class='" + otype + "'>");
 
-                    _currentHtml.Append(HttpUtility.HtmlEncode(text).Replace("\n", "<br/>"));
+                    _currentHtml.Append(HttpUtility.HtmlEncode(text).Replace("\n", "<br/>").Replace(" ", "&nbsp;"));
 
                     if (otype != XSharper.Core.OutputType.Out)
                         _currentHtml.Append("</span>");
@@ -122,54 +104,5 @@ namespace RunScript
             }
         }
         #endregion
-
-
-        public void Stop()
-        {
-            _context.Abort();
-        }
-    }
-
-
-    public class JobManager
-    {
-        private Dictionary<Guid, JobContext> _jobs = new Dictionary<Guid, JobContext>();
-
-        public Guid CreateJob(string script, string args, bool debug)
-        {
-            Guid g = Guid.NewGuid();
-            lock (_jobs)
-                _jobs.Add(g, new JobContext(script, args, debug));
-            return g;
-        }
-
-        public JobContext FindJob(Guid g)
-        {
-            lock (_jobs)
-            {
-                JobContext res;
-                return _jobs.TryGetValue(g, out res) ? res : null;
-            }
-        }
-        public void RemoveJob(Guid g)
-        {
-            lock (_jobs)
-                _jobs.Remove(g);
-        }
-        public void RemoveOldJobs()
-        {
-            List<Guid> g = new List<Guid>();
-            lock (_jobs)
-            {
-                foreach (var job in _jobs)
-                    if (job.Value.IsOld)
-                        g.Add(job.Key);
-
-                foreach (var guid in g)
-                    _jobs.Remove(guid);
-            }
-        }
-
-
     }
 }
