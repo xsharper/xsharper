@@ -2,6 +2,8 @@ using System;
 using System.Diagnostics;
 using System.Text;
 using System.Web;
+using System.Xml;
+using System.IO;
 
 namespace RunScript
 {
@@ -41,38 +43,34 @@ namespace RunScript
         #region -- Private stuff --
         protected override void Execute()
         {
-            using (var xs = new XSharper.Core.ScriptContextScope(_context))
+
+            Stopwatch sw = Stopwatch.StartNew();
+            try
             {
-                Stopwatch sw = Stopwatch.StartNew();
-                try
-                {
-                    _context.Clear();
-                    _context.Output = output;
-                    if (_debug)
-                        _context.MinOutputType = XSharper.Core.OutputType.Nul;
-                    else
-                        _context.MinOutputType = XSharper.Core.OutputType.Info;
+                _context.Clear();
+                _context.Output = output;
+                if (_debug)
+                    _context.MinOutputType = XSharper.Core.OutputType.Nul;
+                else
+                    _context.MinOutputType = XSharper.Core.OutputType.Info;
 
-                    var script = _context.CreateNewScript("temp.xsh");
-                    script.Load(_scriptText);
-                    var ret = _context.ExecuteScript(script, XSharper.Core.Utils.SplitArgs(_args));
-                    lock (_currentHtml)
-                    {
-                        _currentHtml.Append("<hr />");
-                        _outputType = null;
-                    }
-                    _context.Info.WriteLine("Execution completed in {0}. Exit code={1}", sw.Elapsed, ret ?? 0);
-                }
-                catch (Exception ee)
+                var script = _context.LoadScript(XmlReader.Create(new StringReader(_scriptText)),"temp.xsh");
+                var ret = _context.ExecuteScript(script, XSharper.Core.Utils.SplitArgs(_args));
+                lock (_currentHtml)
                 {
-                    lock (_currentHtml)
-                    {
-                        _currentHtml.Append("<hr />");
-                        _outputType = null;
-                    }
-                    _context.WriteException(ee);
+                    _currentHtml.Append("<hr />");
+                    _outputType = null;
                 }
-
+                _context.Info.WriteLine("Execution completed in {0}. Exit code={1}", sw.Elapsed, ret ?? 0);
+            }
+            catch (Exception ee)
+            {
+                lock (_currentHtml)
+                {
+                    _currentHtml.Append("<hr />");
+                    _outputType = null;
+                }
+                _context.WriteException(ee);
             }
         }
 

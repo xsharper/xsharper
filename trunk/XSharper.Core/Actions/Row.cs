@@ -143,11 +143,10 @@ namespace XSharper.Core
         /// <summary>
         /// Write attributes to the XmlWriter
         /// </summary>
-        /// <param name="context">Context</param>
         /// <param name="writer">XmlWriter where the attributes must be written</param>
-        protected override void WriteAttributes(IXsContext context, XmlWriter writer)
+        protected override void WriteAttributes(XmlWriter writer)
         {
-            base.WriteAttributes(context,writer);
+            base.WriteAttributes(writer);
             foreach (Var pair in _variables)
             {
                 if (!string.IsNullOrEmpty(pair.Name))

@@ -19,8 +19,7 @@ namespace RunScript
 
         }
 
-        private static long s_cnt = 0;
-        private static JobManager s_jobManager=new JobManager();
+        private static readonly JobManager s_jobManager=new JobManager();
 
         public static JobManager JobManager
         {
@@ -32,9 +31,6 @@ namespace RunScript
 
         protected void Application_BeginRequest(object sender, EventArgs e)
         {
-            // Do a clean up from time to time
-            if (Interlocked.Increment(ref s_cnt)%10==0)
-                JobManager.RemoveOldJobs();
         }
 
         protected void Application_AuthenticateRequest(object sender, EventArgs e)

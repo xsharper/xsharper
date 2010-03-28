@@ -122,9 +122,8 @@ namespace XSharper.Core
         /// <summary>
         /// Write attributes to the XmlWriter
         /// </summary>
-        /// <param name="context">Context</param>
         /// <param name="writer">XmlWriter where the attributes must be written</param>
-        protected virtual void WriteAttributes(IXsContext context, XmlWriter writer)
+        protected virtual void WriteAttributes(XmlWriter writer)
         {
             object defValue = null;
             foreach (PropertyInfo c in GetType().GetProperties())
@@ -162,7 +161,7 @@ namespace XSharper.Core
         /// <param name="context">XML context</param>
         /// <param name="writer">Where to write</param>
         /// <param name="nameOverride">Local name to be used, or null if name should be retirevent from <see cref="XsTypeAttribute"/> of the type.</param>
-        public virtual void WriteXml(IXsContext context, XmlWriter writer, string nameOverride)
+        public virtual void WriteXml(XmlWriter writer, string nameOverride)
         {
             string namesp = null;
             if (nameOverride==null)
@@ -178,7 +177,7 @@ namespace XSharper.Core
             }
             writer.WriteStartElement(nameOverride, namesp);
 
-            WriteAttributes(context, writer);
+            WriteAttributes(writer);
             WriteText(writer);
 
             foreach (PropertyInfo c in GetOrderedElementProperties(GetType()))
@@ -194,10 +193,10 @@ namespace XSharper.Core
                     if (e != null)
                         foreach (IXsElement action in e)
                             if (action != null)
-                                action.WriteXml(context, writer, ab.CollectionItemElementName);
+                                action.WriteXml(writer, ab.CollectionItemElementName);
                 }
                 else if (o != null && !(ab.SkipIfEmpty && ab.IsEmpty(v)))
-                    o.WriteXml(context, writer, ab.Name);
+                    o.WriteXml(writer, ab.Name);
             }
 
             writer.WriteEndElement();

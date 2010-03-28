@@ -86,10 +86,9 @@ namespace XSharper.Core
         /// <summary>
         /// Write element to the output stream
         /// </summary>
-        /// <param name="context">XML context</param>
         /// <param name="writer">Where to write</param>
         /// <param name="nameOverride">Local name to be used, or null if name should be retirevent from <see cref="XsTypeAttribute"/> of the type.</param>
-        public override void WriteXml(IXsContext context, XmlWriter writer, string nameOverride)
+        public override void WriteXml(XmlWriter writer, string nameOverride)
         {
             Code ce = new Code();
             ce.Methods = Methods;
@@ -99,7 +98,7 @@ namespace XSharper.Core
                 throw new ScriptRuntimeException("This script cannot be decompiled!");
             ce.Value = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(sourceCode));
 
-            ce.WriteXml(context,writer,nameOverride);
+            ce.WriteXml(writer,nameOverride);
         }
     }
 }

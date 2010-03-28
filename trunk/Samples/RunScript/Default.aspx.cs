@@ -23,7 +23,7 @@ namespace RunScript
         public static JobStatus GetUpdate(string jobId)
         {
             var jg = new Guid(jobId);
-            var j = Global.JobManager.FindJob<RunScriptContext>(jg);
+            var j = Global.JobManager.Find<RunScriptContext>(jg);
             if (j==null)
                 return null;
             var ret=new JobStatus
@@ -32,14 +32,14 @@ namespace RunScript
                     HtmlUpdate = j.GetHtmlUpdate()
                 };
             if (ret.IsCompleted)
-                Global.JobManager.RemoveJob(jg);
+                Global.JobManager.Remove(jg);
             return ret;
         }
 
         [WebMethod]
         public static void Stop(string jobId)
         {
-            var j = Global.JobManager.FindJob<RunScriptContext>(new Guid(jobId));
+            var j = Global.JobManager.Find<RunScriptContext>(new Guid(jobId));
             if (j != null)
                 j.Stop();
         }
@@ -47,7 +47,7 @@ namespace RunScript
         [WebMethod]
         public static string Start(string xml, string args, bool debug)
         {
-            return Global.JobManager.AddJob(new RunScriptContext(xml, args, debug)).ToString();
+            return Global.JobManager.Add(new RunScriptContext(xml, args, debug)).ToString();
         }
         
         protected void Page_Load(object sender, EventArgs e)
@@ -57,16 +57,16 @@ namespace RunScript
                  XS.Script script = new XS.Script
                  {
                      Items = new List<XS.IScriptAction> {
-                         new XS.Print("Current directory: ${=.CurrentDirectory}") { OutTo = "^bold"},
-                         new XS.Print("Temp directory: ${%TEMP%}") { OutTo = "^bold"},
-                                    new XS.Dir
-                                    {
-                                        From = "${%TEMP%}",
-                                        Filter = "*.*",
-                                        Items = new List<XS.IScriptAction> {
-                                            new XS.Print(" ${}") { OutTo = "^info"}
-                                        }
-                                    },
+                        new XS.Print("Current directory: ${=.CurrentDirectory}") { OutTo = "^bold"},
+                        new XS.Print("Temp directory: ${%TEMP%}") { OutTo = "^bold"},
+                        new XS.Dir
+                        {
+                            From = "${%TEMP%}",
+                            Filter = "*.*",
+                            Items = new List<XS.IScriptAction> {
+                                new XS.Print(" ${}") { OutTo = "^info"}
+                            }
+                        },
                         new XS.Print(),
                         new XS.While {
                                 MaxCount = 10, 

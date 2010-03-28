@@ -272,7 +272,7 @@ class C${guid} {}
                     StringWriter xml = new StringWriter();
 
                     using (XmlTextWriter tw = new XmlTextWriter(xml))
-                        ((IXsElement)o).WriteXml(ScriptContextScope.Current, tw, null);
+                        ((IXsElement)o).WriteXml(tw, null);
 
                     MainCode.Write("new " + _re.GetTypeName(t) + "(@\"" + xml.ToString().Replace("\"", "\"\"") + "\")");
                     return;

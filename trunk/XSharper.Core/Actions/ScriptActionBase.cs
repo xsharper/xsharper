@@ -225,7 +225,13 @@ namespace XSharper.Core
         /// </summary>
         protected ScriptContext Context
         {
-            get { return ScriptContextScope.Current; }
+            get
+            {
+                var c = ScriptContextScope.Current;
+                if (c==null)
+                    throw new InvalidOperationException("There is no active script context scope in the current thread. Please create ScriptContextScope.");
+                return c;
+            }
         }
 
         /// <summary>
