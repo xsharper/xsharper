@@ -1,96 +1,101 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 
 namespace RunScript
 {
     [Serializable]
-    public abstract class JobContext
+    public abstract class JobContext : IDisposable
     {
-        private IAsyncResult _asyncResult;
         private Stopwatch _sinceStopped;
         private readonly object _lock=new object();
+        private ManualResetEvent _completed=new ManualResetEvent(false);
+        private volatile bool _disposeWhenStopped;
 
-        protected JobContext()
+        /// Completed task is removed after this period expires
+        protected TimeSpan TimeToGetOld=TimeSpan.FromMinutes(10); 
+
+        ~JobContext()
         {
+            Dispose(false);
         }
 
-        protected void Start()
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        public void Dispose()
         {
-            _asyncResult = new Action(Execute).BeginInvoke(onCompleted, null);
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        
+        protected virtual void Dispose(bool dispose)
+        {
+            if (_completed != null)
+            {
+                _completed.Close();
+                _completed = null;
+            }
         }
 
+        /// Start the job
+        public void Start()
+        {
+            ThreadPool.QueueUserWorkItem((state)=>
+                {
+                    try
+                    {
+                        Execute();
+                    }
+                    finally
+                    {
+                        lock (_lock)
+                        {
+                            if (_disposeWhenStopped)
+                                Dispose();
+                            else
+                            {
+                                _completed.Set();
+                                _sinceStopped = Stopwatch.StartNew();
+                            }
+                        }
+                    }
+                });
+        }
+
+        /// Dispose the job if it's completed, or mark it to complete when it terminates
+        public void DisposeOnCompletion()
+        {
+            lock (_lock)
+            {
+                if (IsCompleted)
+                    Dispose();
+                else
+                    _disposeWhenStopped = true;
+            }
+        }
+
+        /// True, if job is completed
         public bool IsCompleted
         {
             get
             {
-                return _asyncResult.IsCompleted;
+                return _completed==null || _completed.WaitOne(0);
             }
         }
 
+        /// True, if job is too old and can be cleaned up
         public bool IsOld
         {
             get
             {
                 lock (_lock)
                 {
-                    return _sinceStopped != null && _sinceStopped.ElapsedMilliseconds > 1000 * 10 * 60;
+                    return _sinceStopped != null && _sinceStopped.Elapsed > TimeToGetOld;
                 }
             }
         }
 
-        private void onCompleted(IAsyncResult ar)
-        {
-            lock (_lock)
-                _sinceStopped = Stopwatch.StartNew();
-        }
+ 
+        /// Job
         protected abstract void Execute();
-    }
-
-
-    public class JobManager
-    {
-        private Dictionary<Guid, JobContext> _jobs = new Dictionary<Guid, JobContext>();
-
-        public Guid AddJob(JobContext job)
-        {
-            Guid g = Guid.NewGuid();
-            lock (_jobs)
-                _jobs.Add(g, job);
-            return g;
-        }
-
-        public JobContext FindJob(Guid g)
-        {
-            lock (_jobs)
-            {
-                JobContext res;
-                return _jobs.TryGetValue(g, out res) ? res : null;
-            }
-        }
-        public T FindJob<T>(Guid g) where T:JobContext
-        {
-            return FindJob(g) as T;
-        }
-        public void RemoveJob(Guid g)
-        {
-            lock (_jobs)
-                _jobs.Remove(g);
-        }
-        public void RemoveOldJobs()
-        {
-            List<Guid> g = new List<Guid>();
-            lock (_jobs)
-            {
-                foreach (var job in _jobs)
-                    if (job.Value.IsOld)
-                        g.Add(job.Key);
-
-                foreach (var guid in g)
-                    _jobs.Remove(guid);
-            }
-        }
-
-
     }
 }

@@ -745,7 +745,6 @@ namespace XSharper.Core
             if (action == null)
                 return null;
 
-            
             using (var scope = new ScriptContextScope(this))
             {
                 _callStack.Push(operation, action);

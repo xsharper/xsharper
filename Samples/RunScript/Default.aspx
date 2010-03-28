@@ -71,10 +71,10 @@
         <table border="0">
             <tr><td colspan="2">
                 <asp:Label runat="server" ID="lblScript" AssociatedControlID="tbScript">Script:</asp:Label> <br />
-                <asp:TextBox runat="server" ID="tbScript" Rows="15" Columns="120" TextMode="MultiLine" CssClass='scriptBody'  EnableViewState="false"/>
+                <asp:TextBox runat="server" ID="tbScript" Rows="15" Columns="120" TextMode="MultiLine" CssClass='scriptBody'  EnableViewState="false" spellcheck='false'/>
             </td></tr>
             <tr><td colspan="2">
-                <asp:Label runat="server" ID="Label1" AssociatedControlID="tbArguments">Arguments:</asp:Label> <br />
+                <asp:Label runat="server" ID="Label1" AssociatedControlID="tbArguments" spellcheck='false'>Arguments:</asp:Label> <br />
                 <asp:TextBox runat="server" ID="tbArguments" Columns="120"  CssClass='scriptBody'  EnableViewState="false"/>
             </td></tr>
             <tr>

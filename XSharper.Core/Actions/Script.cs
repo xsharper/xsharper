@@ -233,7 +233,7 @@ namespace XSharper.Core
         /// <param name="writer">writer where to save it</param>
         public void Save(XmlWriter writer)
         {
-            WriteXml(Context, writer, null);
+            WriteXml(writer, null);
         }
 
         /// <summary>
@@ -244,7 +244,7 @@ namespace XSharper.Core
         {
 
             using (XmlWriter w = XmlWriter.Create(writer, new XmlWriterSettings { Indent = true, Encoding = writer.Encoding, NewLineOnAttributes = false }))
-                WriteXml(Context,w, null);
+                WriteXml(w, null);
         }
 
         /// <summary>
@@ -254,7 +254,7 @@ namespace XSharper.Core
         public void Save(Stream stream)
         {
             using (XmlWriter w = XmlWriter.Create(stream, new XmlWriterSettings { Indent = true, Encoding = new System.Text.UTF8Encoding(false), NewLineOnAttributes = false }))
-                WriteXml(Context, w,null);
+                WriteXml(w,null);
         }
         
         /// <summary>

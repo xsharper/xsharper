@@ -61,10 +61,9 @@ namespace XSharper.Core
         /// <summary>
         /// High-level method, that writes current object to the XML writer
         /// </summary>
-        /// <param name="context">Context</param>
         /// <param name="writer">XmlWriter where to write</param>
         /// <param name="nameOverride">na</param>
-        void WriteXml(IXsContext context, XmlWriter writer, string nameOverride);
+        void WriteXml(XmlWriter writer, string nameOverride);
     }
 
     
