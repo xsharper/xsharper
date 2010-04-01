@@ -13,6 +13,7 @@ namespace RunScript
         private readonly StringBuilder _currentHtml = new StringBuilder();
         private readonly XSharper.Core.ScriptContext _context = new XSharper.Core.ScriptContext();
         private XSharper.Core.OutputType? _outputType;
+        private bool _dirtyString = false;
         private readonly string _scriptText;
         private readonly string _args;
         private readonly bool _debug;
@@ -35,11 +36,12 @@ namespace RunScript
             }
         }
 
-        public void Stop()
+        public override void Stop()
         {
             _context.Abort();
+            base.Stop();
         }
-        
+
         #region -- Private stuff --
         protected override void Execute()
         {
@@ -80,7 +82,7 @@ namespace RunScript
             {
                 string text = eventArgs.Text;
                 XSharper.Core.OutputType otype = eventArgs.OutputType;
-                if (_outputType.HasValue && otype != _outputType)
+                if (_outputType.HasValue && otype != _outputType && _dirtyString)
                 {
                     if (!(otype == XSharper.Core.OutputType.Bold && _outputType == XSharper.Core.OutputType.Out) &&
                         !(otype == XSharper.Core.OutputType.Out && _outputType == XSharper.Core.OutputType.Bold))
@@ -88,11 +90,14 @@ namespace RunScript
                         _currentHtml.Append("<br />");
                     }
                 }
+                _dirtyString = false;
                 if (!string.IsNullOrEmpty(text))
                 {
                     if (otype != XSharper.Core.OutputType.Out)
                         _currentHtml.Append("<span class='" + otype + "'>");
 
+                    char c = text[text.Length - 1];
+                    _dirtyString=!(c == '\n' || c == '\r') ;
                     _currentHtml.Append(HttpUtility.HtmlEncode(text).Replace("\n", "<br/>").Replace(" ", "&nbsp;"));
 
                     if (otype != XSharper.Core.OutputType.Out)

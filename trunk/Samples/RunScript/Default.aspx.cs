@@ -39,9 +39,7 @@ namespace RunScript
         [WebMethod]
         public static void Stop(string jobId)
         {
-            var j = Global.JobManager.Find<RunScriptContext>(new Guid(jobId));
-            if (j != null)
-                j.Stop();
+            Global.JobManager.Stop(new Guid(jobId));
         }
         
         [WebMethod]
@@ -59,24 +57,31 @@ namespace RunScript
                      Items = new List<XS.IScriptAction> {
                         new XS.Print("Current directory: ${=.CurrentDirectory}") { OutTo = "^bold"},
                         new XS.Print("Temp directory: ${%TEMP%}") { OutTo = "^bold"},
-                        new XS.Dir
-                        {
-                            From = "${%TEMP%}",
-                            Filter = "*.*",
-                            Items = new List<XS.IScriptAction> {
-                                new XS.Print(" ${}") { OutTo = "^info"}
-                            }
-                        },
                         new XS.Print(),
+                        new XS.Print("-- This will print 3 steps, ${=2+1} seconds one after another ---"),
                         new XS.While {
-                                MaxCount = 10, 
+                                MaxCount = 3, 
                                 Name = "i",
                                 Items = new List<XS.IScriptAction> {
                                     new XS.Print("Hello ") { NewLine = false },
                                     new XS.Print("World #${i}!") { OutTo = "^bold" },
-                                    new XS.Sleep(2000)
+                                    new XS.Sleep(3000)
                                 }
+                        },
+                        new XS.Shell(@"@echo off
+
+echo -- This batch file will print 10 steps, 2 seconds one after another
+for /l %%f in (1 1 10) do (@echo Step #%%f) & (echo | @CHOICE /D y /T 2 2>nul 1>nul )
+echo -- Completed -- 
+
+") {
+                            OutTo = "^info",
+                            ErrorTo = "^error",
+                            CreateNoWindow = true,
+                            IgnoreExitCode = true,
+                            Mode = XS.ShellMode.Batch
                         }
+                        
                      }
                  };
                  tbScript.Text = script.SaveToString();
