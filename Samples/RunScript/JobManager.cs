@@ -28,6 +28,23 @@ namespace RunScript
         {
             return Find(g) as T;
         }
+        public void StopAll()
+        {
+            List<Guid> jids=new List<Guid>();
+            lock (_jobs)
+                jids.AddRange(_jobs.Keys);
+            foreach (var jid in jids)
+                Stop(jid);
+        }
+        
+        public void Stop(Guid g)
+        {
+            JobContext j;
+            lock (_jobs)
+                j=Find(g);
+            if (j != null)
+                j.Stop();
+        }
         public void Remove(Guid g)
         {
             lock (_jobs)

@@ -31,11 +31,16 @@ namespace RunScript
         {
             if (_completed != null)
             {
-                _completed.Close();
+                if (dispose)
+                {
+                    _completed.WaitOne(Timeout.Infinite);
+                    _completed.Close();
+                }
                 _completed = null;
             }
         }
 
+        
         /// Start the job
         public void Start()
         {
@@ -97,5 +102,9 @@ namespace RunScript
  
         /// Job
         protected abstract void Execute();
+
+        public virtual void Stop()
+        {
+        }
     }
 }

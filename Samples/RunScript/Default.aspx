@@ -6,12 +6,13 @@
 <head runat="server">
     <title></title>
     <style type="text/css">
-        body { font-family: Segoe UI,Tahoma,Arial,Helvetica; font-size: small; }
+        body { font-family: Segoe UI,Tahoma,Arial,Helvetica; font-size: small; margin-left:auto;margin-right:auto; width:80%;}
         .Error { color:Red;}
         .Info { color:Green;}
         .Debug { color:Blue;}
         .Bold { font-weight: bold;}
-        .scriptBody { font-family: Consolas,Courier New,Courier; font-size: small; }
+        #formTable { width:100%;  }
+        .scriptBody { font-family: Consolas,Courier New,Courier; font-size: small; width:100%;}
         #output { font-family: Consolas,Courier New,Courier; background: #eee; font-size: small; max-height: 30em; height: 30em; overflow:scroll;}
     </style>
     <script type="text/javascript">
@@ -68,14 +69,14 @@
     <form id="form1" runat="server">
     <asp:ScriptManager EnablePageMethods="true" runat="server" ID="scriptManager" />
     <div>
-        <table border="0">
+        <table border="0" id="formTable">
             <tr><td colspan="2">
                 <asp:Label runat="server" ID="lblScript" AssociatedControlID="tbScript">Script:</asp:Label> <br />
-                <asp:TextBox runat="server" ID="tbScript" Rows="15" Columns="120" TextMode="MultiLine" CssClass='scriptBody'  EnableViewState="false" spellcheck='false'/>
+                <asp:TextBox runat="server" ID="tbScript" Rows="20" TextMode="MultiLine" CssClass='scriptBody'  EnableViewState="false" spellcheck='false'/>
             </td></tr>
             <tr><td colspan="2">
                 <asp:Label runat="server" ID="Label1" AssociatedControlID="tbArguments" spellcheck='false'>Arguments:</asp:Label> <br />
-                <asp:TextBox runat="server" ID="tbArguments" Columns="120"  CssClass='scriptBody'  EnableViewState="false"/>
+                <asp:TextBox runat="server" ID="tbArguments" CssClass='scriptBody'  EnableViewState="false"/>
             </td></tr>
             <tr>
             <td align="left"><asp:CheckBox id="cbDebug" runat="server" Text="Debug mode"/> </td>
