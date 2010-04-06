@@ -158,7 +158,6 @@ namespace XSharper.Core
         /// <summary>
         /// Write element to the output stream
         /// </summary>
-        /// <param name="context">XML context</param>
         /// <param name="writer">Where to write</param>
         /// <param name="nameOverride">Local name to be used, or null if name should be retirevent from <see cref="XsTypeAttribute"/> of the type.</param>
         public virtual void WriteXml(XmlWriter writer, string nameOverride)

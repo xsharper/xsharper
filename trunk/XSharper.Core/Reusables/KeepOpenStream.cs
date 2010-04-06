@@ -34,16 +34,40 @@ namespace XSharper.Core
     /// </summary>
     public class KeepOpenStream : Stream
     {
-        private readonly Stream _parent;
+        private Stream _parent;
+        private bool _owns;
 
         /// <summary>
         /// Constructor that accepts a parent stream to which all requests are forwarded.
         /// This stream is not closed when KeepOpenStream is closed or disposed.
         /// </summary>
         /// <param name="parentStream"></param>
-        public KeepOpenStream(Stream parentStream)
+        public KeepOpenStream(Stream parentStream) : this(parentStream,true)
+        {
+        }
+
+        /// <summary>
+        /// Constructor that accepts a parent stream to which all requests are forwarded.
+        /// This stream is may be closed or not closed when KeepOpenStream is closed or disposed, depending on ownSstream.
+        /// </summary>
+        /// <param name="parentStream">parent stream</param>
+        /// <param name="ownsStream">true if parent stream should be closed when this stream is closed</param>
+        public KeepOpenStream(Stream parentStream, bool ownsStream)
         {
             _parent = parentStream;
+            _owns = ownsStream;
+        }
+
+        /// Set stream
+        protected void SetStream(Stream parentStream, bool ownsStream)
+        {
+            _parent = parentStream;
+            _owns = ownsStream;
+        }
+
+        /// Default constructor is protected
+        protected KeepOpenStream()
+        {
         }
 
         /// <summary>
@@ -51,6 +75,8 @@ namespace XSharper.Core
         /// </summary>
         public override void  Close()
         {
+            if (_owns)
+                _parent.Close();
         }
 
         /// <summary>
@@ -316,4 +342,41 @@ namespace XSharper.Core
             return _parent.ToString();
         }
     }
+
+    /// Ensures that stream is seekable (by copying it to memory, if it's not)
+    public class SeekableStream : KeepOpenStream
+    {
+        /// <summary>
+        /// Constructor that accepts a parent stream to which all requests are forwarded.
+        /// This stream is not closed when SeekableStream is closed or disposed.
+        /// </summary>
+        /// <param name="parentStream"></param>
+        public SeekableStream(Stream parentStream)
+            : this(parentStream, true)
+        {
+        }
+
+
+        /// Constructor that accepts a parent stream to which all requests are forwarded.
+        /// This stream is may be closed or not closed when KeepOpenStream is closed or disposed, depending on ownSstream.
+        public SeekableStream(Stream parentStream, bool owns)
+        {
+            if (parentStream.CanSeek)
+                SetStream(parentStream,owns);
+            else
+            {
+                var ms = new MemoryStream();
+                byte[] buf = new byte[16384];
+                int n;
+                while ((n = parentStream.Read(buf, 0, buf.Length)) != 0)
+                    ms.Write(buf, 0, n);
+                ms.Position = 0;
+                if (!owns)
+                    parentStream.Close();
+                SetStream(ms,true);
+            }
+        }
+    }
+
+    
 }

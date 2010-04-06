@@ -95,7 +95,7 @@ namespace XSharper.Core
             object ret = null;
             WindowsNameTransform extractNameTransform = new WindowsNameTransform(rootDirectory);
             Dictionary<string, bool> dirs = new Dictionary<string, bool>(StringComparer.InvariantCultureIgnoreCase);
-            using (ZipFile zip = new ZipFile(Context.OpenReadStream(zipFileName)))
+            using (ZipFile zip = new ZipFile(new SeekableStream(Context.OpenReadStream(zipFileName),true)))
             {
                 if (Password != null)
                     zip.Password = Context.TransformStr(Password, Transform);

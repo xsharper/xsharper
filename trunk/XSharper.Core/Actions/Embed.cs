@@ -47,6 +47,33 @@ namespace XSharper.Core
         [Description("True if this is an assembly that will be called by the script")]
         public bool IsAssembly { get; set; }
 
+        /// Default constructor
+        public Embed()
+        {
+            
+        }
+
+        /// Constructor with from
+        public Embed(string from)
+        {
+            From = from;
+        }
+
+        /// Constructor with from and name
+        public Embed(string from,string name)
+        {
+            From = from;
+            Name = name;
+        }
+
+        /// Constructor with from + name + assembly flag
+        public Embed(string from, string name, bool isAssembly)
+        {
+            From = from;
+            Name = name;
+            IsAssembly = isAssembly;
+        }
+
         /// Initialize action
         public override void Initialize()
         {
