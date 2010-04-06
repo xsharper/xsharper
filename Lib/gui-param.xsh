@@ -244,6 +244,7 @@ public class ExecutorForm : Form
                 args.Add(a);
             }
         }
+
         edArgs.Text = XS.ShellArg.GetCommandLine(Context, args);
     }
     void btnRun_Click(object sender, EventArgs e)

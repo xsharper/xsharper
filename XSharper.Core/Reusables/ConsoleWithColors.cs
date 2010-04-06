@@ -115,7 +115,7 @@ namespace XSharper.Core
                     _useColors = false;
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 _useColors = false;
             }

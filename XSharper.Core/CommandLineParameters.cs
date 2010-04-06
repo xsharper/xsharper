@@ -75,7 +75,9 @@ namespace XSharper.Core
             {
                 string value=null;
                 CommandLineParameter p=null;
-                if (searchParameters)
+                if (searchParameters && 
+                    !(Count > positionalCount && this[positionalCount].Count == CommandLineValueCount.ForceSingle) &&
+                    !(currentParam != null && currentParam.Count == CommandLineValueCount.ForceSingle))
                     p=findNamedParam(original, autoHelp, out value);
                 
                 // If there is a non-param, add it to the previous param values
@@ -124,7 +126,7 @@ namespace XSharper.Core
             }
         }
 
-        private object fixType(ScriptContext context, CommandLineParameter parameter, object o)
+        private static object fixType(ScriptContext context, CommandLineParameter parameter, object o)
         {
             var p = context.Transform(parameter.TypeName, parameter.Transform);
             var t = p as Type;
@@ -250,7 +252,7 @@ namespace XSharper.Core
                     context[param.Var] = (param.Unspecified == null)? true : context.Transform(param.Unspecified,param.Transform); 
                     param = null;
                 }
-                else if (param.Count == CommandLineValueCount.Single && value!=null)
+                else if ((param.Count == CommandLineValueCount.Single || param.Count == CommandLineValueCount.ForceSingle) && value != null)
                 {
                     context[param.Var] = value;
                     param = null;
@@ -276,7 +278,8 @@ namespace XSharper.Core
             if (!context.IsSet(currentParameter.Var))
             {
                 if (currentParameter.Count == CommandLineValueCount.Single ||
-                    currentParameter.Count == CommandLineValueCount.Multiple)
+                    currentParameter.Count == CommandLineValueCount.Multiple ||
+                    currentParameter.Count == CommandLineValueCount.ForceSingle)
                 {
                     if (currentParameter.Unspecified == null)
                         throw new ScriptRuntimeException(string.Format("No value is set for parameter {0}", currentParameter.Switch));

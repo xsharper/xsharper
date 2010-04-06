@@ -40,6 +40,10 @@ namespace XSharper.Core
         [Description("Single value. For example, /length 5")]
         Single,
 
+        /// Force single value, even if it starts with switch prefix
+        [Description("Force single value. For example, /param /s ")]
+        ForceSingle,
+
         /// Multiple values. For example, /files file1 file2 file3
         [Description("Multiple values. For example, /files file1 file2 file3")]
         Multiple,
