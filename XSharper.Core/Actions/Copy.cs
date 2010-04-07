@@ -133,10 +133,19 @@ namespace XSharper.Core
 
         private object copy(DirectoryInfo rootFrom, DirectoryInfo fromDir, DirectoryInfo toDir,IStringFilter nf, IStringFilter df)
         {
-            if (rootFrom!=fromDir && df != null && (!df.IsMatch(fromDir.FullName) || !CheckHidden(fromDir)))
+            bool processFiles = true;
+            bool isRoot = (rootFrom == fromDir);
+            bool isVisible = (isRoot || CheckHidden(fromDir));
+
+            if (df != null && (!df.IsMatch(fromDir.FullName) || !isVisible))
             {
-                VerboseMessage("{0} did not pass directory filter", fromDir.FullName);
-                return null;
+                if (isRoot)
+                    processFiles = false;
+                else
+                {
+                    VerboseMessage("{0} did not pass directory filter", fromDir.FullName);
+                    return null;
+                }
             }
             var from = new FileOrDirectoryInfo(fromDir);
             var to = new FileOrDirectoryInfo(toDir);
@@ -152,13 +161,14 @@ namespace XSharper.Core
                                 return r;
                         }
 
-                        foreach (FileInfo f in fromDir.GetFiles())
-                        {
-                            FileInfo toFile = new FileInfo(Path.Combine(to.FullName, f.Name));
-                            object r = copySingleFile(nf, f, toFile);
-                            if (r != null)
-                                return r;
-                        }
+                        if (processFiles)
+                            foreach (FileInfo f in fromDir.GetFiles())
+                            {
+                                FileInfo toFile = new FileInfo(Path.Combine(to.FullName, f.Name));
+                                object r = copySingleFile(nf, f, toFile);
+                                if (r != null)
+                                    return r;
+                            }
                         if (Recursive)
                         {
                             foreach (DirectoryInfo d in fromDir.GetDirectories())

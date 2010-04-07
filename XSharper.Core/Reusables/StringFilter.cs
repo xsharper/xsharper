@@ -131,7 +131,7 @@ namespace XSharper.Core
                         goto case FilterSyntax.Wildcard;
 
                     case FilterSyntax.Wildcard:
-                        foreach (string s in filter.Split(';'))
+                        foreach (string s in filter.TrimEnd(';').Split(';'))
                             processFilter(s, true);
                         break;
                     case FilterSyntax.Pattern:

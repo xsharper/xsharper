@@ -141,7 +141,10 @@ namespace XSharper.Core
             {
                 DirectoryInfo directory = new DirectoryInfo(path);
                 if (directory.Exists)
-                    ret=dir(ctx,directory);
+                {
+                    bool files = (ctx.DirFilter == null || ctx.DirFilter.IsMatch(directory.FullName));
+                    ret = dir(ctx, directory,files);
+                }
             }
             if (ctx.Entries==0)
             {
@@ -160,7 +163,7 @@ namespace XSharper.Core
             public IStringFilter NameFilter;
             public IStringFilter DirFilter;
         }
-        private object dir(Dirctx ctx, DirectoryInfo directoryInfo)
+        private object dir(Dirctx ctx, DirectoryInfo directoryInfo, bool listFiles)
         {
             return ProcessPrepare(new FileOrDirectoryInfo(directoryInfo), null,
                                     delegate
@@ -185,7 +188,7 @@ namespace XSharper.Core
                                                     continue;
                                                 }
                                                 FileInfo fi = (fs as FileInfo);
-                                                if (fi == null)
+                                                if (fi == null || !listFiles)
                                                     continue;
                                                 r = listEntry(ctx, fi);
                                                 if (r != null)
@@ -196,7 +199,7 @@ namespace XSharper.Core
                                             foreach (DirectoryInfo di in rec)
                                             {
                                                 DirectoryInfo di1 = di;
-                                                object ret = dir(ctx, di1);
+                                                object ret = dir(ctx, di1, true);
                                                 if (ret != null)
                                                     return ret;
                                             }
