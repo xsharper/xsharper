@@ -119,7 +119,7 @@ namespace XSharper.Core
                     if (string.IsNullOrEmpty(targetName))
                         continue;
                     if (!Hidden && entry.IsDOSEntry)
-                    {
+                    {   
                         if ((((FileAttributes) entry.ExternalFileAttributes) & (FileAttributes.System | FileAttributes.Hidden)) != 0)
                             continue;
                     }
