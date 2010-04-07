@@ -96,18 +96,27 @@ namespace XSharper.Core
 
         private object delete(delctx ctx, DirectoryInfo root, DirectoryInfo dir)
         {
-            if (root != dir && (!CheckHidden(dir) || (ctx.dirFilter != null && !ctx.dirFilter.IsMatch(dir.FullName))))
+            bool processFiles = true;
+            bool isRoot = (root == dir);
+            bool isVisible = (isRoot || CheckHidden(dir));
+
+            if (!isVisible || (ctx.dirFilter != null && !ctx.dirFilter.IsMatch(dir.FullName)))
             {
-                VerboseMessage("{0} did not pass directory filter", dir.FullName);
-                return null;
+                if (!isRoot)
+                {
+                    VerboseMessage("{0} did not pass directory filter", dir.FullName);
+                    return null;
+                }
+                processFiles = false;
             }
 
-            foreach (FileInfo f in dir.GetFiles())
-            {
-                object ret = deleteSingleFile(ctx, f);
-                if (ret != null)
-                    return ret;
-            }
+            if (processFiles)
+                foreach (FileInfo f in dir.GetFiles())
+                {
+                    object ret = deleteSingleFile(ctx, f);
+                    if (ret != null)
+                        return ret;
+                }
             if (Recursive)
             {
                 foreach (DirectoryInfo d in dir.GetDirectories())

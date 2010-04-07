@@ -208,13 +208,23 @@ namespace XSharper.Core
 
         object scanDir(string sourceDirectory, string directory, scanDirParams scanDirParams)
         {
+            bool isRoot = (sourceDirectory == directory);
+            bool processFiles = true;
             if (!scanDirParams.DirFilter.IsMatch(directory))
-                return null;
+            {
+                if (!isRoot)
+                {
+                    VerboseMessage("{0} did not pass directory filter", directory);
+                    return null;
+                }
+                processFiles = false;
+            }
+
 
             // Process this directory
             DirectoryInfo di = new DirectoryInfo(directory);
             ZipFSEntry ze = null;
-            if (sourceDirectory == directory)
+            if (isRoot)
             {
                 ZipEntry zen = new ZipEntry("");
                 zen.ExternalFileAttributes |= 16;
@@ -227,10 +237,10 @@ namespace XSharper.Core
                 ze = new ZipFSEntry(scanDirParams.EntryFactory, di, ZipTime);
             }
 
-            return ProcessPrepare(new FileOrDirectoryInfo(di), ze, () => prepareDir(di, sourceDirectory, directory, scanDirParams));
+            return ProcessPrepare(new FileOrDirectoryInfo(di), ze, () => prepareDir(di, sourceDirectory, directory, scanDirParams, processFiles));
         }
 
-        object prepareDir(DirectoryInfo di, string sourceDirectory, string directory, scanDirParams scanDirParams)
+        object prepareDir(DirectoryInfo di, string sourceDirectory, string directory, scanDirParams scanDirParams, bool processFiles)
         {
             var entries = di.GetFileSystemInfos();
             bool match = false;
@@ -243,7 +253,7 @@ namespace XSharper.Core
                 }
 
                 FileInfo fi = entries[i] as FileInfo;
-                if (fi != null && scanDirParams.NameFilter.IsMatch(fi.FullName))
+                if (fi != null && processFiles && scanDirParams.NameFilter.IsMatch(fi.FullName))
                 {
                     match = true;
                     continue;
