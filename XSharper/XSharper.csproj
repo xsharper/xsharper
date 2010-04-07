@@ -77,7 +77,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Embedded\Source\ConsoleWithColors.gz" />
     <EmbeddedResource Include="Embedded\Assemblies\XSharper.Core.dll.gz">
     </EmbeddedResource>
     <EmbeddedResource Include="Embedded\Manifests\asInvoker.res.gz" />
