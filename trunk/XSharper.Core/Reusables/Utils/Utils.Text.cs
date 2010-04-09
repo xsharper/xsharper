@@ -318,7 +318,7 @@ namespace XSharper.Core
         {
             if (s == null || s.Length < maxLen)
                 return s;
-
+            
             if (options == FitWidthOption.CutStart)
                 return s.Substring(0, maxLen);
             if (options == FitWidthOption.CutEnd)

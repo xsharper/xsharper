@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="RunScript._Default" ValidateRequest="false" EnableSessionState="True"  EnableViewState="true"%>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="RunScript._Default" ValidateRequest="false" EnableSessionState="True"  EnableViewState="true" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -18,10 +18,12 @@
     <script type="text/javascript">
         var timer = null;
         var refreshPeriod = 1000;
+        var callCount = 0;
         function pageLoad() {
             var btn = $get('<%=btnStop.ClientID %>');
             if (!btn.disabled)
                 timer = setTimeout(updateStatus, refreshPeriod);
+            callCount = 0;
         }
 
         function updateStatus() {
@@ -34,16 +36,21 @@
         function enableControls() {
             $get('<%=btnStop.ClientID %>').disabled = true;
             $get('<%=btnRun.ClientID %>').disabled = false;
-            $get('<%=tbScript.ClientID %>').readOnly = false;
+            if ($get('<%=tbScript.ClientID %>'))
+                $get('<%=tbScript.ClientID %>').readOnly = false;
         }
         function statusUpdated(result, userContext, methodName) {
             var output = $get('<%=output.ClientID %>');
             var received = $get('<%=received.ClientID %>');
             output.innerHTML += result.HtmlUpdate;
+
+            var r;
             if (received.innerHTML)
-                received.innerHTML = parseInt(received.innerHTML, 10) + result.HtmlUpdate.length + " characters received.";
+                r = parseInt(received.innerHTML, 10) + result.HtmlUpdate.length;
             else
-                received.innerHTML = result.HtmlUpdate.length + " characters  received.";
+                r = result.HtmlUpdate.length;
+            received.innerHTML = r + " characters received in " + (++callCount) + " calls.";
+            
             output.scrollTop = output.scrollHeight;
             if (timer)
                 clearTimeout(timer);
@@ -72,6 +79,7 @@
         <table border="0" id="formTable">
             <tr><td colspan="2">
                 <asp:Label runat="server" ID="lblScript" AssociatedControlID="tbScript">Script:</asp:Label> <br />
+                <asp:DropDownList runat="server" ID="cbScript" spellcheck='false'/>
                 <asp:TextBox runat="server" ID="tbScript" Rows="20" TextMode="MultiLine" CssClass='scriptBody'  EnableViewState="false" spellcheck='false'/>
             </td></tr>
             <tr><td colspan="2">

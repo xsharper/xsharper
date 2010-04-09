@@ -1,3 +1,28 @@
+#region -- Copyrights --
+// ***********************************************************************
+//  This file is a part of XSharper (http://xsharper.com)
+// 
+//  Copyright (C) 2006 - 2010, Alexei Shamov, DeltaX Inc.
+// 
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to deal
+//  in the Software without restriction, including without limitation the rights
+//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//  copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
+//  
+//  The above copyright notice and this permission notice shall be included in
+//  all copies or substantial portions of the Software.
+//  
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//  THE SOFTWARE.
+// ************************************************************************
+#endregion
 using System;
 using System.Diagnostics;
 using System.Text;
@@ -14,22 +39,25 @@ namespace RunScript
         private readonly XSharper.Core.ScriptContext _context = new XSharper.Core.ScriptContext();
         private XSharper.Core.OutputType? _outputType;
         private bool _dirtyString = false;
-        private readonly string _scriptText;
+        private readonly string _scriptXml;
+        private readonly string _scriptFilename;
         private readonly string _args;
         private readonly bool _debug;
 
-        public RunScriptContext(string scriptText, string args, bool debug)
+        public RunScriptContext(string filename, string xml, string args, bool debug)
         {
-            _scriptText = scriptText;
+            _scriptFilename = filename;
+            _scriptXml = xml;
             _args = args;
             _debug = debug;
             Start();
         }
-
+        
         public string GetHtmlUpdate()
         {
             lock (_currentHtml)
             {
+                
                 string s = _currentHtml.ToString();
                 _currentHtml.Length = 0;
                 return s;
@@ -56,7 +84,11 @@ namespace RunScript
                 else
                     _context.MinOutputType = XSharper.Core.OutputType.Info;
 
-                var script = _context.LoadScript(XmlReader.Create(new StringReader(_scriptText)),"temp.xsh");
+                XSharper.Core.Script script;
+                if (!string.IsNullOrEmpty(_scriptFilename))
+                    script= _context.LoadScript(_scriptFilename,false);
+                else
+                    script= _context.LoadScript(XmlReader.Create(new StringReader(_scriptXml)),"temp.xsh");
                 var ret = _context.ExecuteScript(script, XSharper.Core.Utils.SplitArgs(_args));
                 lock (_currentHtml)
                 {
