@@ -1323,7 +1323,7 @@ namespace XSharper.Core
             else
                 return s;
 
-            if (s.IndexOf(begin[0]) != -1) 
+            if (s.IndexOf(begin,StringComparison.Ordinal) != -1) 
             {
                 StringBuilder sbNew = new StringBuilder();
                 using (var sr = new ParsingReader(new StringReader(s)))
@@ -1335,14 +1335,14 @@ namespace XSharper.Core
                         char ch = (char)sr.Read();
                         if (ch!=begin[ptr])    
                         {
-                            sbNew.Append(begin,0,ptr);
+abort:                      sbNew.Append(begin,0,ptr);
                             sbNew.Append(ch);
                             ptr = 0;
                             first = false;
                             continue;
                         }
                         ptr++;
-                        if (ptr<begin.Length)
+                        if (ptr < begin.Length)
                             continue;
                         if (sr.Peek()=='{' || sr.Peek()=='[')
                         {
@@ -1370,7 +1370,11 @@ namespace XSharper.Core
                         first = false;
                         sbNew.Append(Utils.To<string>(sv));
                     }
+                    for (int i = 0; i < ptr; ++i)
+                        sbNew.Append(begin[i]);
                 }
+                
+                
                 return sbNew.ToString();
             }
             return s;

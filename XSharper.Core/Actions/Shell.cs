@@ -276,7 +276,12 @@ namespace XSharper.Core
 
             ShellMode t = this.Mode;
             if (t == ShellMode.Auto)
-                t = string.IsNullOrEmpty(Verb) ? ShellMode.Comspec : ShellMode.ShellExecute;
+            {
+                if (string.IsNullOrEmpty(Verb))
+                    t = ShellMode.Comspec;
+                else
+                    t=ShellMode.ShellExecute;
+            }
 
             string outp = Context.TransformStr(OutTo, Transform);
             string errorp = Context.TransformStr(ErrorTo, Transform);
@@ -330,7 +335,9 @@ namespace XSharper.Core
                             fileToDelete = null; // don't delete the batch if we're not waiting for it to complete
                         goto default;
                     default:
-                        string cmd = Utils.QuoteArg(Environment.ExpandEnvironmentVariables("%COMSPEC%")) + " "+args;
+                        string cmd = Utils.QuoteArg(Environment.ExpandEnvironmentVariables("%COMSPEC%")) ;
+                        if (!string.IsNullOrEmpty(args))
+                            cmd += " " + args;
                         fillFilenameAndArguments(pi, cmd);
                         pi.Arguments = " /C \"" + pi.Arguments + "\"";
                         pi.UseShellExecute = false;
@@ -476,7 +483,12 @@ namespace XSharper.Core
 
                             VerboseMessage("Execution completed with exit code={0}", exitCode);
                             if (exitCode != 0 && !IgnoreExitCode)
-                                throw new ScriptRuntimeException(string.Format("Command [{0}] failed with exit code = {1}", Utils.QuoteArg(pi.FileName) + " " + pi.Arguments, p.ExitCode));
+                            {
+                                string a = Utils.QuoteArg(pi.FileName);
+                                if (!string.IsNullOrEmpty(pi.Arguments))
+                                    a += " " + pi.Arguments;
+                                throw new ScriptRuntimeException(string.Format("Command [{0}] failed with exit code = {1}", a, p.ExitCode));
+                            }
                         }
                     }
                 }
@@ -501,7 +513,15 @@ namespace XSharper.Core
 
         private void fillFilenameAndArguments(ProcessStartInfo pi, string args)
         {
-            string cmdLine = string.Concat(args,args.Length>0?" ":string.Empty,ShellArg.GetCommandLine(Context, Args)).TrimStart();
+            StringBuilder cmBuilder=new StringBuilder(args);
+            string extra = ShellArg.GetCommandLine(Context, Args);
+            if (args.Length>0 && !string.IsNullOrEmpty(extra))
+            {
+                cmBuilder.Append(" ");
+                cmBuilder.Append(extra);
+            }
+
+            string cmdLine = cmBuilder.ToString().TrimStart();
             if (cmdLine.StartsWith("\"",StringComparison.Ordinal))
             {
                 int n = cmdLine.IndexOf("\"", 1,StringComparison.Ordinal);
