@@ -1335,7 +1335,7 @@ namespace XSharper.Core
                         char ch = (char)sr.Read();
                         if (ch!=begin[ptr])    
                         {
-abort:                      sbNew.Append(begin,0,ptr);
+                            sbNew.Append(begin,0,ptr);
                             sbNew.Append(ch);
                             ptr = 0;
                             first = false;

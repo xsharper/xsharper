@@ -1,0 +1,31 @@
+<VSTemplate Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Type="Project">
+  <TemplateData>
+    <Name>XSharper script</Name>
+    <Description>XSharper script</Description>
+    <ProjectType>CSharp</ProjectType>
+    <ProjectSubType>Windows</ProjectSubType>
+    <SortOrder>1000</SortOrder>
+    <CreateNewFolder>true</CreateNewFolder>
+    <DefaultName>xsh</DefaultName>
+    <ProvideDefaultName>true</ProvideDefaultName>
+    <LocationField>Enabled</LocationField>
+    <EnableLocationBrowseButton>true</EnableLocationBrowseButton>
+    <Icon>xsharper.ico</Icon>
+  </TemplateData>
+  <TemplateContent>
+    <Project TargetFileName="$safeprojectname$.csproj" File="xsharper.csproj" ReplaceParameters="true">
+      <ProjectItem ReplaceParameters="true" TargetFileName="Program.cs">Program.cs</ProjectItem>
+      <Folder Name="Properties" TargetFolderName="Properties">
+        <ProjectItem ReplaceParameters="true" TargetFileName="AssemblyInfo.cs">AssemblyInfo.cs</ProjectItem>
+      </Folder>
+
+	  <Folder Name="3rdParty" TargetFolderName="3rdParty">
+	      <ProjectItem TargetFileName="XSharper.Core.dll">XSharper.Core.dll</ProjectItem>
+	      <ProjectItem TargetFileName="ICSharpCode.SharpZipLib.dll">ICSharpCode.SharpZipLib.dll</ProjectItem>
+	  </Folder>
+
+      <ProjectItem ReplaceParameters="true" TargetFileName="$safeprojectname$.xsh">script.xsh</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="$safeprojectname$.generated.cs">script.generated.cs</ProjectItem>
+    </Project>
+  </TemplateContent>
+</VSTemplate>
