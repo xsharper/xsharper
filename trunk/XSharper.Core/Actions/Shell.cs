@@ -515,9 +515,10 @@ namespace XSharper.Core
         {
             StringBuilder cmBuilder=new StringBuilder(args);
             string extra = ShellArg.GetCommandLine(Context, Args);
-            if (args.Length>0 && !string.IsNullOrEmpty(extra))
+            if (!string.IsNullOrEmpty(extra))
             {
-                cmBuilder.Append(" ");
+                if (args.Length>0)
+                    cmBuilder.Append(" ");
                 cmBuilder.Append(extra);
             }
 
