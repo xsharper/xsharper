@@ -156,11 +156,16 @@ namespace XSharper.Core.Operations
                     if (o1 == null || o2 == null) 
                     {
                         if (_operator == OperatorType.Equal)
-                            stack.Push(o1==o2);
-                        else if (_operator == OperatorType.NotEqual)
+                        {
+                            stack.Push(o1 == o2);
+                            return;
+                        }
+                        if (_operator == OperatorType.NotEqual)
+                        {
                             stack.Push(o1 != o2);
-                        else
-                            throw new NullReferenceException();
+                            return;
+                        }
+                        throw new NullReferenceException();
                     }
 
                     if (o1 is decimal || o2 is decimal)

@@ -38,8 +38,7 @@ namespace XSharper.Core
         private char? _top;
         private TextReader _r;
         private bool _owns;
-        private const int _historyLen = 40;
-        private readonly StringBuilder _history=new StringBuilder();
+        private readonly char[] _history = new char[40];
         private int _ptr = 0;
         private int _line = 1;
         
@@ -52,8 +51,8 @@ namespace XSharper.Core
         public string History
         {
             get { 
-                string s=_history.ToString(); 
-                if (_historyLen!=_history.Length)
+                string s=new string(_history).Trim('\x0'); 
+                if (s.Length!=_history.Length)
                     return s;
                 return "... "+s.Substring(_ptr) + s.Substring(0, _ptr);
             }
@@ -105,7 +104,7 @@ namespace XSharper.Core
         /// Returns true if character can be poked
         public bool CanPoke
         {
-            get { return _top == null; }
+            get { return !_top.HasValue; }
         }
 
         /// <summary>
@@ -127,7 +126,7 @@ namespace XSharper.Core
         /// <param name="ch">Character to poke</param>
         public void Poke(char ch)
         {
-            if (_top!=null)
+            if (_top.HasValue)
                 throw new InvalidOperationException("Cannot poke");
             _top = ch;
         }
@@ -153,14 +152,8 @@ namespace XSharper.Core
                 {
                     if (ret == '\n')
                         _line++;
-                    if (_history.Length < _historyLen)
-                        _history.Append((char) ret);
-                    else
-                    {
-                        _history[_ptr++] = (char) ret;
-                        if (_ptr >= _historyLen)
-                            _ptr = 0;
-                    }
+                    _history[_ptr] = (char) ret;
+                    _ptr = (_ptr + 1)%_history.Length;
                 }
             }
             return ret;
@@ -496,4 +489,4 @@ namespace XSharper.Core
 
 
     }
-}
+}       

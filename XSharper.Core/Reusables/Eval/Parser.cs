@@ -579,9 +579,10 @@ namespace XSharper.Core
             Operations.OperationVariableAccess va = new Operations.OperationVariableAccess();
             StringBuilder sb = new StringBuilder();
             bool orMet = true;
-            while (!reader.IsEOF)
+            int n;
+            while ((n=reader.Peek())!=-1)
             {
-                var q = (char)reader.Peek();
+                var q = (char)n;
                 if (q == '}' || q == ')' || q == ']')
                     break;
                 switch (q)
@@ -827,17 +828,23 @@ namespace XSharper.Core
                         if (ch == '.')
                         {
                             r.Read();
-                            number = !r.IsEOF && Char.IsDigit((char)r.Peek());
+                            int cc = r.Peek();
+                            number = (cc != -1) && Char.IsDigit((char)cc);
                             r.Poke('.');
                         }
                         if (number)
-                            return new QToken(QType.Value, r.ReadNumber());
+                        {
+                            var nn = r.ReadNumber();
+                            if (nn == null)
+                                ThrowParsingException("Invalid number");
+                            return new QToken(QType.Value, nn);
+                        }
 
                         StringBuilder sb = new StringBuilder();
                         
-                        while (!r.IsEOF)
+                        while ((n = (char)r.Peek())!=-1)
                         {
-                            ch = (char)r.Peek();
+                            ch = (char) n;
                             if (char.IsLetterOrDigit(ch) || ch == '.' || _parser._tokenSpecialCharacters.IndexOf(ch) != -1)
                             {
                                 sb.Append(ch);
@@ -870,14 +877,15 @@ namespace XSharper.Core
             {
                 Operations.OperationVariableAccess va = new Operations.OperationVariableAccess();
 
-                bool blockMode = (!_reader.IsEOF && _reader.Peek() == '{');
+                var cc = _reader.Peek();
+                bool blockMode = (cc== '{');
 
                 StringBuilder sb = new StringBuilder();
                 if (!blockMode)
                 {
-                    while (!_reader.IsEOF)
+                    while ((cc=_reader.Peek())!=-1)
                     {
-                        var ch = (char)_reader.Peek();
+                        var ch = (char) cc;
                         if (!char.IsLetterOrDigit(ch) && _parser._tokenSpecialCharacters.IndexOf(ch) == -1)
                             break;
 

@@ -307,6 +307,7 @@ namespace XSharper.Core
         }
 
         #region -- Gory details --
+
         private static readonly Dictionary<Type, FastCreateInstance> _fastCreator = new Dictionary<Type, FastCreateInstance>();
         private static bool _useFastCreator = true;
         private delegate object FastCreateInstance();
@@ -359,6 +360,7 @@ namespace XSharper.Core
             }
             return ret;
         }
+
         private static bool runAgainstObject(object obj, Type objType, string func, Array a, RunFlags flags, out object retVal)
         {
             try
@@ -432,6 +434,7 @@ namespace XSharper.Core
             }
             else
             {
+                // "proper" way is to use a custom Binder, but not only we need to invoke, but also to determine whether it can be invoked, so do it manually
                 int best = -1;
                 PropertyInfo bestPropInfo = null;
                 foreach (var prop in objType.GetProperties(bindingFlags))
@@ -561,10 +564,9 @@ namespace XSharper.Core
             a.CopyTo(r, 0);
             return r;
         }
+
         static private Array convertParams(ParameterInfo[] pi, Array a)
         {
-            
-            
             var par = new object[pi.Length];
             int pptr = 0;
             if (a != null)

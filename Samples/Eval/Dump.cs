@@ -32,6 +32,30 @@ using System.Text;
 
 namespace XSharper.Core
 {
+    /// Dump configuration
+    public class DumpSettings
+    {
+        /// <summary>
+        /// Maximum number of list or IEnumerable items to display
+        /// </summary>
+        public int MaxItems=50;
+
+        /// <summary>
+        /// true = display private members of the class/struct
+        /// </summary>
+        public bool DisplayPrivate=false;
+
+        /// <summary>
+        /// Limit tree depth to this (default 5)
+        /// </summary>
+        public int MaxDepth=5;
+
+        /// <summary>
+        /// Use full class names
+        /// </summary>
+        public bool UseFullClassNames = false;
+    }
+
     /// <summary>
     /// Utility class to dump all properties and fields of the object to the output
     /// </summary>
@@ -40,43 +64,43 @@ namespace XSharper.Core
         /// Mark type as opaque. For opaque types its ToString() output is copied to the dump instead of the proper tree walking.
         public static void AddOpaqueType(Type exc)
         {
-            lock (s_types)
-                s_types[exc.FullName] = true;
+            lock (s_opaqueTypes)
+                s_opaqueTypes[exc.FullName] = true;
         }
 
         /// Mark type as opaque. For opaque types its ToString() output is copied to the dump instead of the proper tree walking.
         public static void AddOpaqueType(string typename)
         {
-            lock (s_types)
-                s_types.Add(typename, true);
+            lock (s_opaqueTypes)
+                s_opaqueTypes.Add(typename, true);
+        }
+
+        /// Mark a property as opaque. For opaque properties its ToString() output is copied to the dump instead of the proper tree walking.
+        public static void AddOpaqueProperty(Type type, string propertyName)
+        {
+            addProperty(type, propertyName, false);
+        }
+
+        /// Mark a property as having a side effect. Properties with side effects are ignored
+        public static void AddSideEffectProperty(Type type, string propertyName)
+        {
+            addProperty(type, propertyName, true);
         }
 
         /// Add a friendly type name
         public static void AddTypeName(Type type, string typename)
         {
-            lock (s_types)
+            lock (s_opaqueTypes)
                 s_friendlyName.Add(type, typename);
         }
 
-        /// <summary>
-        /// Maximum number of list or IEnumerable items to display
-        /// </summary>
-        public int MaxItems { get; set; }
-
-        /// <summary>
-        /// true = display private members of the class/struct
-        /// </summary>
-        public bool DisplayPrivate { get; set; }
-
-        /// <summary>
-        /// Limit tree depth to this (default 5)
-        /// </summary>
-        public int MaxDepth { get; set; }
-
+    
         private readonly object _object;
         private readonly Type _type;
         private readonly string _name;
         private readonly int _level;
+        private readonly DumpSettings _settings;
+        private static readonly DumpSettings s_defaultSettings=new DumpSettings();
 
         /// Constructor
         public Dump(object objectToDump) : this(objectToDump, null, null, 0)
@@ -89,6 +113,12 @@ namespace XSharper.Core
         {
         }
 
+        /// Constructor with explicit type specification
+        public Dump(object objectToDump, DumpSettings settings)
+            : this(objectToDump, null, null, 0, settings)
+        {
+        }
+
         /// Constructor with explicit type specification and prefix
         public Dump(object objectToDump, Type type, string name)
             : this(objectToDump, type, name, 0)
@@ -97,12 +127,18 @@ namespace XSharper.Core
 
         /// Constructor with explicit type specification, prefix, indent level 
         public Dump(object objectToDump, Type type, string name, int level)
-            : this(objectToDump, type, name, level, 5)
+            : this(objectToDump, type, name, level, s_defaultSettings)
+        {
+        }
+
+        /// Constructor with explicit type specification
+        public Dump(object objectToDump, Type type, DumpSettings settings)
+            : this(objectToDump, type, null, 0, settings)
         {
         }
 
         /// Constructor with explicit type specification, prefix, indent level and depth level
-        public Dump(object objectToDump, Type type, string name, int level, int maxDepth)
+        public Dump(object objectToDump, Type type, string name, int level, DumpSettings settings)
         {
             _object = objectToDump;
             _type = type;
@@ -113,21 +149,33 @@ namespace XSharper.Core
                     _type = typeof (object);
             _name = name;
             _level = level;
-            MaxItems = 50;
-            DisplayPrivate = false;
-            MaxDepth = maxDepth;
+            _settings = settings??s_defaultSettings;
         }
 
         /// Dump object to string
         public static string ToDump<T>(T objectToDump)
         {
-            return ToDump<T>(objectToDump, null);
+            return ToDump<T>(objectToDump, null,null);
         }
+
+
+        /// Dump object to string
+        public static string ToDump<T>(T objectToDump, DumpSettings settings)
+        {
+            return ToDump<T>(objectToDump, null, settings);
+        }
+
 
         /// Dump object to string, adding 'name=' prefix before output
         public static string ToDump<T>(T objectToDump, string name)
         {
-            return ToDump(objectToDump, (objectToDump == null) ? typeof (T) : objectToDump.GetType(), name);
+            return ToDump(objectToDump, name,null);
+        }
+
+        /// Dump object to string, adding 'name=' prefix before output
+        public static string ToDump<T>(T objectToDump, string name, DumpSettings settings)
+        {
+            return ToDump(objectToDump, (objectToDump == null) ? typeof(T) : objectToDump.GetType(), name, settings);
         }
 
         /// Dump object to string, interpreting object as the object of type 
@@ -143,10 +191,23 @@ namespace XSharper.Core
         }
 
         /// Dump object to string, interpreting object as the object of type , adding 'name=' prefix before output
+        public static string ToDump(object objectToDump, Type type, string name, DumpSettings settings)
+        {
+            return new Dump(objectToDump, type, name, 0, settings).ToString();
+        }
+
+        /// Dump object to string, interpreting object as the object of type , adding 'name=' prefix before output
         public static string ToDump(object objectToDump, Type type, string name, int level)
         {
             return new Dump(objectToDump, type, name, level).ToString();
         }
+
+        /// Dump object to string, interpreting object as the object of type , adding 'name=' prefix before output
+        public static string ToDump(object objectToDump, Type type, string name, int level, DumpSettings settings)
+        {
+            return new Dump(objectToDump, type, name, level, settings).ToString();
+        }
+
 
         /// Returns dump of the object
         public override string ToString()
@@ -165,11 +226,20 @@ namespace XSharper.Core
 
         #region --- Implementation details ---
 
-        private static bool isOpaque(Type t)
+        private static void addProperty(Type type, string propertyName, bool sideEffect)
         {
-            return s_types.ContainsKey(t.FullName);
+            lock (s_propertyHints)
+            {
+                Dictionary<string, bool> prop;
+                if (!s_propertyHints.TryGetValue(type, out prop))
+                {
+                    prop = new Dictionary<string, bool>();
+                    s_propertyHints.Add(type, prop);
+                }
+                prop[propertyName]=sideEffect;
+            }
         }
-
+        
         private class ReferenceComparer : IEqualityComparer<object>
         {
             bool IEqualityComparer<object>.Equals(object x, object y)
@@ -185,35 +255,35 @@ namespace XSharper.Core
             }
         }
 
-        private static readonly Dictionary<string, bool> s_types = new Dictionary<string, bool>()
-            {
-                {"System.DateTime", true},
-                {"System.Type", true},
-                {"System.Security.Principal.SecurityIdentifier", true},
-                {"System.Xml.Linq.XElement", true},
-                {"System.Xml.Linq.XDocument", true},
-                {"System.Reflection.RuntimeConstructorInfo", true},
-                {"System.Reflection.RuntimePropertyInfo", true},
-                {"System.Reflection.RuntimeMethodInfo", true},
-                {"System.RuntimeType", true},
-                {"System.Reflection.MethodBase", true},
-                {"System.Security.Policy.Evidence", true},
-                {"System.Globalization.CultureInfo", true},
-                {"System.Version", true}
-            };
+        private static readonly Dictionary<string, bool> s_opaqueTypes = initOpaqueTypes();
 
-        private class OpaquePropertyInfo
-        {
-            public Type Type;
-            public List<string> OpaqueProperties = new List<string>();
-        }
-
-        private static readonly List<OpaquePropertyInfo> s_opaqueProperties = initOpaqueProperties();
+        // For each special store true=side effect, false=opaque
+        private static readonly Dictionary<Type, Dictionary<string,bool>> s_propertyHints = initPropertyHints();
         private static readonly Dictionary<Type, string> s_friendlyName = initFriendlyNames();
+
+        private static Dictionary<string, bool> initOpaqueTypes()
+        {
+            Dictionary<string, bool> ret = new Dictionary<string, bool>();
+            foreach (string s in new string[] {"System.DateTime",
+                                            "System.Type",
+                                            "System.Security.Principal.SecurityIdentifier",
+                                            "System.Xml.Linq.XElement",
+                                            "System.Xml.Linq.XDocument",
+                                            "System.Reflection.RuntimeConstructorInfo",
+                                            "System.Reflection.RuntimePropertyInfo",
+                                            "System.Reflection.RuntimeMethodInfo",
+                                            "System.RuntimeType",
+                                            "System.Reflection.MethodBase",
+                                            "System.Security.Policy.Evidence",
+                                            "System.Globalization.CultureInfo",
+                                            "System.Version"})
+                ret[s] = true;
+            return ret;
+        }
 
         private static Dictionary<Type, string> initFriendlyNames()
         {
-            var r=new Dictionary<Type, string>();
+            Dictionary<Type, string> r=new Dictionary<Type, string>();
             r.Add(typeof(string),"string");
             r.Add(typeof(int), "int");
             r.Add(typeof(uint), "uint");
@@ -230,14 +300,13 @@ namespace XSharper.Core
             return r;
         }
 
-        private static List<OpaquePropertyInfo> initOpaqueProperties()
+        private static Dictionary<Type, Dictionary<string,bool>> initPropertyHints()
         {
-            List<OpaquePropertyInfo> s =new List<OpaquePropertyInfo>();
-            OpaquePropertyInfo i=new OpaquePropertyInfo();
-            i.Type = typeof (FileSystemInfo);
-            i.OpaqueProperties.Add("Parent");
-            i.OpaqueProperties.Add("Root");
-            s.Add(i);
+            Dictionary<Type, Dictionary<string, bool>> s = new Dictionary<Type, Dictionary<string, bool>>();
+            Dictionary<string, bool> data = new Dictionary<string, bool>();
+            data["Parent"] = false;
+            data["Root"] = false;
+            s[typeof(FileSystemInfo)] = data;
             return s;
         }
 
@@ -248,7 +317,7 @@ namespace XSharper.Core
         void process2(string name, Type t, object o, int depth)
         {
 
-            string typeName = GetFriendlyTypeName(t);
+            string typeName = GetFriendlyTypeName(t,_settings.UseFullClassNames);
 
             _out.Append(new string(' ', depth*2));
             if (!string.IsNullOrEmpty(name))
@@ -262,7 +331,7 @@ namespace XSharper.Core
                 return;
             }
 
-            if ((t != typeof(string) && (o is string)) || MaxDepth <= depth)
+            if ((t != typeof(string) && (o is string)) || _settings.MaxDepth <= depth)
             {
                 _out.Append("\"" + toEscapedString(o)+"\" /* ToString */");
                 return;
@@ -276,12 +345,13 @@ namespace XSharper.Core
 
             
             BindingFlags flags = BindingFlags.Instance | BindingFlags.FlattenHierarchy;
-            if (!DisplayPrivate)
+            if (!_settings.DisplayPrivate)
                 flags |= BindingFlags.Public;
             PropertyInfo[] props = t.GetProperties(flags | BindingFlags.GetProperty);
             FieldInfo[] fi = t.GetFields(flags);
 
-            if (t.IsPrimitive || t.IsEnum || (t.IsValueType && props.Length == 0 && fi.Length == 0) || isOpaque(t) || t== typeof(decimal))
+            
+            if (t.IsPrimitive || t.IsEnum || (t.IsValueType && props.Length == 0 && fi.Length == 0) || s_opaqueTypes.ContainsKey(t.FullName) || t== typeof(decimal))
             {
                 if ((t == typeof (int)) || (t == typeof (byte)) || (t == typeof (uint)) || t == typeof (long) ||
                     t == typeof (ulong))
@@ -303,7 +373,7 @@ namespace XSharper.Core
                 int id;
                 if (_usedMap.TryGetValue(o,out id))
                 {
-                    _out.AppendFormat("<see #{0} above>",id);
+                    _out.AppendFormat("<see #{0}, {1:x8} above>", id, o.GetHashCode());
                     return;
                 }
                 _usedMap[o] = ++_counter;
@@ -326,21 +396,29 @@ namespace XSharper.Core
             {
                 writeBrace(o);
 
-                OpaquePropertyInfo oi=null;
-                foreach (var info in s_opaqueProperties)
-                    if (t==info.Type || t.IsSubclassOf(info.Type))
+                Dictionary<string,bool> propNames=null;
+                foreach (KeyValuePair<Type, Dictionary<string,bool>> info in s_propertyHints)
+                    if (t==info.Key || t.IsSubclassOf(info.Key))
                     {
-                        oi = info;
+                        propNames = info.Value;
                         break;
                     }
 
-                FileSystemInfo fsi = o as FileSystemInfo;
                 foreach (PropertyInfo p in props)
                 {
-                    if (oi!=null && oi.OpaqueProperties.Contains(p.Name))
-                        dumpProperty(p, o, depth + 1,true);
+                    bool sideEffect;
+                    if (propNames != null && propNames.TryGetValue(p.Name, out sideEffect))
+                    {
+                        if (!sideEffect)
+                            dumpProperty(p, o, depth + 1, true);
+                        else
+                        {
+                            process2(p.Name, p.PropertyType, "<ignored>", depth+1);
+                            _out.AppendLine();
+                        }
+                    }
                     else
-                        dumpProperty(p, o, depth + 1,false);
+                        dumpProperty(p, o, depth + 1, false);
                 }
                 foreach (FieldInfo f in fi)
                     dumpField(f, o, depth + 1);
@@ -413,7 +491,7 @@ namespace XSharper.Core
                 Type tinside=info == null ? typeof(object) : info.GetType();
                 process2("[" + index + "]", tinside, info, nLevel + 1);
                 _out.AppendLine();
-                if (index++ > MaxItems)
+                if (index++ > _settings.MaxItems)
                 {
                     _out.AppendLine("...");
                     break;
@@ -433,7 +511,7 @@ namespace XSharper.Core
                     if (i != 0)
                         _out.Append(' ');
                     _out.Append(b[i].ToString("x2"));
-                    if (i > MaxItems)
+                    if (i > _settings.MaxItems)
                     {
                         _out.Append("...");
                         break;
@@ -471,7 +549,7 @@ namespace XSharper.Core
 
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
-                var st = Nullable.GetUnderlyingType(type);
+                Type st = Nullable.GetUnderlyingType(type);
                 if (st!=null)
                     return GetFriendlyTypeName(st) + "?";
                 return "T?";
@@ -480,14 +558,13 @@ namespace XSharper.Core
                 return GetFriendlyTypeName(type.GetElementType()) + "[" + new string(',', type.GetArrayRank() - 1) + "]";
 
             string s;
-            if (!fullName &&s_friendlyName.TryGetValue(type, out s))
+            if (!fullName && s_friendlyName.TryGetValue(type, out s))
                 return s;
             string name = fullName ? type.FullName : type.Name;
-            if (type.IsGenericParameter || type.IsPrimitive || !type.IsGenericType || type == typeof (decimal))
+            if (type.IsGenericParameter || type.IsPrimitive || !type.IsGenericType || type == typeof(decimal))
                 return name;
 
             StringBuilder builder = new StringBuilder();
-            
             int index = name.IndexOf('`');
             if (index == -1)
                 builder.Append(name);

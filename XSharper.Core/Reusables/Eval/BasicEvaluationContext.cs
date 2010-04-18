@@ -32,10 +32,13 @@ namespace XSharper.Core
     /// Basic implementation of the IEvaluationContext
     public class BasicEvaluationContext : IEvaluationContext
     {
-        private readonly Parser _parser=new Parser();
-        private readonly Dictionary<string, object> _variables = new Dictionary<string, object>();
-        private readonly Dictionary<string, object> _objects = new Dictionary<string, object>();
+        private readonly Parser _parser;
+        private readonly IEqualityComparer<string> _comparer;
+        private readonly Dictionary<string, object> _variables;
+        private readonly Dictionary<string, object> _objects;
         private readonly List<string> _namespaces = new List<string> { "System", "System.Text", "System.Collections", "System.Text.RegularExpressions" };
+        private readonly List<TypeObjectPair> _nonameObjects=new List<TypeObjectPair>();
+
 
         /// Return current parser
         public Parser Parser    {   get { return _parser; } }
@@ -63,10 +66,16 @@ namespace XSharper.Core
         public virtual bool AccessPrivate { get { return false; } }
         
         /// Call external method
-        public virtual object CallExternal(string name, object[] parameters) { throw new NotImplementedException("Function " + name + " is not available"); }
+        public virtual object CallExternal(string name, object[] parameters)
+        {
+            throw new NotImplementedException("Function " + name + " with " + parameters.Length+" parameter(s) is not implemented");
+        }
 
         /// Get list of no-name objects or type to try methods that start with .
-        public virtual IEnumerable<TypeObjectPair> GetNonameObjects() { return null; }
+        public virtual IEnumerable<TypeObjectPair> GetNonameObjects()
+        {
+            return _nonameObjects.Count == 0 ? null : _nonameObjects;
+        }
 
         /// Find external type. Returns null if type not found
         public virtual Type FindType(string name)
@@ -84,9 +93,33 @@ namespace XSharper.Core
         }
         #endregion
 
-        
+
+        /// Set variable value
+        public virtual void SetVariable(string name, object value)
+        {
+            Variables[name] = value;
+        }
+
+        /// Set object value
+        public virtual void SetObject(string name, object value)
+        {
+            Objects[name] = value;
+        }
+
+        /// Add noname object (.X will call value.X instance method)
+        public virtual void AddNonameObject(object value)
+        {
+            _nonameObjects.Add(new TypeObjectPair(value.GetType(), value));
+        }
+
+        /// Add noname type (.X will call type.X static method)
+        public virtual void AddNonameType(Type type)
+        {
+            _nonameObjects.Add(new TypeObjectPair(type, null));
+        }
+
         /// Constructor
-        public BasicEvaluationContext()
+        public BasicEvaluationContext() : this(new Parser(), StringComparer.OrdinalIgnoreCase )
         {
             _objects.Add("null",null);
             _objects.Add("true", true);
@@ -94,16 +127,14 @@ namespace XSharper.Core
         }
 
         /// Constructor
-        public BasicEvaluationContext(IEqualityComparer<string> cmp) : this()
+        public BasicEvaluationContext(Parser parser, IEqualityComparer<string> comparer)
         {
-            _variables = new Dictionary<string, object>(cmp);
-            _objects = new Dictionary<string, object>(cmp);
-        }
-
-        /// Constructor
-        public BasicEvaluationContext(Parser parser) : this()
-        {
+            if (parser == null) throw new ArgumentNullException("parser");
+            if (comparer == null) throw new ArgumentNullException("comparer");
             _parser = parser;
+            _comparer = comparer;
+            _variables = new Dictionary<string, object>(comparer);
+            _objects = new Dictionary<string, object>(comparer);
         }
         
         /// Evaluate string and return the result of the evaluation
@@ -152,6 +183,6 @@ namespace XSharper.Core
         {
             return Eval<object>(op);
         }
-        
+
     }
 }
