@@ -182,6 +182,7 @@ namespace XSharper.Core
             throw new InvalidCastException("Cannot convert " + ot + " to " + pt);
         }
 
+		private static char[] s_enumDelimiters="+;,|\n\r\t ".ToCharArray();
 
         private static object convertString(string text, Type pt)
         {
@@ -261,7 +262,7 @@ namespace XSharper.Core
                         throw new InvalidCastException(String.Format("Unexpected empty enum value"));
 
                     int step = 0;
-                    foreach (string str in text.Split(";,|\n\r\t ".ToCharArray()))
+                    foreach (string str in text.Split(s_enumDelimiters))
                     {
                         if (String.IsNullOrEmpty(str))
                             continue;
@@ -283,6 +284,7 @@ namespace XSharper.Core
 
             throw new InvalidCastException(String.Format("'{0}' cannot be converted to {1}", text, pt.ToString()));
         }
+
 
         /// Convert string timespan (can be in milliseconds, or 00:00:00.33) to a TimeSpan.
         static public TimeSpan? ToTimeSpan(string timeout)

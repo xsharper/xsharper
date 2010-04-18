@@ -68,7 +68,7 @@ namespace XSharper.Core.Operations
 
             // ID is smth like x.y.z where we have no idea whether x is namespace,type, or object name. So we split it
             // and ask
-            var parts = (!_id.Contains(".") && !string.IsNullOrEmpty(_id)&& _paramCount != 0 && _isProperty)?((_id+".").Split('.')):_id.Split('.');
+            var parts = (!_id.Contains(".") && !string.IsNullOrEmpty(_id) && _paramCount != 0 && _isProperty)?((_id+".").Split('.')):_id.Split('.');
             
             IEnumerable<TypeObjectPair> typeAndObjects = null;
             if (_thisCall)
@@ -81,7 +81,7 @@ namespace XSharper.Core.Operations
             bool success = false;
             for (int i=0;i<parts.Length;++i)
             {
-                string s = parts[i];
+                string currentPart = parts[i];
                 if (typeAndObjects == null)
                 {
                     string tn = string.Join(".", parts, 0, i + 1);
@@ -89,7 +89,6 @@ namespace XSharper.Core.Operations
                         typeAndObjects = context.GetNonameObjects();
                     else
                     {
-
                         if (context.TryGetExternal(tn, out sub))
                         {
                             success = true;
@@ -111,11 +110,10 @@ namespace XSharper.Core.Operations
                     success = false;
                     foreach (var to in typeAndObjects)
                     {
-                        bool prop = !(i == parts.Length - 1 && !_isProperty);
-                        if (prop)
-                            success = Utils.TryGetProperty(to.Object, to.Type, s, (i == parts.Length - 1) ? p : null, context.AccessPrivate,out sub);
+                        if (_isProperty || i != parts.Length - 1)
+                            success = Utils.TryGetProperty(to.Object, to.Type, currentPart, (i == parts.Length - 1) ? p : null, context.AccessPrivate,out sub);
                         else
-                            success = Utils.TryCallMethod(to.Object, to.Type, s, (i == parts.Length - 1) ? p : null, context.AccessPrivate, out sub);
+                            success = Utils.TryCallMethod(to.Object, to.Type, currentPart, (i == parts.Length - 1) ? p : null, context.AccessPrivate, out sub);
                         if (success)
                         {
                             typeAndObjects = null;
@@ -126,8 +124,8 @@ namespace XSharper.Core.Operations
                     }
                     if (!success)
                     {
-                        // This may happen for COM objects where reflection does not work, but calling does!
-                        if (parts.Length == 1)
+                        // Last possible chance for COM objects where reflection does not work, but calling might! 
+                        if (i==parts.Length-1)
                         {
                             foreach (var to in typeAndObjects)
                             {
@@ -135,7 +133,7 @@ namespace XSharper.Core.Operations
                                 {
                                     if (p.Length == 0)
                                     {
-                                        stack.Push(Utils.GetProperty(to.Object, parts[0]));
+                                        stack.Push(Utils.GetProperty(to.Object, currentPart));
                                         return;
                                     }
                                 }
@@ -143,7 +141,7 @@ namespace XSharper.Core.Operations
                                 {
                                     try
                                     {
-                                        stack.Push(Utils.CallMethod(to.Object, parts[0], p));
+                                        stack.Push(Utils.CallMethod(to.Object, currentPart, p));
                                     }
                                     catch(Exception e)
                                     {
@@ -151,15 +149,15 @@ namespace XSharper.Core.Operations
                                         var miex = e as MissingMethodException;
                                         if (miex != null || (comex != null && ((uint)comex.ErrorCode == 0x80020006u || (uint)comex.ErrorCode == 0x80020005u)))
                                         {
-                                            if (parts[0].StartsWith("set_", StringComparison.OrdinalIgnoreCase) && p.Length==1)
+                                            if (currentPart.StartsWith("set_", StringComparison.OrdinalIgnoreCase) && p.Length == 1)
                                             {
-                                                Utils.SetPropertySimple(to.Object, parts[0].Substring(4), p[0]);
+                                                Utils.SetPropertySimple(to.Object, currentPart.Substring(4), p[0]);
                                                 stack.Push(null);
                                                 return;
                                             }
-                                            if (parts[0].StartsWith("get_", StringComparison.OrdinalIgnoreCase) && p.Length == 0)
+                                            if (currentPart.StartsWith("get_", StringComparison.OrdinalIgnoreCase) && p.Length == 0)
                                             {
-                                                stack.Push(Utils.GetProperty(to.Object, parts[0].Substring(4)));
+                                                stack.Push(Utils.GetProperty(to.Object, currentPart.Substring(4)));
                                                 return;
                                             }
                                         }
@@ -171,15 +169,12 @@ namespace XSharper.Core.Operations
                                 }
                             }
                         }
-                        throw new MissingMemberException("Failed to resolve '" + s + "'");
+                        throw new MissingMemberException("Failed to resolve '" + currentPart + "'");
                     }
                 }
             }
             if (!success)
-            {
-                
                 throw new MissingMemberException("Failed to resolve '" + _id + "'");
-            }
             if (typeAndObjects==null)
                 stack.Push(null);
             else

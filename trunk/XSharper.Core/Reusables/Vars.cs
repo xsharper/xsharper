@@ -399,6 +399,8 @@ namespace XSharper.Core
             return ToDumpAll(new StringFilter(filter));
         }
 
+        private static readonly DumpSettings s_dumpAllSettings = new DumpSettings {MaxItems = 10, MaxDepth = 7};
+
         /// Dump variables matching the filter to a string for debug purposes
         public string ToDumpAll(IStringFilter filter)
         {
@@ -412,9 +414,7 @@ namespace XSharper.Core
             {
                 if (filter!=null && !filter.IsMatch(pair.Name))
                     continue;
-                Dump od = new Dump(pair.Value, ((pair.Value == null) ? typeof (object) : pair.Value.GetType()), pair.Name.PadRight(maxlen + 1, ' '), 7);
-                od.MaxItems=10;
-                od.MaxDepth = 7;
+                Dump od = new Dump(pair.Value, ((pair.Value == null) ? typeof(object) : pair.Value.GetType()), pair.Name.PadRight(maxlen + 1, ' '), 7, s_dumpAllSettings);
                 sb.AppendLine(od.ToString().Trim());
             }
             return sb.ToString().TrimEnd();
