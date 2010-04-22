@@ -23,16 +23,20 @@ namespace EvalExpression
             variableBindingSource.Add(new Variable { Name = "B", Value = "0x0a" });
             variableBindingSource.Add(new Variable { Name = "D", Value = "30.5d" });
 
-            tbExpression.Text = "Math.Sqrt( (int)A+(long)B+hello.Length)+(float)D+System.IO.Directory.GetFiles('c:\').Length;";
+            tbExpression.Text = "Math.Sqrt( $A+$B+$hello.Length)+$D+System.IO.Directory.GetFiles('c:\').Length;";
         }
 
         private void btnCalc_Click(object sender, EventArgs e)
         {
-            BasicEvaluationContext be=new BasicEvaluationContext(StringComparer.OrdinalIgnoreCase);
-            foreach (Variable var in variableBindingSource    )
-                be.Objects.Add(var.Name,var.Value);
+            BasicEvaluationContext be=new BasicEvaluationContext();
 
-            
+            foreach (Variable var in variableBindingSource    )
+            {
+                ParsingReader pr=new ParsingReader(var.Value);
+                be.SetVariable(var.Name, (object)pr.ReadNumber() ?? var.Value);
+            }
+
+
             try
             {
                 tbResult.Text = Dump.ToDump(be.Eval(tbExpression.Text));

@@ -1,0 +1,24 @@
+<body>
+<script language='javascript'>
+
+	var ex="( ( v_t == 'B' ) ? 'bus'.Length : ( v_t == 'A' ) ? 'airplane'.Length+10 : ( v_t == 'T' ) ? 'train'.Length+100 : ( v_t == 'C' ) ? 'car'.Length +1000:  ( v_t == 'H' ) ? 'horse'.Length +10000:  'feet'.Length+100000 ); //";
+	var v_t="T";
+	var loops=200000;
+
+	var start = new Date().getTime();
+	for (i = 0; i < 200000; ++i) 
+		var r=( ( v_t == 'B' ) ? 'bus'.Length : ( v_t == 'A' ) ? 'airplane'.Length+10 : ( v_t == 'T' ) ? 'train'.Length+100 : ( v_t == 'C' ) ? 'car'.Length +1000:  ( v_t == 'H' ) ? 'horse'.Length +10000:  'feet'.Length+100000 );
+	var end = new Date().getTime();
+	var evalTime=end-start;
+
+	var out='Evaluation time: ' + evalTime+"\n";
+
+	start = new Date().getTime();
+	for (i = 0; i < 200000; ++i) 
+		eval(ex+i);
+	end = new Date().getTime();
+	out+='Parsing time: ' + (end-start-evalTime);
+	alert(out);
+
+</script>
+</body>

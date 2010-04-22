@@ -192,14 +192,63 @@ namespace XSharper.Core
             _top = null;
             return s;
         }
-        ///<summary>Skip until first non-whitespace character in the stream</summary>
+        ///<summary>Skip until first non-whitespace character in the stream, excluding // EOL and /**/ styled comments</summary>
         public void SkipWhiteSpace()
         {
-            while (!IsEOF && char.IsWhiteSpace((char) Peek()))
+            int n;
+            while ((n = Peek()) != -1 && char.IsWhiteSpace((char)n))
                 Read();
         }
+        ///<summary>Skip until first non-whitespace character in the stream, excluding // EOL and /**/ styled comments</summary>
+        public void SkipWhiteSpaceAndComments()
+        {
+            int n;
+            while ((n = Peek()) != -1)
+            {
+                char ch = (char) n;
+                if (char.IsWhiteSpace(ch))
+                {
+                    Read();
+                    continue;
+                }
+                if (ch=='/')
+                {
+                    Read();
+                    n = Peek();
+                    if (n=='*') // /* */ comment 
+                    {
+                        Read();
+                        while ((n = Peek()) != -1)
+                        {
+                            Read();
+                            if (n == '*' && Peek()=='/')
+                            {
+                                Read();
+                                break;
+                            }
+                        }
+                        if (n==-1)
+                            throw new ParsingException("Comment is not closed");
+                    }
+                    else if (n == '/') // /// comment 
+                    {
+                        Read();
+                        while ((n = Peek()) != -1 && n != '\n')
+                            Read();
+                    }
+                    else
+                    {
+                        // Smth else here
+                        Poke(ch);
+                        break;
+                    }
+                }
+                else
+                    break;
+            }
+        }
 
-        /// Read a number value from the stream. Value may be hex (with 0x prefix) or decimal, and may have suffixes such as 'm' or 'd'
+        /// Read a number value from the stream, or null if no number. Value may be hex (with 0x prefix), or double, or decimal, and may have suffixes such as 'm' or 'd'
         public ValueType ReadNumber()
         {
             StringBuilder sb = new StringBuilder();
@@ -425,7 +474,7 @@ namespace XSharper.Core
             {
                 if (sr.ReadNumber() == null)
                     return false;
-                sr.SkipWhiteSpace();
+                sr.SkipWhiteSpaceAndComments();
                 if (sr.Peek() != -1)
                     return false;
             }
@@ -438,11 +487,11 @@ namespace XSharper.Core
             if (str == null) throw new ArgumentNullException("str");
             using (var sr = new ParsingReader(str))
             {
-                sr.SkipWhiteSpace();
+                sr.SkipWhiteSpaceAndComments();
                 ValueType o = sr.ReadNumber();
                 if (o == null)
                     throw new ParsingException("Invalid numeric expression at " + sr.ReadLine());
-                sr.SkipWhiteSpace();
+                sr.SkipWhiteSpaceAndComments();
                 if (sr.Peek() != -1)
                     throw new ParsingException("Invalid numeric expression, unexpected characters at " + sr.ReadLine());
                 return o;
@@ -462,11 +511,11 @@ namespace XSharper.Core
                 return null;
             using (var sr = new ParsingReader(stringToParse))
             {
-                sr.SkipWhiteSpace();
+                sr.SkipWhiteSpaceAndComments();
                 ValueType o = sr.ReadNumber();
                 if (o == null)
                     return null;
-                sr.SkipWhiteSpace();
+                sr.SkipWhiteSpaceAndComments();
                 if (sr.Peek() != -1)
                     return null;
                 return o;

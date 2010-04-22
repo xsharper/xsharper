@@ -129,6 +129,9 @@ namespace XSharper.Core.Operations
                         {
                             foreach (var to in typeAndObjects)
                             {
+                                if (to.Object==null)
+                                    continue;
+                               
                                 if (_isProperty)
                                 {
                                     if (p.Length == 0)
@@ -169,12 +172,12 @@ namespace XSharper.Core.Operations
                                 }
                             }
                         }
-                        throw new MissingMemberException("Failed to resolve '" + currentPart + "'");
+                        throw new MissingMemberException("Failed to resolve '" + currentPart + "' with "+p.Length+" arguments");
                     }
                 }
             }
             if (!success)
-                throw new MissingMemberException("Failed to resolve '" + _id + "'");
+                throw new MissingMemberException("Failed to resolve '" + _id + "' with " + p.Length + " arguments");
             if (typeAndObjects==null)
                 stack.Push(null);
             else

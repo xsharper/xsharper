@@ -61,46 +61,7 @@ namespace XSharper.Core
     /// </summary>
     public class Dump
     {
-        /// Mark type as opaque. For opaque types its ToString() output is copied to the dump instead of the proper tree walking.
-        public static void AddOpaqueType(Type exc)
-        {
-            lock (s_opaqueTypes)
-                s_opaqueTypes[exc.FullName] = true;
-        }
-
-        /// Mark type as opaque. For opaque types its ToString() output is copied to the dump instead of the proper tree walking.
-        public static void AddOpaqueType(string typename)
-        {
-            lock (s_opaqueTypes)
-                s_opaqueTypes.Add(typename, true);
-        }
-
-        /// Mark a property as opaque. For opaque properties its ToString() output is copied to the dump instead of the proper tree walking.
-        public static void AddOpaqueProperty(Type type, string propertyName)
-        {
-            addProperty(type, propertyName, false);
-        }
-
-        /// Mark a property as having a side effect. Properties with side effects are ignored
-        public static void AddSideEffectProperty(Type type, string propertyName)
-        {
-            addProperty(type, propertyName, true);
-        }
-
-        /// Add a friendly type name
-        public static void AddTypeName(Type type, string typename)
-        {
-            lock (s_opaqueTypes)
-                s_friendlyName.Add(type, typename);
-        }
-
-    
-        private readonly object _object;
-        private readonly Type _type;
-        private readonly string _name;
-        private readonly int _level;
-        private readonly DumpSettings _settings;
-        private static readonly DumpSettings s_defaultSettings=new DumpSettings();
+        #region --- Constructors ---
 
         /// Constructor
         public Dump(object objectToDump) : this(objectToDump, null, null, 0)
@@ -151,6 +112,25 @@ namespace XSharper.Core
             _level = level;
             _settings = settings??s_defaultSettings;
         }
+
+        #endregion
+
+        /// Returns dump of the object
+        public override string ToString()
+        {
+            try
+            {
+                _out.Length = 0;
+                process2(_name, _type, _object, _level);
+                return _out.ToString();
+            }
+            catch (Exception e)
+            {
+                return "??? thrown " + e.GetType().FullName;
+            }
+        }
+        
+        #region --- ToDump static methods ---
 
         /// Dump object to string
         public static string ToDump<T>(T objectToDump)
@@ -208,23 +188,111 @@ namespace XSharper.Core
             return new Dump(objectToDump, type, name, level, settings).ToString();
         }
 
-
-        /// Returns dump of the object
-        public override string ToString()
+        #endregion
+        #region -- Public static utility methods --
+        /// <summary>
+        /// Return a user-friendly type name of a given type. For example, int?[] instead of the default name
+        /// </summary>
+        /// <param name="type">Type</param>
+        /// <returns>Type name</returns>
+        static public string GetFriendlyTypeName(Type type)
         {
-            try
+            return GetFriendlyTypeName(type, false);
+        }
+        /// <summary>
+        /// Return a user-friendly type name of a given type. For example, int?[] instead of the default name
+        /// </summary>
+        /// <param name="type">Type</param>
+        /// <param name="fullName">Return full name of the type</param>
+        /// <returns>Type name</returns>
+        static public string GetFriendlyTypeName(Type type, bool fullName)
+        {
+            if (type == null)
+                throw new ArgumentNullException("type");
+
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
-                _out.Length = 0;
-                process2(_name, _type, _object, _level);
-                return _out.ToString();
+                Type st = Nullable.GetUnderlyingType(type);
+                if (st != null)
+                    return GetFriendlyTypeName(st) + "?";
+                return "T?";
             }
-            catch (Exception e)
+            if (type.IsArray)
+                return GetFriendlyTypeName(type.GetElementType()) + "[" + new string(',', type.GetArrayRank() - 1) + "]";
+
+            string s;
+            if (!fullName && s_friendlyName.TryGetValue(type, out s))
+                return s;
+            string name = fullName ? type.FullName : type.Name;
+            if (type.IsGenericParameter || type.IsPrimitive || !type.IsGenericType || type == typeof(decimal))
+                return name;
+
+            StringBuilder builder = new StringBuilder();
+            int index = name.IndexOf('`');
+            if (index == -1)
+                builder.Append(name);
+            else
+                builder.Append(name.Substring(0, index));
+            builder.Append('<');
+            bool first = true;
+            foreach (Type arg in type.GetGenericArguments())
             {
-                return "??? thrown " + e.GetType().FullName;
+                if (!first)
+                {
+                    builder.Append(',');
+                }
+                builder.Append(GetFriendlyTypeName(arg));
+                first = false;
             }
+            builder.Append('>');
+            return builder.ToString();
+        }
+        #endregion
+        #region -- Static configuration methods --
+
+        /// Mark type as bloat. For bloattypes its ToString() output is copied to the dump instead of the proper tree walking.
+        public static void AddBloatType(Type exc)
+        {
+            lock (s_bloatTypes)
+                s_bloatTypes[exc.FullName] = true;
         }
 
+        /// Mark type as bloat . For bloat types its ToString() output is copied to the dump instead of the proper tree walking.
+        public static void AddBloatType(string typename)
+        {
+            lock (s_bloatTypes)
+                s_bloatTypes.Add(typename, true);
+        }
+
+        /// Mark a property as bloat . For bloat properties its ToString() output is copied to the dump instead of the proper tree walking.
+        public static void AddBloatProperty(Type type, string propertyName)
+        {
+            addProperty(type, propertyName, false);
+        }
+
+        /// Mark a property as one that should not be dumped, for example if the property has a side effect. 
+        public static void AddHiddenProperty(Type type, string propertyName)
+        {
+            addProperty(type, propertyName, true);
+        }
+
+        /// Add a friendly type name
+        public static void AddTypeName(Type type, string typename)
+        {
+            lock (s_bloatTypes)
+                s_friendlyName.Add(type, typename);
+        }
+        #endregion
+
+
         #region --- Implementation details ---
+        private readonly object _object;
+        private readonly Type _type;
+        private readonly string _name;
+        private readonly int _level;
+        private readonly DumpSettings _settings;
+        private static readonly DumpSettings s_defaultSettings = new DumpSettings();
+
 
         private static void addProperty(Type type, string propertyName, bool sideEffect)
         {
@@ -255,13 +323,13 @@ namespace XSharper.Core
             }
         }
 
-        private static readonly Dictionary<string, bool> s_opaqueTypes = initOpaqueTypes();
+        private static readonly Dictionary<string, bool> s_bloatTypes = initBloatTypes();
 
-        // For each special store true=side effect, false=opaque
+        // For each special store true=side effect, false=bloat
         private static readonly Dictionary<Type, Dictionary<string,bool>> s_propertyHints = initPropertyHints();
         private static readonly Dictionary<Type, string> s_friendlyName = initFriendlyNames();
 
-        private static Dictionary<string, bool> initOpaqueTypes()
+        private static Dictionary<string, bool> initBloatTypes()
         {
             Dictionary<string, bool> ret = new Dictionary<string, bool>();
             foreach (string s in new string[] {"System.DateTime",
@@ -303,6 +371,8 @@ namespace XSharper.Core
         private static Dictionary<Type, Dictionary<string,bool>> initPropertyHints()
         {
             Dictionary<Type, Dictionary<string, bool>> s = new Dictionary<Type, Dictionary<string, bool>>();
+
+            // FileSystemInfo Parent and Root properties are examples of "bloat" properties and should be dumped with ToString
             Dictionary<string, bool> data = new Dictionary<string, bool>();
             data["Parent"] = false;
             data["Root"] = false;
@@ -351,7 +421,7 @@ namespace XSharper.Core
             FieldInfo[] fi = t.GetFields(flags);
 
             
-            if (t.IsPrimitive || t.IsEnum || (t.IsValueType && props.Length == 0 && fi.Length == 0) || s_opaqueTypes.ContainsKey(t.FullName) || t== typeof(decimal))
+            if (t.IsPrimitive || t.IsEnum || (t.IsValueType && props.Length == 0 && fi.Length == 0) || s_bloatTypes.ContainsKey(t.FullName) || t== typeof(decimal))
             {
                 if ((t == typeof (int)) || (t == typeof (byte)) || (t == typeof (uint)) || t == typeof (long) ||
                     t == typeof (ulong))
@@ -527,63 +597,7 @@ namespace XSharper.Core
 
 #endregion
 
-        /// <summary>
-        /// Return a user-friendly type name of a given type. For example, int?[] instead of the default name
-        /// </summary>
-        /// <param name="type">Type</param>
-        /// <returns>Type name</returns>
-        static public string GetFriendlyTypeName(Type type)
-        {
-            return GetFriendlyTypeName(type, false);
-        }
-                /// <summary>
-        /// Return a user-friendly type name of a given type. For example, int?[] instead of the default name
-        /// </summary>
-        /// <param name="type">Type</param>
-        /// <param name="fullName">Return full name of the type</param>
-        /// <returns>Type name</returns>
-        static public string GetFriendlyTypeName(Type type, bool fullName)
-        {
-            if (type == null) 
-                throw new ArgumentNullException("type");
-
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
-            {
-                Type st = Nullable.GetUnderlyingType(type);
-                if (st!=null)
-                    return GetFriendlyTypeName(st) + "?";
-                return "T?";
-            }
-            if (type.IsArray)
-                return GetFriendlyTypeName(type.GetElementType()) + "[" + new string(',', type.GetArrayRank() - 1) + "]";
-
-            string s;
-            if (!fullName && s_friendlyName.TryGetValue(type, out s))
-                return s;
-            string name = fullName ? type.FullName : type.Name;
-            if (type.IsGenericParameter || type.IsPrimitive || !type.IsGenericType || type == typeof(decimal))
-                return name;
-
-            StringBuilder builder = new StringBuilder();
-            int index = name.IndexOf('`');
-            if (index == -1)
-                builder.Append(name);
-            else
-                builder.Append(name.Substring(0, index));
-            builder.Append('<');
-            bool first = true;
-            foreach (Type arg in type.GetGenericArguments())
-            {
-                if (!first)
-                {
-                    builder.Append(',');
-                }
-                builder.Append(GetFriendlyTypeName(arg));
-                first = false;
-            }
-            builder.Append('>');
-            return builder.ToString();
-        }
+        
     }
 
 }

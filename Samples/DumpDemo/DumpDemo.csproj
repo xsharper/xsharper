@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{3FA89D65-A03C-4D3D-8057-077B481A450D}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{0B2C9147-A657-4F1F-BF32-73E7C9AD9D04}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Eval</RootNamespace>
-    <AssemblyName>Eval</AssemblyName>
+    <RootNamespace>DumpDemo</RootNamespace>
+    <AssemblyName>DumpDemo</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkSubset>
@@ -23,6 +23,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>default</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -38,32 +39,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BasicEvaluationContext.cs" />
-    <Compile Include="CustomAttributeHelper.cs" />
     <Compile Include="Dump.cs" />
-    <Compile Include="Operations.cs" />
-    <Compile Include="Operations\OperationAs.cs" />
-    <Compile Include="Operations\OperationCall.cs" />
-    <Compile Include="Operations\OperationCoalesce.cs" />
-    <Compile Include="Operations\OperationConditional.cs" />
-    <Compile Include="Operations\OperationCreateBlock.cs" />
-    <Compile Include="Operations\OperationExpression.cs" />
-    <Compile Include="Operations\OperationHelper.cs" />
-    <Compile Include="Operations\OperationIs.cs" />
-    <Compile Include="Operations\OperationNewObject.cs" />
-    <Compile Include="Operations\OperationOperator.cs" />
-    <Compile Include="Operations\OperationPop.cs" />
-    <Compile Include="Operations\OperationPush.cs" />
-    <Compile Include="Operations\OperationTypeCast.cs" />
-    <Compile Include="Operations\OperationTypeof.cs" />
-    <Compile Include="Operations\OperationVariableAccess.cs" />
-    <Compile Include="Parser.cs" />
-    <Compile Include="ParsingException.cs" />
-    <Compile Include="ParsingReader.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utils.Convert.cs" />
-    <Compile Include="Utils.EvalHelper.cs" />
-    <Compile Include="Utils.Types.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

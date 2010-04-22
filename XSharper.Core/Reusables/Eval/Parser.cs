@@ -188,13 +188,13 @@ namespace XSharper.Core
                 if (data.Count > 0)
                     data.Add(new Operations.OperationPop());
                 data.Add(ex);
-                r.SkipWhiteSpace();
+                r.SkipWhiteSpaceAndComments();
                 if (r.Peek() != ';')
                     break;
                 do
                 {
                     r.Read();
-                    r.SkipWhiteSpace();
+                    r.SkipWhiteSpaceAndComments();
                 } while (r.Peek() == ';');
             }
             if (data.Count == 0)
@@ -600,7 +600,7 @@ namespace XSharper.Core
                         if (sb.Length != 0)
                             reader.ThrowParsingException("Quote must be a first character");
                         va.AddValue(reader.ReadQuote());
-                        reader.SkipWhiteSpace();
+                        reader.SkipWhiteSpaceAndComments();
                         if (reader.Peek() != '}' && reader.Peek() != '|')
                             reader.ThrowParsingException("Unexpected character '" + (char)reader.Peek() + "'");
                         sb.Length = 0;
@@ -763,7 +763,7 @@ namespace XSharper.Core
             private QToken parseToken()
             {
                 var r = _reader;
-                r.SkipWhiteSpace();
+                r.SkipWhiteSpaceAndComments();
                 int n = r.Peek();
                 if (n == -1)
                     return null;
@@ -851,7 +851,7 @@ namespace XSharper.Core
                                 r.Read();
                             }
                             else if (char.IsWhiteSpace(ch) && sb.Length > 0 && sb[sb.Length - 1] == '.')
-                                r.SkipWhiteSpace();
+                                r.SkipWhiteSpaceAndComments();
                             else
                                 break;
                         }
@@ -898,7 +898,7 @@ namespace XSharper.Core
                 }
                 _reader.Read();  // Read {
                 var v = _parser.ParseMulti(_reader);
-                _reader.SkipWhiteSpace();
+                _reader.SkipWhiteSpaceAndComments();
                 _reader.ReadAndThrowIfNot('}'); // eat }
                 return v;
             }

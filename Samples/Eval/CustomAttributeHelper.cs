@@ -142,23 +142,23 @@ namespace XSharper.Core
             }
         }
 
-        private static readonly Dictionary<Type, bool> _inherit = new Dictionary<Type, bool>(500);
-        private static readonly Dictionary<Mid, object> _map = new Dictionary<Mid, object>(500);
+        private static readonly Dictionary<Type, bool> s_inherit = new Dictionary<Type, bool>(500);
+        private static readonly Dictionary<Mid, object> s_map = new Dictionary<Mid, object>(500);
 
         private static T[] all<T>(Mid mid, ICustomAttributeProvider provider) where T : Attribute
         {
-            lock (_map)
+            lock (s_map)
             {
                 object o;
-                if (_map.TryGetValue(mid, out o))
+                if (s_map.TryGetValue(mid, out o))
                     return (T[])o;
             }
 
             Type at = typeof(T);
             bool inherit;
-            lock (_inherit)
+            lock (s_inherit)
             {
-                if (!_inherit.TryGetValue(at, out inherit))
+                if (!s_inherit.TryGetValue(at, out inherit))
                 {
                     inherit = false;
                     foreach (AttributeUsageAttribute a in at.GetCustomAttributes(typeof(AttributeUsageAttribute), false))
@@ -166,14 +166,14 @@ namespace XSharper.Core
                         inherit = a.Inherited;
                         break;
                     }
-                    _inherit[at] = inherit;
+                    s_inherit[at] = inherit;
                 }
             }
             
             T[] att = (T[])provider.GetCustomAttributes(typeof(T), inherit);
-            lock (_map)
+            lock (s_map)
             {
-                _map[mid] = att;
+                s_map[mid] = att;
             }
             return att;
         }
