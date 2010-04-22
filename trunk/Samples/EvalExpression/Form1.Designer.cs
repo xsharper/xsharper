@@ -31,14 +31,14 @@
             this.components = new System.ComponentModel.Container();
             this.label1 = new System.Windows.Forms.Label();
             this.dbGrid = new System.Windows.Forms.DataGridView();
+            this.nameDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.valueDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.variableBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.tbExpression = new System.Windows.Forms.TextBox();
             this.tbResult = new System.Windows.Forms.TextBox();
             this.btnCalc = new System.Windows.Forms.Button();
-            this.nameDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.valueDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.variableBindingSource = new System.Windows.Forms.BindingSource(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.dbGrid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.variableBindingSource)).BeginInit();
             this.SuspendLayout();
@@ -48,9 +48,9 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(9, 13);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(207, 13);
+            this.label1.Size = new System.Drawing.Size(358, 13);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Variables (all values are treated as strings):";
+            this.label1.Text = "Variables (all values are treated as strings, unless they start with a number):";
             // 
             // dbGrid
             // 
@@ -64,6 +64,22 @@
             this.dbGrid.Name = "dbGrid";
             this.dbGrid.Size = new System.Drawing.Size(492, 163);
             this.dbGrid.TabIndex = 1;
+            // 
+            // nameDataGridViewTextBoxColumn
+            // 
+            this.nameDataGridViewTextBoxColumn.DataPropertyName = "Name";
+            this.nameDataGridViewTextBoxColumn.HeaderText = "Name";
+            this.nameDataGridViewTextBoxColumn.Name = "nameDataGridViewTextBoxColumn";
+            // 
+            // valueDataGridViewTextBoxColumn
+            // 
+            this.valueDataGridViewTextBoxColumn.DataPropertyName = "Value";
+            this.valueDataGridViewTextBoxColumn.HeaderText = "Value";
+            this.valueDataGridViewTextBoxColumn.Name = "valueDataGridViewTextBoxColumn";
+            // 
+            // variableBindingSource
+            // 
+            this.variableBindingSource.DataSource = typeof(EvalExpression.Variable);
             // 
             // label2
             // 
@@ -109,22 +125,6 @@
             this.btnCalc.Text = "Calculate";
             this.btnCalc.UseVisualStyleBackColor = true;
             this.btnCalc.Click += new System.EventHandler(this.btnCalc_Click);
-            // 
-            // nameDataGridViewTextBoxColumn
-            // 
-            this.nameDataGridViewTextBoxColumn.DataPropertyName = "Name";
-            this.nameDataGridViewTextBoxColumn.HeaderText = "Name";
-            this.nameDataGridViewTextBoxColumn.Name = "nameDataGridViewTextBoxColumn";
-            // 
-            // valueDataGridViewTextBoxColumn
-            // 
-            this.valueDataGridViewTextBoxColumn.DataPropertyName = "Value";
-            this.valueDataGridViewTextBoxColumn.HeaderText = "Value";
-            this.valueDataGridViewTextBoxColumn.Name = "valueDataGridViewTextBoxColumn";
-            // 
-            // variableBindingSource
-            // 
-            this.variableBindingSource.DataSource = typeof(EvalExpression.Variable);
             // 
             // Form1
             // 

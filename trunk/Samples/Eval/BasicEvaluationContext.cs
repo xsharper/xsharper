@@ -149,7 +149,7 @@ namespace XSharper.Core
             using (var sr = new ParsingReader(new StringReader(st)))
             {
                 var o = Eval<T>(sr);
-                sr.SkipWhiteSpace();
+                sr.SkipWhiteSpaceAndComments();
                 sr.ReadAndThrowIfNot(-1);
                 return o;
             }

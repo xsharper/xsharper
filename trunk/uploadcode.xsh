@@ -32,7 +32,6 @@
 		<print nl='0'>${back}${}</print>
 	</zip>
 
-
 	<print>${back}</print>
 
   <path operation="combine" path="${=Environment.GetFolderPath('MyDocuments')}" param="Sites\xsharper.site" outTo="siteFile" />
