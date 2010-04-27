@@ -158,7 +158,7 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>$(TargetPath) "$(ProjectDir)PostBuild.xsh" //debug 
+    <PostBuildEvent>"$(TargetPath)" "$(ProjectDir)PostBuild.xsh" //debug 
 </PostBuildEvent>
     <PreBuildEvent>"$(SolutionDir)\3rdparty\rc.exe" /fo "$(ProjectDir)\Embedded\Manifests\asInvoker.res" "$(ProjectDir)\Manifests\asInvoker.rc"
 "$(SolutionDir)\3rdparty\rc.exe" /fo "$(ProjectDir)\Embedded\Manifests\requireAdministrator.res" "$(ProjectDir)\Manifests\requireAdministrator.rc"

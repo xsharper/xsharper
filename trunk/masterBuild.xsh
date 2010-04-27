@@ -72,14 +72,14 @@
 		  <block>
 			  <try>
   				  <shell outTo="o1" errorTo="e1" tr="trim trimInternal expandAfterTrim">
-				  								${msbuild} ${=.script.DirectoryName}xsharper.sln 
+				  								${msbuild} ${=.quoteArg(.script.DirectoryName+'xsharper.sln')}
 				  								/t:clean
 				  								/p:Configuration=Release
 				  								/nologo 
 				  								/consoleloggerparameters:summary 
 				  								/verbosity:minimal</shell>
 				  <shell outTo="o2" errorTo="e2" tr="trim trimInternal expandAfterTrim">
-				  								${msbuild} ${=.script.DirectoryName}xsharper.sln 
+				  								${msbuild} ${=.quoteArg(.script.DirectoryName+'xsharper.sln')}
 				  								/t:xsharper 
 				  								/p:Configuration=Release
 				  								/nologo 
