@@ -300,7 +300,12 @@ namespace XSharper
             Script s = context.CreateNewScript(Process.GetCurrentProcess().MainModule.FileName);
             s.Id = id;
             s.EngineVersion = context.CoreVersion.ToString();
-            s.NetVersion = context.Compiler.DefaultNETVersion.ToString();
+
+            if (context.Compiler.DefaultNETVersion>new Version(3,5))
+                s.NetVersion = "3.5";
+            else
+                s.NetVersion = context.Compiler.DefaultNETVersion.ToString();
+
             return s;
         }
 

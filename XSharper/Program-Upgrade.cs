@@ -221,13 +221,19 @@ namespace XSharper
                     if (!string.IsNullOrEmpty(r))
                     {
                         Reference rr = null;
+                        bool addUsing = false;
+                        if (r.StartsWith("@", StringComparison.Ordinal))
+                        {
+                            r = r.Substring(1);
+                            addUsing = true;
+                        }
                         if (file)
                         {
-                            rr = new Reference { From = r, WithTypes = withTypes, Transform = TransformRules.None};
-                            preScript.Add(new Embed {From = r, IsAssembly = true, Transform = TransformRules.None});
+                            rr = new Reference {From = r, WithTypes = withTypes, Transform = TransformRules.None, AddUsing = addUsing};
+                            preScript.Add(new Embed { From = r, IsAssembly = true, Transform = TransformRules.None });
                         }
                         else
-                            rr = new Reference { Name = r, WithTypes = withTypes, Transform = TransformRules.None};
+                            rr = new Reference { Name = r, WithTypes = withTypes, Transform = TransformRules.None, AddUsing = addUsing };
                         if (withTypes)
                             context.AddAssembly(rr.AddReference(context, true),true);
                         preScript.Add(rr);

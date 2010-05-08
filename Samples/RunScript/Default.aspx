@@ -11,6 +11,8 @@
         .Info { color:Green;}
         .Debug { color:Blue;}
         .Bold { font-weight: bold;}
+        .normalStatus { color:Black;}
+        .errorStatus { color:Red; }
         #formTable { width:100%;  }
         .scriptBody { font-family: Consolas,Courier New,Courier; font-size: small; width:100%;}
         #output { font-family: Consolas,Courier New,Courier; background: #eee; font-size: small; max-height: 30em; height: 30em; overflow:scroll;}
@@ -30,7 +32,7 @@
             var jid = $get('<%=hfJobId.ClientID %>');
             if (timer)
                 clearTimeout(timer);
-            PageMethods.GetUpdate(jid.value, statusUpdated, OnFail);
+            PageMethods.GetUpdate(jid.value, statusUpdated, onFail);
         }
 
         function enableControls() {
@@ -42,6 +44,7 @@
         function statusUpdated(result, userContext, methodName) {
             var output = $get('<%=output.ClientID %>');
             var received = $get('<%=received.ClientID %>');
+            received.className = 'normalStatus';
             output.innerHTML += result.HtmlUpdate;
 
             var r;
@@ -65,10 +68,27 @@
             PageMethods.Stop(jid.value);
         }
 
-        
-        function OnFail(error) {
-            alert(error.get_message());
-            enableControls();
+
+        function onFail(error) {
+            var received = $get('<%=received.ClientID %>');
+            var message=error.get_message()
+                                .replace(/&/g, '&amp;')
+                                .replace(/</g, '&lt;')
+                                .replace(/>/g, '&gt;');
+
+            var now = new Date();
+            var hours = now.getHours();
+            var minutes = now.getMinutes();
+            var seconds = now.getSeconds();
+            var timeValue = "" + ((hours > 12) ? hours - 12 : hours);
+            if (timeValue == "0") timeValue = 12;
+            timeValue += ((minutes < 10) ? ":0" : ":") + minutes;
+            timeValue += ((seconds < 10) ? ":0" : ":") + seconds;
+            timeValue += (hours >= 12) ? " P.M." : " A.M.";
+            
+            received.innerHTML = timeValue +" : "+message;
+            received.className = 'errorStatus';
+            timer = setTimeout(updateStatus, refreshPeriod);
         }
     </script>
 </head>

@@ -728,15 +728,8 @@ namespace XSharper.Core
                             break;
                         }
                     }
-                    // This is a hack, I don't get why this is happening.
-                    // The code does NOT compile from codeprovider WITHOUT this System.Runtime.Remoting reference,
-                    // yet does NOT compile as batch file WITH this reference.
-                    // Same story with windows forms & drawing
-                    foreach (string repl in "System.Runtime.Remoting|System.Windows.Forms|System.Drawing".Split('|'))
-                    {
-                        s = Regex.Replace(s, @"/R:[^\s]*?"+repl+@".*?\s+", "");
-                    }
-                    s = csc + " " + s;
+                    
+                    s = csc + " /noconfig " + s;
                     s = s.Replace(tempName + ".0", id);
                     s = s.Replace(tempName, id);
 
