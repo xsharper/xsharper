@@ -51,9 +51,11 @@ namespace XSharper.Core
         public bool WithTypes { get; set; }
 
         /// true, if this assembly must be embedded into the executable
+        [Description("true, if this assembly must be embedded into the executable")]
         public bool Embed { get; set; }
 
         /// true, if this assembly name should also be added as namespace
+        [Description("true, if this assembly name should also be added as namespace")]
         public bool AddUsing { get; set; }
 
         /// true, if assembly is loaded during execution phase. By default assembly is loaded during initialization phase.
@@ -87,6 +89,7 @@ namespace XSharper.Core
                 if (name.StartsWith("@", StringComparison.Ordinal))
                 {
                     addUsing = true;
+                    AddUsing = true;
                     name = name.Substring(1);
                 }
 
@@ -102,8 +105,14 @@ namespace XSharper.Core
                 if (name == null)
                     name = AssemblyName.GetAssemblyName(from).FullName;
             }
-            if (addUsing)
-                context.Compiler.AddHeaders("using "+name+";");
+            if (addUsing && !string.IsNullOrEmpty(name))
+            {
+                int n = name.IndexOf(",");
+                if (n!=-1)
+                    context.Compiler.AddHeaders("using " + name.Substring(0,n) + ";");
+                else
+                    context.Compiler.AddHeaders("using " + name + ";");
+            }
             return context.Compiler.AddReference(from, name, false, forceLoad,string.Empty);
         }
 
