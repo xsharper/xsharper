@@ -71,7 +71,7 @@ namespace XSharper.Core
             [Op(12)]    Minus,
 
             [Op(13)]    Divide,
-            [Op(13)]    Module,
+            [Op(13, "MOD")] Modulo,
             [Op(13)]    Multiply,
 
             [Op(15)]    TypeCast,
@@ -816,7 +816,7 @@ namespace XSharper.Core
                     case '-': r.Read(); return new QToken(Operators.Minus);
                     case '/': r.Read(); return new QToken(Operators.Divide);
                     case '*': r.Read(); return new QToken(Operators.Multiply);
-                    case '%': r.Read(); return new QToken(Operators.Module);
+                    case '%': r.Read(); return new QToken(Operators.Modulo);
                     case ',': r.Read(); return new QToken(Operators.Comma);
                     case '\'':
                     case '`':
