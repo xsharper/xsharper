@@ -65,6 +65,10 @@ namespace XSharper.Core
         [Description("Filename or URI from where to read the text. ")]
         public string From { get; set; }
 
+        /// Extra path to try
+        [Description("Extra path to try")]
+        public string Path { get; set; }
+
         /// Encoding of the file
         [Description("Encoding of the file")]
         public string Encoding { get; set; }
@@ -113,7 +117,7 @@ namespace XSharper.Core
         private string loadText()
         {
             string strLoc = Context.TransformStr(From, Transform);
-            strLoc = Context.FindScriptPartFileName(strLoc);
+            strLoc = Context.FindScriptPartFileName(strLoc, Context.TransformStr(Path, Transform));
             return Context.ReadText(strLoc, Utils.GetEncoding(Context.TransformStr(Encoding, Transform)));
         }
 

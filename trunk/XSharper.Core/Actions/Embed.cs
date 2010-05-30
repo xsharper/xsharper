@@ -37,11 +37,16 @@ namespace XSharper.Core
     public class Embed : ScriptActionBase
     {
         /// Internal name. The file will be accessible as embed:///name
+        [Description("Internal name. The file will be accessible as embed:///name")]
         public string Name { get; set; }
 
         /// File location
         [Description("File location")]
         public string From { get; set; }
+
+        /// Extra path to try
+        [Description("Extra path to try")]
+        public string Path { get; set; }
 
         /// True if this is an assembly that will be called by the script
         [Description("True if this is an assembly that will be called by the script")]
@@ -95,7 +100,7 @@ namespace XSharper.Core
             if (!found)
             {
                 string f = Context.TransformStr(From, Transform);
-                string fromex = Context.FindScriptPartFileName(f);
+                string fromex = Context.FindScriptPartFileName(f,Context.TransformStr(Path,Transform));
                 if (fromex == null)
                     throw new FileNotFoundException("Cannot find file to embed", f);
                 string nameex = Context.TransformStr(Name, Transform);

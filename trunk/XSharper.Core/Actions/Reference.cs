@@ -46,6 +46,10 @@ namespace XSharper.Core
         [Description("Assembly DLL filename. ")]
         public string From { get; set; }
 
+        /// Extra path to try
+        [Description("Extra path to try")]
+        public string Path { get; set; }
+
         /// true, if assembly contains additional actions and must be loaded immediately
         [Description("true, if assembly contains additional actions and must be loaded immediately")]
         public bool WithTypes { get; set; }
@@ -99,7 +103,7 @@ namespace XSharper.Core
                 from = null;
             else
             {
-                from = context.FindScriptPartFileName(f);
+                from = context.FindScriptPartFileName(f, context.TransformStr(Path, Transform));
                 if (from==null)
                     throw new FileNotFoundException("Cannot find referenced assembly", f);
                 if (name == null)
