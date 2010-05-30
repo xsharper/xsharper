@@ -40,9 +40,15 @@ namespace XSharper.Core
         /// File from where to load the file
         [XsAttribute("from"), XsAttribute("location")]
         [XsRequired]
+        [Description("File from where to load the file")]
         public string From { get; set; }
 
-        /// Included script, after reading the file. 
+        /// Extra path to try
+        [Description("Extra path to try")]
+        public string Path { get; set; }
+
+        /// Whether signature is to be validated
+        [Description("Whether signature is to be validated")]
         public bool ValidateSignature { get; set; }
 
         /// Included script, after reading the file. 
@@ -64,7 +70,7 @@ namespace XSharper.Core
 
         private void load()
         {
-            string sloc = Context.FindScriptPartFileName(Context.TransformStr(From, Transform));
+            string sloc = Context.FindScriptPartFileName(Context.TransformStr(From, Transform), Context.TransformStr(Path, Transform));
             VerboseMessage("Loading include file '"+sloc+"'");
             IncludedScript = Context.LoadScript(sloc, ValidateSignature);
         }

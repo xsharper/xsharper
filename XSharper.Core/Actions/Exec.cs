@@ -134,6 +134,10 @@ namespace XSharper.Core
         [XsAttribute("from"),XsAttribute("location")]
         public string From { get; set; }
 
+        /// Extra path to try
+        [Description("Extra path to try")]
+        public string Path { get; set; }
+
         /// Where to put script output value
         [Description("Where to put script output value")]
         public string OutTo { get; set; }
@@ -205,7 +209,7 @@ namespace XSharper.Core
                         else
                             throw new ScriptRuntimeException("Script not specified");
                     }
-                    string fFound = Context.FindScriptPartFileName(f);
+                    string fFound = Context.FindScriptPartFileName(f, Context.TransformStr(Path, Transform));
                     if (fFound != null)
                         f = fFound;
                     _loadedScript = Context.LoadScript(f, ValidateSignature);

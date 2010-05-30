@@ -136,7 +136,7 @@ namespace XSharper.Core
         /// Execute script from file with parameters
         public object ExecFile(string file, params string[] parameters)
         {
-            string fFound = FindScriptPartFileName(file);
+            string fFound = FindScriptPartFileName(file,null);
             if (fFound == null)
                 fFound = file;
             Script s=LoadScript(fFound, false);
@@ -150,11 +150,18 @@ namespace XSharper.Core
 
 
         /// Try to resolve location using ScriptPath
-        public string FindScriptPartFileName(string loc)
+        public string FindScriptPartFileName(string loc, string path)
         {
             if (string.IsNullOrEmpty(loc))
                 return loc;
-            string path = ScriptPath;
+            if (string.IsNullOrEmpty(path))
+                path = ScriptPath;
+            else
+            {
+                if (!path.EndsWith(";"))
+                    path += ";";
+                path+= ScriptPath;
+            }
             if (Script != null)
                 path = Script.DirectoryName + ";" + path;
 

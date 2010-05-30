@@ -253,9 +253,9 @@ namespace XSharper.Core
         {
             if (IdentityInsert)
             {
-                batch.Append("SET IDENTITY_INSERT " + tableName + " ON");
-                footer.AppendLine("SET IDENTITY_INSERT " + tableName + " OFF");
-            }
+                batch.Append("SET IDENTITY_INSERT " + tableName + " ON\n");
+                footer.AppendLine("SET IDENTITY_INSERT " + tableName + " OFF\n");
+            } 
             if (updateMode==SqlUpdateMode.Merge)
             {
                 string[] sqlKeys = new string[keys.Count];
