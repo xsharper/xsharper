@@ -16,6 +16,17 @@
 			<print>Files copied</print>
 		</if>
 
+		<if directoryExists="c:\my\utils">
+			<print>Copying "${exe}" to c:\my\utils</print>
+			<copy from="${exe}" to="c:\my\utils" />
+			
+			<print>Generating schema in c:\util</print>
+			<shell mode="direct">"${exe}" //quiet //genxsd c:\my\utils\xsharper.xsd</shell>
+			
+			<print>Files copied</print>
+		</if>
+
+
 	</block>
 	<print>Completed</print>
 </xsharper>
