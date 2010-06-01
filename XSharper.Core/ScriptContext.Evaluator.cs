@@ -217,6 +217,9 @@ namespace XSharper.Core
         /// Read expression from string, evaluate it and return the value
         public object Eval(string expression)
         {
+            if (expression == null)
+                return null;
+            
             IOperation ex = _exprCache[expression];
             if (ex == null)
             {
@@ -228,6 +231,8 @@ namespace XSharper.Core
                     _exprCache[expression] = ex;
                 }
             }
+            if (ex == null)
+                return null;
             return Eval(ex);
         }
 
@@ -240,6 +245,8 @@ namespace XSharper.Core
         /// Read multi-expression (like ${a|b|=3+5}) from the string, evaluate it and return the value
         public object EvalMulti(string multiExpression)
         {
+            if (multiExpression==null)
+                return null;
             IOperation o = _exprCache[multiExpression];
             if (o == null)
             {
@@ -263,7 +270,8 @@ namespace XSharper.Core
         /// Evaluate expression
         public object Eval(IOperation operation)
         {
-            if (operation == null) throw new ArgumentNullException("operation");
+            if (operation == null)
+                return null;
 
             var stack = new Stack<object>();
             operation.Eval(this, stack);

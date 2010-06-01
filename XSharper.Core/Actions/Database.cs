@@ -106,11 +106,22 @@ namespace XSharper.Core
             VerboseMessage("Opening a DB connection {0} with cs='{1}'", factory, cs);
             DbProviderFactory dbFactory = DbProviderFactories.GetFactory(factory);
 
-            using (var conn = dbFactory.CreateConnection())
-            {
+            var conn = dbFactory.CreateConnection();
+            try {
                 conn.ConnectionString = cs;
-                conn.Open();
 
+                if (ClearPool)
+                {
+                    VerboseMessage("Cleaning DB connection pool for cs='{0}'", cs);
+                
+                    if (conn is SqlConnection)
+                        SqlConnection.ClearPool((SqlConnection)conn);
+                    conn=dbFactory.CreateConnection();
+                    conn.ConnectionString = cs;
+                }
+
+                conn.Open();
+                
                 if (DatabaseType == DatabaseType.Auto)
                 {
                     _dbType = Core.DatabaseType.Other;
@@ -142,13 +153,6 @@ namespace XSharper.Core
 
 
 
-                if (ClearPool && conn is SqlConnection)
-                {
-                    VerboseMessage("Cleaning DB connection pool for cs='{0}'", cs);
-                    SqlConnection.ClearPool((SqlConnection) conn);
-                    conn.Close();
-                    conn.Open();
-                }
                 IDbConnection old = _current;
                 try
                 {
@@ -160,6 +164,11 @@ namespace XSharper.Core
                     _current = old;
                 }
 
+            }
+            finally
+            {
+                if (conn!=null)
+                    conn.Dispose();
             }
         }
 
