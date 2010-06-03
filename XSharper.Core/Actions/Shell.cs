@@ -30,6 +30,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Security;
 using System.Text;
 using System.Threading;
 using Microsoft.Win32;
@@ -80,6 +81,22 @@ namespace XSharper.Core
         /// Where to save exit code 
         [Description("Where to save exit code ")]
         public string ExitCodeTo { get; set; }
+
+        /// Where to save exit code 
+        [Description("Where to save process id")]
+        public string ProcessIdTo { get; set; }
+
+        /// User name
+        [Description("User name")]
+        public string Username { get; set; }
+
+        /// Password
+        [Description("Password")]
+        public string Password { get; set; }
+
+        /// true, if user profile should be loaded
+        [Description("true, if user profile should be loaded")]
+        public bool LoadUserProfile { get; set; }
 
         /// Input stream redirection
         [Description("Input stream redirection")]
@@ -143,6 +160,7 @@ namespace XSharper.Core
             WindowStyle = ProcessWindowStyle.Normal;
             Wait = true;
             Mode = ShellMode.Auto;
+            LoadUserProfile = true;
         }
 
         /// Constructor
@@ -297,11 +315,12 @@ namespace XSharper.Core
             pi.CreateNoWindow = CreateNoWindow;
             pi.WindowStyle = WindowStyle;
             pi.ErrorDialog = false;
-
+            
             pi.WorkingDirectory = Context.TransformStr(Directory, Transform);
             if (string.IsNullOrEmpty(pi.WorkingDirectory))
                 pi.WorkingDirectory = Environment.CurrentDirectory;
 
+            
             string fileToDelete = null;
             
             
@@ -366,12 +385,24 @@ namespace XSharper.Core
                     ts = Utils.ToTimeSpan(Context.TransformStr(Timeout, Transform));
                 VerboseMessage("Executing " + Utils.QuoteArg(pi.FileName) + " " + pi.Arguments);
 
+                if (!string.IsNullOrEmpty(pi.UserName))
+                {
+                    pi.UserName = Context.TransformStr(Username, Transform);
+                    var ss = new SecureString();
+                    foreach (var c in (Context.TransformStr(Password, Transform) ?? string.Empty))
+                        ss.AppendChar(c);
+                    pi.Password = ss;
+                    pi.LoadUserProfile = LoadUserProfile;
+                }
+
                 using (ManualResetEvent terminated = new ManualResetEvent(false))
                 using (WaitableTimer timeout = new WaitableTimer(ts))
                 {
                     ExitedWithContext ect = new ExitedWithContext(terminated);
                     using (Process p = Process.Start(pi))
                     {
+                        if (!string.IsNullOrEmpty(ProcessIdTo))
+                            Context.OutTo(Context.TransformStr(ProcessIdTo, Transform), p.Id);
                         if (Wait && p != null)
                         {
                             Redir[] r = new Redir[2] {new Redir(Context, outp), new Redir(Context, errorp)};
@@ -379,9 +410,10 @@ namespace XSharper.Core
                             p.Exited += ect.onExited;
                             p.EnableRaisingEvents = true;
 
+
+                            AsyncWriter asyncWriter = null;
                             try
                             {
-                                AsyncWriter asyncWriter = null;
                                 if (pi.RedirectStandardInput)
                                 {
                                     byte[] data;
@@ -476,10 +508,9 @@ namespace XSharper.Core
                                 p.Exited -= ect.onExited;
                             }
 
-
                             int exitCode = p.ExitCode;
                             if (!string.IsNullOrEmpty(ExitCodeTo))
-                                Context.OutTo(Context.TransformStr(ExitCodeTo, Transform), exitCode.ToString(CultureInfo.InvariantCulture));
+                                Context.OutTo(Context.TransformStr(ExitCodeTo, Transform), exitCode);
 
                             VerboseMessage("Execution completed with exit code={0}", exitCode);
                             if (exitCode != 0 && !IgnoreExitCode)

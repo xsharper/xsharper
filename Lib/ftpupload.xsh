@@ -26,6 +26,12 @@
 			ub.UserName=null;
 			ub.Password=null;
 		}
+		bool ssl=false;
+		if (ub.Scheme=="ftps" || ub.Scheme=="ftpas" || ub.Scheme=="ftpsa")
+		{
+			ssl=true;
+			ub.Scheme="ftp";
+		}			  
 		
 		System.Net.FtpWebRequest wr;
 		if (c.GetBool("mkdir",false))
@@ -86,6 +92,7 @@
 				wr = (System.Net.FtpWebRequest)System.Net.FtpWebRequest.Create(ub.Uri);
 				wr.UseBinary=!c.GetBool("text",false);
 				wr.UsePassive=c.GetBool("passive",false);
+				wr.EnableSsl=ssl;
 				if (nc!=null)
 					wr.Credentials=nc;
 				wr.KeepAlive=false;
@@ -114,6 +121,7 @@
 			wr = (System.Net.FtpWebRequest)System.Net.FtpWebRequest.Create(ub.Uri);
 			wr.UseBinary=!c.GetBool("text",false);
 			wr.UsePassive=c.GetBool("passive",false);
+			wr.EnableSsl=ssl;
 			if (nc!=null)
 				wr.Credentials=nc;
 			wr.KeepAlive=false;
