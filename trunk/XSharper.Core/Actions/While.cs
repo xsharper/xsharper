@@ -39,7 +39,7 @@ namespace XSharper.Core
         /// </summary>
         [Description("Maximum number of loops. null = infinite")]
         [XsAttribute("maxCount"), XsAttribute("maxLoops", Deprecated = true), XsAttribute("max", Deprecated = true), XsAttribute("count", Deprecated = true)]
-        public int? MaxCount { get; set; }
+        public string MaxCount { get; set; }
         
         /// <summary>
         /// Loop counter variable name
@@ -66,8 +66,9 @@ namespace XSharper.Core
         public override object Execute()
         {
             var pref = Context.TransformStr(Name, Transform);
-            
-            for (int n = 0; (MaxCount == null || n< MaxCount) && ShouldRun(); ++n)
+
+            int? maxCount = Utils.To<int?>(Context.TransformStr(MaxCount, Transform));
+            for (int n = 0; (maxCount == null || n< maxCount) && ShouldRun(); ++n)
             {
                 Context.CheckAbort();
                 Vars sv=new Vars();
