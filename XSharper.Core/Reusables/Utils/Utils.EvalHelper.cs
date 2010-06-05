@@ -24,6 +24,7 @@
 // ************************************************************************
 #endregion
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -319,10 +320,8 @@ namespace XSharper.Core
                 if (!_fastCreator.TryGetValue(type, out oc))
                 {
                     var ctor = type.GetConstructor(BindingFlags.Instance | BindingFlags.Public, null, Type.EmptyTypes, null);
-                    if (ctor == null)
-                    {
+                    if (!type.IsPublic || ctor == null)
                         return delegate() { return Activator.CreateInstance(type); };
-                    }
 
                     DynamicMethod method = new DynamicMethod(string.Empty, typeof(object), Type.EmptyTypes);
                     ILGenerator gen = method.GetILGenerator();
@@ -461,7 +460,23 @@ namespace XSharper.Core
                     return true;
                 }
             }
-
+            if (args.Length==1)
+            {
+                IEnumerable z = obj as IEnumerable;
+                if (z!=null)
+                {
+                    int n = Utils.To<int>(args.GetValue(0));
+                    if (n<0)
+                        throw new IndexOutOfRangeException();
+                    foreach (var o in z)
+                        if (n-- == 0)
+                        {
+                            retVal = o;
+                            return true;
+                        }
+                    throw new IndexOutOfRangeException();
+                }
+            }
             retVal = null;
             return false;
         }

@@ -808,6 +808,12 @@ namespace XSharper.Core
             _typeManager.AddAssembly(assembly,withTypes);
         }
 
+        /// Make assembly resolveable in XSharper expressions
+        public void AddActionType(Type type)
+        {
+            _typeManager.AddType(type,true);
+        }
+
         #endregion
 
         #region -- Action search by type and ID --

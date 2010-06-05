@@ -92,7 +92,8 @@
 				wr = (System.Net.FtpWebRequest)System.Net.FtpWebRequest.Create(ub.Uri);
 				wr.UseBinary=!c.GetBool("text",false);
 				wr.UsePassive=c.GetBool("passive",false);
-				wr.EnableSsl=ssl;
+				if (ssl)
+					wr.EnableSsl=ssl;
 				if (nc!=null)
 					wr.Credentials=nc;
 				wr.KeepAlive=false;
@@ -121,7 +122,8 @@
 			wr = (System.Net.FtpWebRequest)System.Net.FtpWebRequest.Create(ub.Uri);
 			wr.UseBinary=!c.GetBool("text",false);
 			wr.UsePassive=c.GetBool("passive",false);
-			wr.EnableSsl=ssl;
+			if (ssl)
+				wr.EnableSsl=ssl;
 			if (nc!=null)
 				wr.Credentials=nc;
 			wr.KeepAlive=false;

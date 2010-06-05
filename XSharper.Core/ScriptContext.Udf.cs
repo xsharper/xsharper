@@ -134,12 +134,12 @@ namespace XSharper.Core
         }
 
         /// Execute script from file with parameters
-        public object ExecFile(string file, params string[] parameters)
+        public object ExecFile(string file, bool validate, params string[] parameters)
         {
             string fFound = FindScriptPartFileName(file,null);
             if (fFound == null)
                 fFound = file;
-            Script s=LoadScript(fFound, false);
+            Script s=LoadScript(fFound, validate);
             Initialize(s);
             object r = ExecuteScript(s, parameters, CallIsolation.Default);
             return ReturnValue.Unwrap(r);

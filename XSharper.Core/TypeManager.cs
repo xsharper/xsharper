@@ -100,27 +100,30 @@ namespace XSharper.Core
             return ta;
 
         }
+        public void AddType(Type type, bool force)
+        {
+            var arr = type.GetCustomAttributes(typeof(XsTypeAttribute), false);
+            if (force && arr.Length == 0)
+                arr = new [] {new XsTypeAttribute(type.Name)};
+            foreach (XsTypeAttribute pair in arr)
+            {
+                if (pair.Name == null)
+                {
+                    _nonameTypes.Add(type);
+                    continue;
+                }
 
+                if (!string.IsNullOrEmpty(pair.Namespace))
+                    _types[pair.Namespace + "#" + pair.Name] = type;
+
+                _types[pair.Name] = type;
+            }
+        }
         private void loadAllTypes()
         {
             foreach (Assembly assembly in _loadTypesAssemblies)
                 foreach (Type type in assembly.GetExportedTypes())
-                {
-                    var arr = type.GetCustomAttributes(typeof(XsTypeAttribute), false);
-                    foreach (XsTypeAttribute pair in arr)
-                    {
-                        if (pair.Name == null)
-                        {
-                            _nonameTypes.Add(type);
-                            continue;
-                        }
-
-                        if (!string.IsNullOrEmpty(pair.Namespace))
-                            _types[pair.Namespace + "#" + pair.Name] = type;
-
-                        _types[pair.Name] = type;
-                    }
-                }
+                    AddType(type,false);
             _loadTypesAssemblies.Clear();
         }
 
