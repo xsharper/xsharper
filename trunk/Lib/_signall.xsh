@@ -12,7 +12,7 @@
 		<print>${=$.fullName}</print>
 		<redirect outTo="^info" infoTo="^nul">	
 			<exec includeId="sign">
-				<param>S:\myDocs\Sites\DeltaX.snk</param>
+				<param>${=Environment.GetFolderPath('mydocuments')}\Sites\DeltaX.snk</param>
 				<param>${}</param>
 			</exec>
 		</redirect>

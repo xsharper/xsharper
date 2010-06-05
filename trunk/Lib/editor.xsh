@@ -1,4 +1,4 @@
-	<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xsharper xmlns="http://www.xsharper.com/schemas/1.0" ID="Editor" unknownSwitches="true">
 	<versionInfo title="XSharper Editor" value="Edit any XSharper script in interactive mode." Version="0.1.0.0" Copyright="(C) 2009 DeltaX Inc." />
 	<usage options="ifNoArguments default" />
