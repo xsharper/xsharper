@@ -627,7 +627,7 @@ namespace XSharper.Core
         /// Add row to the rowset
         public void AddRow(Vars r)
         {
-            AddRow(new Row(r));
+             AddRow(new Row(r));
         }
 
         /// Add row to the rowset

@@ -255,7 +255,7 @@ namespace XSharper.Core
             if (o != null)
             {
                 Type t = o.GetType();
-                foreach (var p in t.GetType().GetProperties(BindingFlags.Instance|BindingFlags.Public))
+                foreach (var p in t.GetProperties(BindingFlags.Instance|BindingFlags.Public))
                 {
                     if (filter!=null && !filter.IsMatch(p.Name))
                         continue;
@@ -268,15 +268,22 @@ namespace XSharper.Core
                     {
                         v[p.Name] = p.GetValue(o, null);
                     }
-                    catch (TargetInvocationException)
+                     catch 
                     {
                     }
                 }
-                foreach (var f in t.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public))
+                foreach (var f in t.GetFields(BindingFlags.Instance | BindingFlags.Public))
                 {
                     if (filter != null && !filter.IsMatch(f.Name))
                         continue;
+                    try
+                    {
+                    
                     v[f.Name] = f.GetValue(o);
+                    }
+                    catch
+                    {
+                    }
                 }
             }
             return v;
@@ -294,6 +301,67 @@ namespace XSharper.Core
             return PropsToVars(o, (IStringFilter)null);
         }
 
+        /// Get values of all public object fields and properties 
+        public static Vars PropsToVars(object o)
+        {
+            return PropsToVars(o, (IStringFilter)null);
+        }
+
+        /// Get values of all public object fields and properties in the list
+        public static IEnumerable<Vars> ListToVars(IEnumerable o)
+        {
+            if (o != null)
+                foreach (var v in o)
+                    yield return PropsToVars(v, (IStringFilter)null);
+        }
+
+        /// Get values of selected fields and properties in the list
+        public static IEnumerable<Vars> ListToVars(IEnumerable o,string filter)
+        {
+            if (o != null)
+                foreach (var v in o)
+                    yield return PropsToVars(v, filter);
+        }
+
+        /// Get values of selected fields and properties in the list
+        public static IEnumerable<Vars> ListToVars(IEnumerable o, IStringFilter filter)
+        {
+            if (o != null)
+                foreach (var v in o)
+                    yield return PropsToVars(v, filter);
+        }
+
+        /// Return at most count element, starting from the specified element, as array
+        public static object[] ToArray(IEnumerable a, int from, int count)
+        {
+            if (a == null)
+                return null;
+            var r = new List<object>();
+            foreach (var o in a)
+            {
+                if (from > 0)
+                    from--;
+                else
+                    if (count-- > 0)
+                        r.Add(o);
+                    else
+                        break;
+            }
+            return r.ToArray();
+        }
+
+
+        /// Convert enumerable to array
+        public static object[] ToArray(IEnumerable a)
+        {
+            return ToArray(a, 0, int.MaxValue);
+        }
+
+        /// Skip from elements and return the rest as array
+        public static object[] ToArray(IEnumerable a, int from)
+        {
+            return ToArray(a, from, int.MaxValue);
+        }
 
         /// Create a set of name-value pairs out of list {name1,value1,name2,value2,...}
         public static Vars ToVars(IEnumerable o)

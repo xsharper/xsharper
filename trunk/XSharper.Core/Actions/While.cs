@@ -67,7 +67,7 @@ namespace XSharper.Core
         {
             var pref = Context.TransformStr(Name, Transform);
 
-            int? maxCount = Utils.To<int?>(Context.TransformStr(MaxCount, Transform));
+            int? maxCount = Utils.To<int?>(Context.TransformStr(MaxCount, Transform));  
             for (int n = 0; (maxCount == null || n< maxCount) && ShouldRun(); ++n)
             {
                 Context.CheckAbort();
