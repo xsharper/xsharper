@@ -70,6 +70,7 @@ namespace XSharper.Core
         {
             if (WithTypes)
             {
+                Initialize();
                 ScriptContext c = (ScriptContext) context;
                 c.Compiler.AddHeaders(GetTransformedValueStr());
                 Code code = new Code();

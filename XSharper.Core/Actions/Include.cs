@@ -26,6 +26,7 @@
 using System;
 using System.ComponentModel;
 using System.IO;
+using System.Xml;
 
 namespace XSharper.Core
 {
@@ -58,6 +59,26 @@ namespace XSharper.Core
         /// True if the script must be loaded during execution phase (for example if filename is an expression), or
         /// false if the script must be loaded during compilation phase
         public bool Dynamic { get; set; }
+
+        /// true if the code must be compiled immediately during parsing, as it contains types and actions 
+        /// essential to further script parsing
+        [Description("true if the code must be compiled immediately during parsing, as it contains types and actions essential to further script parsing")]
+        public bool WithTypes { get; set; }
+
+
+        /// <summary>
+        /// Read element from the XML reader
+        /// </summary>
+        /// <param name="context">XML context</param>
+        /// <param name="reader">Reader</param>
+        public override void ReadXml(IXsContext context, XmlReader reader)
+        {
+            base.ReadXml(context, reader);
+            if (WithTypes)
+            {
+                Initialize();
+            }
+        }
 
         /// Initialize action
         public override void Initialize()
