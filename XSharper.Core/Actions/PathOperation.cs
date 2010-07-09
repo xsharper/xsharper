@@ -144,7 +144,14 @@ namespace XSharper.Core
         /// Path parameter 
         [Description("Path parameter ")]
         [XsAttribute("path")]
-        public string Path { get; set; }
+        [XsAttribute("value")]
+        [XsAttribute("")]
+        public string Value { get; set; }
+
+        /// True if Transform property should be ignored and value used verbatim (it would still apply to string attributes)
+        [Description("True if Transform property should be ignored and value used verbatim (it would still apply to string attributes)")]
+        public bool Verbatim { get; set; }
+
 
         /// Additional argument for operations that require it
         [Description("Additional argument for operations that require it")]
@@ -176,7 +183,7 @@ namespace XSharper.Core
         /// Execute action
         public override object Execute()
         {
-            string path = Context.TransformStr(Path, Transform);
+            string path = Verbatim?Value:Context.TransformStr(Value, Transform);
             string parm = Context.TransformStr(Param, Transform);
 
             string ret = path;

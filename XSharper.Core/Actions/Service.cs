@@ -42,17 +42,34 @@ namespace XSharper.Core
         [Description("Stop service")]
         Stop,
 
+        /// Stop service and wait for it to stop
+        [Description("Stop service and wait for it to stop")]
+        StopWait,
+
         /// Start service
         [Description("Start service")]
         Start,
 
-        /// Start service
+        /// Start service and wait
+        [Description("Start service and wait for it to start")]
+        StartWait,
+
+
+        /// Restart service
         [Description("Restart service")]
         Restart,
+
+        /// Restart service and wait for it to start
+        [Description("Restart service and wait for it to start")]
+        RestartWait,
 
         /// Pause service
         [Description("Pause service")]
         Pause,
+
+        /// Pause service and wait for it to get into paused state
+        [Description("Pause service and wait for it to get into paused state")]
+        PauseWait,
 
         /// Wait until service is stopped
         [Description("Wait until service is stopped")]
@@ -61,6 +78,10 @@ namespace XSharper.Core
         /// Wait until service is in running state
         [Description("Wait until service is in running state")]
         WaitForRunning,
+
+        /// Wait until service is in paused state
+        [Description("Wait until service is in paused state")]
+        WaitForPaused,
 
         /// Get service status
         [Description("Get service status")]
@@ -134,24 +155,38 @@ namespace XSharper.Core
                 switch (Command)
                 {
                     case ServiceCommand.Stop:
-                        if (sc.Status!=ServiceControllerStatus.Stopped)
+                    case ServiceCommand.StopWait:
+                        if (sc.Status == ServiceControllerStatus.Stopped || sc.Status == ServiceControllerStatus.StopPending)
                             sc.Stop();
+                        if (Command == ServiceCommand.StopWait)
+                            goto case ServiceCommand.WaitForStopped;
                         break;
                     case ServiceCommand.Start:
-                        if (sc.Status != ServiceControllerStatus.Running)
+                    case ServiceCommand.StartWait:
+                        if (sc.Status != ServiceControllerStatus.Running && sc.Status != ServiceControllerStatus.StartPending)
                             sc.Start();
+                        if (Command == ServiceCommand.StartWait || Command == ServiceCommand.RestartWait)
+                            goto case ServiceCommand.WaitForRunning;
                         break;
                     case ServiceCommand.Restart:
+                    case ServiceCommand.RestartWait:
                         if (sc.Status != ServiceControllerStatus.Stopped)
                             sc.Stop();
                         sc.WaitForStatus(ServiceControllerStatus.Stopped, Utils.ToTimeSpan(Timeout).Value);
-                        sc.Start();
-                        break;
+                        goto case ServiceCommand.StartWait;
+
                     case ServiceCommand.Pause:
-                        sc.Pause();
+                    case ServiceCommand.PauseWait:
+                        if (sc.Status != ServiceControllerStatus.Paused && sc.Status!=ServiceControllerStatus.PausePending)
+                            sc.Pause();
+                        if (Command == ServiceCommand.PauseWait)
+                            goto case ServiceCommand.WaitForPaused;
                         break;
                     case ServiceCommand.WaitForRunning:
                         sc.WaitForStatus(ServiceControllerStatus.Running,Utils.ToTimeSpan(Timeout).Value);
+                        break;
+                    case ServiceCommand.WaitForPaused:
+                        sc.WaitForStatus(ServiceControllerStatus.Paused, Utils.ToTimeSpan(Timeout).Value);
                         break;
                     case ServiceCommand.WaitForStopped:
                         sc.WaitForStatus(ServiceControllerStatus.Stopped, Utils.ToTimeSpan(Timeout).Value);
