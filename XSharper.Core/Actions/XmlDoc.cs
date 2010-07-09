@@ -345,14 +345,17 @@ namespace XSharper.Core
             XmlDocument x = XmlDocument;
             using (var f=Context.OpenFileStream(fileName,FileMode.Create,false))
             {
-                using (XmlTextWriter tw = new XmlTextWriter(f, encoding))
-                {
-                    tw.Formatting = Formatting.Indented;
-                    tw.Indentation = 2;
-                    tw.IndentChar = ' ';
-                    tw.Settings.OmitXmlDeclaration = !declaration;
+                var set=new XmlWriterSettings {
+                    Encoding=encoding,
+                    OmitXmlDeclaration = !declaration,
+                    Indent=true,
+                    IndentChars="  ",
+                    CloseOutput=false,
+                    NewLineHandling=NewLineHandling.Entitize,
+                    NewLineOnAttributes=false
+                };
+                using (var tw = XmlWriter.Create(f, set))
                     x.WriteTo(tw);
-                }
             }
         }
 
