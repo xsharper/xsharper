@@ -444,12 +444,12 @@ XSH_COLORS          : ${%XSH_COLORS%|''}"
             script.Parameters.Add(new CommandLineParameter(null, "ignore", CommandLineValueCount.None, "0", "1") { Synonyms = "i", Value = "Ignore errors" });
             script.Parameters.Add(new CommandLineParameter(null, "hidden", CommandLineValueCount.None, "0", "1") { Synonyms = "i", Value = "Extract hidden files" });
 
-            script.Add(new PathOperation { Path = "${zip}", Operation = PathOperationType.GetFullPath, OutTo = "zip", Existence = Existence.FileExists});
+            script.Add(new PathOperation { Value = "${zip}", Operation = PathOperationType.GetFullPath, OutTo = "zip", Existence = Existence.FileExists});
             script.Add(new If(new Set("zip", "${=Path.ChangeExtension(${zip},'.zip')}"))
             {
                 IsEmpty = "${=Path.GetExtension(${zip})}"
             });
-            script.Add(new PathOperation { Path = "${destination}", Operation = PathOperationType.ToDirectoryInfo, Backslash = BackslashOption.Add, OutTo = "destination" });
+            script.Add(new PathOperation { Value= "${destination}", Operation = PathOperationType.ToDirectoryInfo, Backslash = BackslashOption.Add, OutTo = "destination" });
             script.Add(new SetAttr("z", "zipTime", "${zipTime}"));
             script.Add(new SetAttr("z", "overwrite", "${overwrite}"));
             script.Add(new SetAttr("z", "hidden", "${hidden}"));
@@ -497,7 +497,7 @@ XSH_COLORS          : ${%XSH_COLORS%|''}"
             script.Parameters.Add(new CommandLineParameter(null,"emptyDirectories", CommandLineValueCount.None, "0", "1") { Value = "Include empty directories" });
             script.Parameters.Add(new CommandLineParameter(null, "hidden", CommandLineValueCount.None, "0", "1") { Synonyms = "i", Value = "Extract hidden files" });
                 
-            script.Add(new PathOperation {Path = "${zip}", Operation = PathOperationType.GetFullPath, OutTo = "zip"});
+            script.Add(new PathOperation {Value = "${zip}", Operation = PathOperationType.GetFullPath, OutTo = "zip"});
             script.Add(new If(new Set( "zip", "${=Path.ChangeExtension(${zip},'.zip')}"))
                 {
                     IsEmpty = "${=Path.GetExtension(${zip})}"
