@@ -316,10 +316,21 @@ namespace XSharper.Core
         /// Save document to file with specified encoding
         public void Save(string fileName, string encoding)
         {
-            Save(fileName,(encoding==null)?(Encoding)null:Utils.GetEncoding(encoding));
+            Save(fileName,encoding,false);
+        }
+
+        /// Save document to file with specified encoding
+        public void Save(string fileName, string encoding, bool declaration)
+        {
+            Save(fileName, (encoding == null) ? (Encoding)null : Utils.GetEncoding(encoding), declaration);
         }
         /// Save document to file with specified encoding
         public void Save(string fileName, Encoding encoding)
+        {
+            Save(fileName, encoding, false);
+        }
+        /// Save document to file with specified encoding
+        public void Save(string fileName, Encoding encoding, bool declaration)
         {
             if (encoding == null)
             {
@@ -339,6 +350,7 @@ namespace XSharper.Core
                     tw.Formatting = Formatting.Indented;
                     tw.Indentation = 2;
                     tw.IndentChar = ' ';
+                    tw.Settings.OmitXmlDeclaration = !declaration;
                     x.WriteTo(tw);
                 }
             }
