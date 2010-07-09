@@ -211,7 +211,8 @@ namespace XSharper.Core
         /// true, if there is at least one node matching the given xpath
         public bool Any(string xpath)
         {
-            return Nodes(xpath) != null;
+            var z=Nodes(xpath);
+            return (z == null || z.Count > 0);
         }
 
         /// <summary>
