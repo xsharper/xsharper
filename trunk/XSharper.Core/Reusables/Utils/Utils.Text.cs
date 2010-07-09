@@ -232,7 +232,7 @@ namespace XSharper.Core
         {
             if (encoding == null)
                 return null;
-            encoding = encoding.Replace("utf8", "utf-8").Replace("utf16", "utf-16").Replace("utf32", "utf-32").Replace("utf7", "utf-7");
+            encoding = encoding.ToLower(System.Globalization.CultureInfo.InvariantCulture).Replace("utf8", "utf-8").Replace("utf16", "utf-16").Replace("utf32", "utf-32").Replace("utf7", "utf-7");
             switch (encoding.ToLowerInvariant())
             {
                 case "utf-8/nobom": return new UTF8Encoding(false);
