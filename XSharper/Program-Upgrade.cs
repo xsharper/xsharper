@@ -51,9 +51,32 @@ namespace XSharper
                 cout.WriteLine(OutputType.Info, "Terminating parent process #" + args[1]);
                 Process p = Process.GetProcessById(Utils.To<int>(args[1]));
                 if (p != null)
+                {
                     p.Kill();
-                cout.WriteLine(OutputType.Info, "Waiting for 2 seconds...");
-                Thread.Sleep(2000);
+                    p.Close();
+                }
+
+                Stopwatch sw = Stopwatch.StartNew();
+                cout.Write(OutputType.Info, "Waiting for program to close...");
+                for (int i = 0; i < 15; ++i)
+                {
+                    cout.Write(OutputType.Info, ".");
+                    Thread.Sleep(1000);
+
+                    try
+                    {
+                        FileInfo fi = new FileInfo(args[2]);
+                        if (!fi.Exists)
+                            break;
+                        fi.Attributes = FileAttributes.Normal;
+                        using (var q = new FileStream(fi.FullName, FileMode.Open, FileAccess.Write, FileShare.None))
+                            break;
+                    }
+                    catch
+                    {
+                    }
+                }
+                cout.WriteLine(OutputType.Info);
 
                 switch (args[0])
                 {

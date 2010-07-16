@@ -352,7 +352,7 @@ namespace XSharper.Core
                     Indent=true,
                     IndentChars="  ",
                     CloseOutput=false,
-                    NewLineHandling=NewLineHandling.Entitize,
+                    NewLineHandling=NewLineHandling.None,
                     NewLineOnAttributes=false
                 };
                 using (var tw = XmlWriter.Create(f, set))
