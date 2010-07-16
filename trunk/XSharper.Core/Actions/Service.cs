@@ -156,7 +156,7 @@ namespace XSharper.Core
                 {
                     case ServiceCommand.Stop:
                     case ServiceCommand.StopWait:
-                        if (sc.Status == ServiceControllerStatus.Stopped || sc.Status == ServiceControllerStatus.StopPending)
+                        if (sc.Status != ServiceControllerStatus.Stopped || sc.Status != ServiceControllerStatus.StopPending)
                             sc.Stop();
                         if (Command == ServiceCommand.StopWait)
                             goto case ServiceCommand.WaitForStopped;
