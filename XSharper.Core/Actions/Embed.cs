@@ -89,7 +89,7 @@ namespace XSharper.Core
                 // try to get embedded resource, perhaps it's been already embedded?
                 try
                 {
-                    Context.OpenReadStream("embed:///" + Name);
+                    Context.OpenStream("embed:///" + Name);
                     found = true;
                 }
                 catch (System.IO.IOException)

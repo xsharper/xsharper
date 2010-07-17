@@ -95,7 +95,7 @@ namespace XSharper.Core
             object ret = null;
             WindowsNameTransform extractNameTransform = new WindowsNameTransform(rootDirectory);
             Dictionary<string, bool> dirs = new Dictionary<string, bool>(StringComparer.InvariantCultureIgnoreCase);
-            using (ZipFile zip = new ZipFile(new SeekableStream(Context.OpenReadStream(zipFileName),true)))
+            using (ZipFile zip = new ZipFile(new SeekableStream(Context.OpenStream(zipFileName), true)))
             {
                 if (Password != null)
                     zip.Password = Context.TransformStr(Password, Transform);
@@ -224,7 +224,7 @@ namespace XSharper.Core
                                 fi.Attributes = fi.Attributes & ~mask;
                             }
 
-                            using (Stream outputStream = Context.CreateWriteStream(targetName))
+                            using (Stream outputStream = Context.CreateStream(targetName))
                             {
                                 StreamUtils.Copy(zip.GetInputStream(entry), outputStream, new byte[16384],
                                                  delegate(object x, ProgressEventArgs y) { Context.OnProgress(1, y.Name); }, ProgressInterval, this, entry.Name, entry.Size);

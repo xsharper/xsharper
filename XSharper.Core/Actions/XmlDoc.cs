@@ -258,7 +258,7 @@ namespace XSharper.Core
                 string fromts = Context.TransformStr(From, Transform);
                 if (!string.IsNullOrEmpty(fromts) && (Verbatim || Transform == TransformRules.None) && string.IsNullOrEmpty(Context.TransformStr(Encoding, Transform)))
                 {
-                    using (var str = Context.OpenReadStream(fromts))
+                    using (var str = Context.OpenStream(fromts))
                         _xmlDocument.Load(str);
                 }
                 else 
@@ -344,7 +344,7 @@ namespace XSharper.Core
                 encoding = Utils.GetEncoding("utf8/nobom");
 
             XmlDocument x = XmlDocument;
-            using (var f=Context.OpenFileStream(fileName,FileMode.Create,false))
+            using (var f=Context.OpenStream(fileName,FileMode.Create,false))
             {
                 var set=new XmlWriterSettings {
                     Encoding=encoding,

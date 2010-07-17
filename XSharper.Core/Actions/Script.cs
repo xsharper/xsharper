@@ -223,7 +223,7 @@ namespace XSharper.Core
         /// <param name="fileName">file where to save it</param>
         public void Save(string fileName)
         {
-            using (Stream tr = Context.CreateWriteStream(fileName))
+            using (Stream tr = Context.CreateStream(fileName))
                 Save(tr);
         }
 

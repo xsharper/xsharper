@@ -170,7 +170,7 @@ namespace XSharper.Core
         }
 
         /// Search for a file in the specified location using the path provided
-        public string SearchPath(string location, string path)
+        public virtual string SearchPath(string location, string path)
         {
             // For URLs - no change
             Uri url;
@@ -212,12 +212,21 @@ namespace XSharper.Core
             return null;
         }
         
-        /// Overrideable method that opens the given file for writing. File does not have to be on the file system, can be a ftp://, http:// instead
-        public virtual Stream OpenReadStream(string fileName)
+        public Stream OpenStream(string fileName)
         {
+            return OpenStream(fileName, FileMode.Open, true);
+        }
+
+        /// Open file in specified mode for writing.
+        public virtual Stream OpenStream(string fileName, FileMode mode, bool shared)
+        {
+            WriteVerbose("OpenStream> Opening '"+fileName+"' for "+mode+(shared?"(shared)":string.Empty));
+                
             Uri u;
             if (Uri.TryCreate(fileName, UriKind.Absolute, out u) && !u.IsFile)
             {
+                if (mode!=FileMode.Open)
+                    throw new ArgumentOutOfRangeException("mode","Only FileMode.Open mode is allowed for URIs");
                 WriteVerbose("OpenStream> Reading from " + Utils.SecureUri(u));
                 if (u.Scheme == "embed")
                 {
@@ -234,41 +243,36 @@ namespace XSharper.Core
                     active = true;
                 }
 
-                WriteVerbose("Open stream> Starting download");
+                WriteVerbose("OpenStream> Starting download");
                 using (var w = new WebClientEx(!active, true))
                 {
                     w.CachePolicy = new RequestCachePolicy(RequestCacheLevel.Revalidate);
                     u = w.SetCredentials(u, null, null);
 
                     var ms = new MemoryStream(w.DownloadData(u));
-                    WriteVerbose("Open stream> Download completed");
+                    WriteVerbose("OpenStream> Download completed");
                     return ms;
-                }    
+                }
             }
-            // Uri constructor does not work well with C:\Windows\..\X.txt producing C:\Windows\X.txt
-            if (u != null && fileName.StartsWith(Uri.UriSchemeFile + ":",StringComparison.OrdinalIgnoreCase))
-                fileName = u.LocalPath;
-
-            
-            WriteVerbose("OpenStream> Reading from file "+fileName);
-            return OpenFileStream(fileName, FileMode.Open, true);
-        }
-
-        /// Open file in specified mode for writing.
-        public virtual Stream OpenFileStream(string fileName, FileMode mode, bool shared)
-        {
+                
             FileShare share = shared ? FileShare.Read : FileShare.None;
-            if (mode==FileMode.Open)
+            if (mode == FileMode.Open)
+            {
+                // Uri constructor does not work well with C:\Windows\..\X.txt producing C:\Windows\X.txt
+                if (u != null && fileName.StartsWith(Uri.UriSchemeFile + ":", StringComparison.OrdinalIgnoreCase))
+                    fileName = u.LocalPath;
+
                 return new FileStream(fileName, mode, FileAccess.Read, share, 16384);
+            }
             if (mode == FileMode.Append)
                 return new FileStream(fileName, mode, FileAccess.Write, share, 16384);
             return new FileStream(fileName, mode, FileAccess.ReadWrite, share, 16384);
         }
 
         /// Create file stream, overwriting an existing file
-        public Stream CreateWriteStream(string fileName)
+        public Stream CreateStream(string fileName)
         {
-            return OpenFileStream(fileName, FileMode.Create,false);
+            return OpenStream(fileName, FileMode.Create,false);
         }
 
         /// Read all text from file. Encoding may be specified in the filename itself by attaching it after |. For example, c:\file.txt|utf-8
@@ -287,7 +291,7 @@ namespace XSharper.Core
                 if (comp.Length >= 2)
                     encoding = Utils.GetEncoding(comp[1]);
             }
-            using (Stream fs = OpenReadStream(fileName))
+            using (Stream fs = OpenStream(fileName))
             using (StreamReader sr = createSR(fs, encoding))
                 return sr.ReadToEnd();
         }
@@ -315,7 +319,7 @@ namespace XSharper.Core
         /// This is synonym for <see cref="ReadAllLines(string,Encoding)"/>
         public IEnumerable<string> ReadLines(string fileName, Encoding encoding)
         {
-            using (Stream fs = OpenReadStream(fileName))
+            using (Stream fs = OpenStream(fileName))
             using (StreamReader sr = createSR(fs, encoding))
             {
                 string s;
@@ -339,7 +343,7 @@ namespace XSharper.Core
         /// Read all bytes, up to 4GB, from a give file from the specified offset. If exactCount is set, throw if EOF is found earlier
         public byte[] ReadBytes(string fileName,long fileOffset, int count, bool exactCount)
         {
-            using (Stream fs = OpenReadStream(fileName))
+            using (Stream fs = OpenStream(fileName))
             {
                 if (fileOffset > 0)
                     fs.Seek(fileOffset, SeekOrigin.Begin);
@@ -358,7 +362,7 @@ namespace XSharper.Core
         /// Write the given byte array to a file, starting from the specified file offset, using <see cref="OpenFileStream"/> to open the file
         public void WriteBytes(string fileName, byte[] data, long fileOffset, bool overwrite)
         {
-            using (Stream fs = OpenFileStream(fileName, overwrite ? FileMode.Create : FileMode.OpenOrCreate, false))
+            using (Stream fs = OpenStream(fileName, overwrite ? FileMode.Create : FileMode.OpenOrCreate, false))
             {
                 if (fileOffset != 0)
                     fs.Seek(fileOffset, SeekOrigin.Begin);
@@ -397,8 +401,8 @@ namespace XSharper.Core
             if (encoding == null)
                 encoding = Encoding.UTF8;
 
-            using (StreamWriter sw = (encoding==null) ? new StreamWriter(OpenFileStream(fileName, append ? FileMode.Append : FileMode.Create, true)) :
-                                                        new StreamWriter(OpenFileStream(fileName, append ? FileMode.Append : FileMode.Create, true), encoding))
+            using (StreamWriter sw = (encoding==null) ? new StreamWriter(OpenStream(fileName, append ? FileMode.Append : FileMode.Create, true)) :
+                                                        new StreamWriter(OpenStream(fileName, append ? FileMode.Append : FileMode.Create, true), encoding))
             {
                 sw.Write(Utils.To<string>(value));
             }
@@ -455,7 +459,7 @@ namespace XSharper.Core
         public byte[] SHA1File(string filename)
         {
             using (SHA1 hash = SHA1Managed.Create())
-            using (var s = OpenReadStream(filename))
+            using (var s = OpenStream(filename))
                 return hash.ComputeHash(s);
         }
 
