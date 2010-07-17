@@ -342,9 +342,9 @@ namespace XSharper.Core
                 try
                 {
                     byte[] buf=new byte[16384];
-                    using (Stream stream = Context.OpenReadStream(fromExpanded))
+                    using (Stream stream = Context.OpenStream(fromExpanded))
                     {
-                        using (Stream fout = string.IsNullOrEmpty(outToExpanded)?Context.CreateWriteStream(toExpanded):new MemoryStream())
+                        using (Stream fout = string.IsNullOrEmpty(outToExpanded)?Context.CreateStream(toExpanded):new MemoryStream())
                         {
                             int n;
                             while ((n = stream.Read(buf, 0, buf.Length)) != 0)

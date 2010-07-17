@@ -296,7 +296,7 @@ namespace XSharper.Core
            string sLoc = SearchPath(location, ".;"+ScriptPath);
            if (sLoc == null)
                sLoc = location;
-           using (Stream str = OpenReadStream(sLoc))
+           using (Stream str = OpenStream(sLoc))
            {
                FileStream fs = str as FileStream;
                if (fs != null)
@@ -924,7 +924,7 @@ namespace XSharper.Core
             // Check embedded files
             EmbeddedFileInfo ei;
             if (_embed.TryGetValue(streamName,out ei) && ei!=null)
-                return OpenReadStream(ei.Location);
+                return OpenStream(ei.Location);
 
             Stream s = Utils.FindResourceStream(ResourceAssembly, streamName);
             if (s != null)

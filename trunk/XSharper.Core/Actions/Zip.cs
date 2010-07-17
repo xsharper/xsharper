@@ -123,7 +123,7 @@ namespace XSharper.Core
             
             try
             {
-                using (Stream fs = Context.CreateWriteStream(trg))
+                using (Stream fs = Context.CreateStream(trg))
                 {
                     var ret = createZip(fs, src.FullName, nf, df);
                     if (ReturnValue.IsBreak(ret))
@@ -286,7 +286,7 @@ namespace XSharper.Core
                                               {
                                                   if (!skip2)
                                                   {
-                                                      using (Stream stream = Context.OpenReadStream(fi.FullName))
+                                                      using (Stream stream = Context.OpenStream(fi.FullName))
                                                       {
                                                           byte[] buffer=new byte[16384];
                                                           ZipEntry zentry = scanDirParams.EntryFactory.MakeFileEntry(fi.FullName);
