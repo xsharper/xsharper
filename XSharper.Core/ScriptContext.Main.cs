@@ -304,8 +304,12 @@ namespace XSharper.Core
                Uri url;
                if (Uri.TryCreate(location, UriKind.Absolute, out url))
                {
-                   string path = url.GetComponents(UriComponents.Path, UriFormat.Unescaped);
-                   return loadScript(str, Path.Combine(Path.Combine(Path.GetTempPath(), Path.GetRandomFileName()), Path.GetFileName(path)), origLocation, validateSignature);
+                   if (!url.IsFile)
+                   {
+                       string path = url.GetComponents(UriComponents.Path, UriFormat.Unescaped);
+                       return loadScript(str, Path.Combine(Path.Combine(Path.GetTempPath(), Path.GetRandomFileName()), Path.GetFileName(path)), origLocation, validateSignature);
+                   }
+                   sLoc = url.LocalPath;
                }
 
                return loadScript(str, sLoc, origLocation, false);
