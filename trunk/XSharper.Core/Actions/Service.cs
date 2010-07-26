@@ -89,7 +89,12 @@ namespace XSharper.Core
 
         /// Output true if service is installed, or false otherwise
         [Description("Output true if service is installed, or false otherwise")]
-        IsInstalled
+        IsInstalled,
+
+        /// Continue
+        [Description("Continue service")]
+        Continue,
+
     }
 
     /// <summary>
@@ -149,7 +154,7 @@ namespace XSharper.Core
                 Context.OutTo(Context.TransformStr(OutTo, Transform), installed);
                 return null;
             }
-
+            
             using (var sc = new ServiceController(svcName,machineName))
             {
                 switch (Command)
@@ -158,6 +163,7 @@ namespace XSharper.Core
                     case ServiceCommand.StopWait:
                         if (sc.Status != ServiceControllerStatus.Stopped || sc.Status != ServiceControllerStatus.StopPending)
                             sc.Stop();
+
                         if (Command == ServiceCommand.StopWait)
                             goto case ServiceCommand.WaitForStopped;
                         break;
@@ -175,6 +181,10 @@ namespace XSharper.Core
                         sc.WaitForStatus(ServiceControllerStatus.Stopped, Utils.ToTimeSpan(Timeout).Value);
                         goto case ServiceCommand.StartWait;
 
+                    case ServiceCommand.Continue:
+                        if (sc.Status!=ServiceControllerStatus.Running && sc.Status!=ServiceControllerStatus.ContinuePending)
+                            sc.Continue();
+                        break;
                     case ServiceCommand.Pause:
                     case ServiceCommand.PauseWait:
                         if (sc.Status != ServiceControllerStatus.Paused && sc.Status!=ServiceControllerStatus.PausePending)
