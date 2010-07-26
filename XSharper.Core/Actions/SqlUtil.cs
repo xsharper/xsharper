@@ -133,27 +133,80 @@ namespace XSharper.Core
                         string type = context.TransformStr(parameter.SqlType, parameter.Transform);
 
                         var param = cmd.CreateParameter();
-                        if (String.IsNullOrEmpty(type) )
+                        if (String.IsNullOrEmpty(type))
+                        {
                             if (param is SqlParameter)
                                 type = "nvarchar(4000)";
                             else
                                 type = "string(4000)";
+                            if (val != null)
+                            {
+                                if (val is DateTime || val is DateTime?)
+                                    type = "datetime";
+                                else if (val is DateTimeOffset || val is DateTimeOffset?)
+                                    type = "datetimeoffset";
+                                if (param is SqlParameter)
+                                {
+                                    if (val is int || val is int?)
+                                        type = SqlDbType.Int.ToString();
+                                    else if (val is short || val is short? || val is byte || val is byte?)
+                                        type = SqlDbType.SmallInt.ToString();
+                                    else if (val is sbyte || val is sbyte?)
+                                        type = SqlDbType.TinyInt.ToString();
+                                    else if (val is decimal || val is decimal?)
+                                        type = SqlDbType.Money.ToString();
+                                    else if (val is byte[])
+                                        type = SqlDbType.Binary.ToString();
+                                    else if (val is double || val is double? || val is float || val is float?)
+                                        type = SqlDbType.Real.ToString();
+                                    else if (val is uint || val is Nullable<uint> ||
+                                            val is ushort || val is Nullable<ushort>)
+                                        type = SqlDbType.Int.ToString();
+                                    else if (val is long || val is Nullable<long> ||
+                                             val is Nullable<ulong> || val is ulong)
+                                        type = SqlDbType.BigInt.ToString();
+                                }
+                                else
+                                {
+                                    if (val is int || val is int?)
+                                        type = DbType.Int32.ToString();
+                                    else if (val is short || val is short? || val is byte || val is byte?)
+                                        type = DbType.Int16.ToString();
+                                    else if (val is sbyte || val is sbyte?)
+                                        type = DbType.SByte.ToString();
+                                    else if (val is decimal || val is decimal?)
+                                        type = DbType.Decimal.ToString();
+                                    else if (val is byte[])
+                                        type = DbType.Binary.ToString();
+                                    else if (val is double || val is double? || val is float || val is float?)
+                                        type = DbType.Double.ToString();
+                                    else if (val is uint || val is Nullable<uint> ||
+                                            val is ushort || val is Nullable<ushort>)
+                                        type = DbType.Int64.ToString();
+                                    else if (val is long || val is Nullable<long> ||
+                                             val is Nullable<ulong> || val is ulong)
+                                        type = DbType.Int64.ToString();
+                                }
+                            }
+                        }
 
                         int? size = null;
                         int n = type.IndexOf('(');
                         if (n != -1)
                         {
-                            size = Utils.To<int>(type.Substring(n + 1).TrimEnd().TrimEnd(new char[] {')'}));
+                            var sz = type.Substring(n + 1).TrimEnd().TrimEnd(new char[] { ')' }).Trim();
+                            size = (string.Compare(sz,"max",StringComparison.OrdinalIgnoreCase)==0)?-1:Utils.To<int>(sz);
                             type = type.Substring(0, n).Trim();
                         }
+                        if (param is SqlParameter && Array.Exists(s_sqlDbTypeNames, x => StringComparer.OrdinalIgnoreCase.Compare(type, x) == 0))
+                            ((SqlParameter)param).SqlDbType = Utils.To<SqlDbType>(type);
+                        else
+                            param.DbType = Utils.To<DbType>(type);
+                        
 
                         param.ParameterName = parameter.Name;
                         param.Direction = ParameterDirection.Input;
                             
-                        if (param is SqlParameter && Array.Exists(s_sqlDbTypeNames,x=>StringComparer.OrdinalIgnoreCase.Compare(type,x)==0))
-                            ((SqlParameter)param).SqlDbType = Utils.To<SqlDbType>(type);
-                        else
-                            param.DbType = Utils.To<DbType>(type);
                         
                         if (size.HasValue)
                             param.Size = size.Value;
