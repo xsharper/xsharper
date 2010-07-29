@@ -211,13 +211,13 @@ namespace XSharper.Core
                 if (s.EndsWith(":32",StringComparison.Ordinal))
                 {
                     s = s.Substring(0, s.Length - 3);
-                    if (Environment.OSVersion.Version.Major <= 5)
+                    if (Environment.OSVersion.Version.Major > 5)
                         _extraFlags = NativeMethods.RegSAM.WOW64_32Key;
                 }
                 else if (s.EndsWith(":64", StringComparison.Ordinal))
                 {
                     s = s.Substring(0, s.Length - 3);
-                    if (Environment.OSVersion.Version.Major <= 5)
+                    if (Environment.OSVersion.Version.Major > 5)
                         _extraFlags = NativeMethods.RegSAM.WOW64_64Key;
                 }
 
