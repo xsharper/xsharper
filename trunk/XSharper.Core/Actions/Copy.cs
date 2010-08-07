@@ -29,6 +29,35 @@ using System.IO;
 
 namespace XSharper.Core
 {
+    // Fake file info for URIs
+    public class UriFileInfo : IFileSystemInfo
+    {
+        Uri _uri;
+        DateTime _time,_timeUtc;
+        public UriFileInfo(Uri uri)
+        {
+            _uri = uri;
+            _time=DateTime.Now;
+            _timeUtc=DateTime.UtcNow;
+        }
+        #region IFileSystemInfo Members
+
+        public bool IsDirectory         {   get { return false; }        }
+        public bool IsFile              {   get { return true; }        }
+        public bool Exists              {   get { return true; }    }
+        public long Length              {   get { return -1; }}
+        public string Name              {   get { return Path.GetFileName(_uri.GetComponents(UriComponents.Path,UriFormat.Unescaped)); } }
+        public string FullName          { get { return _uri.OriginalString; } }
+        public string Extension         {   get { return Path.GetExtension(Name); }}
+        public FileAttributes Attributes {  get { return FileAttributes.Normal; }}
+        public DateTime CreationTime    { get { return _time; }}
+        public DateTime CreationTimeUtc { get { return _timeUtc; } }
+        public DateTime LastWriteTime   { get { return _time ;}}
+        public DateTime LastWriteTimeUtc { get { return _timeUtc; }}
+        public DateTime LastAccessTime   { get { return _time; }}
+        public DateTime LastAccessTimeUtc { get { return _timeUtc; }}
+        #endregion
+    }
     /// How to deal with already existing files
     public enum OverwriteMode
     {
@@ -97,33 +126,51 @@ namespace XSharper.Core
             var nf = new FileNameOnlyFilter(Syntax, Context.TransformStr(Filter, Transform));
             var df = new FullPathFilter(Syntax, Context.TransformStr(DirectoryFilter, Transform));
 
+            object ret = null;
+            Uri uri;
+            if (Uri.TryCreate(fromExpanded, UriKind.Absolute, out uri))
+                if (uri.IsFile)
+                {
+                    fromExpanded=uri.LocalPath;
+                    uri=null;
+                }
 
-            object ret=null;
-            DirectoryInfo di = new DirectoryInfo(fromExpanded);
-            if (fromExpanded.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal) ||
-                fromExpanded.EndsWith(Path.AltDirectorySeparatorChar.ToString(), StringComparison.Ordinal) ||
-                di.Exists)
+            if (uri!=null)
             {
-                VerboseMessage("Copying a directory {0} to {1}", di, toExpanded);
-                ret = copy(di, di, new DirectoryInfo(toExpanded), nf, df);
+                FileInfo to;
+                toExpanded= Download.UrlToLocalFileName(fromExpanded,toExpanded);
+                to = new FileInfo(toExpanded);
+                VerboseMessage("Copying from URI {0} to {1}", fromExpanded, to);
+                ret=downloadSingleFile(nf,uri,to);
             }
             else
             {
-
-                FileInfo fr = new FileInfo(fromExpanded);
-                FileInfo to;
-                if (toExpanded.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal) ||
-                    toExpanded.EndsWith(Path.AltDirectorySeparatorChar.ToString(), StringComparison.Ordinal) ||
-                    new DirectoryInfo(toExpanded).Exists)
+                DirectoryInfo di = new DirectoryInfo(fromExpanded);
+                if (fromExpanded.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal) ||
+                    fromExpanded.EndsWith(Path.AltDirectorySeparatorChar.ToString(), StringComparison.Ordinal) ||
+                    di.Exists)
                 {
-                    to = new FileInfo(Path.Combine(new DirectoryInfo(toExpanded).FullName, fr.Name));
+                    VerboseMessage("Copying a directory {0} to {1}", di, toExpanded);
+                    ret = copy(di, di, new DirectoryInfo(toExpanded), nf, df);
                 }
                 else
                 {
-                    to = new FileInfo(toExpanded);
+
+                    FileInfo fr = new FileInfo(fromExpanded);
+                    FileInfo to;
+                    if (toExpanded.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal) ||
+                        toExpanded.EndsWith(Path.AltDirectorySeparatorChar.ToString(), StringComparison.Ordinal) ||
+                        new DirectoryInfo(toExpanded).Exists)
+                    {
+                        to = new FileInfo(Path.Combine(new DirectoryInfo(toExpanded).FullName, fr.Name));
+                    }
+                    else
+                    {
+                        to = new FileInfo(toExpanded);
+                    }
+                    VerboseMessage("Copying a single file {0} to {1}", fr, to);
+                    ret = copySingleFile(nf, fr, to);
                 }
-                VerboseMessage("Copying a single file {0} to {1}", fr, to);
-                ret=copySingleFile(nf, fr, to);
             }
             if (ReturnValue.IsBreak(ret))
                 return null;
@@ -200,6 +247,74 @@ namespace XSharper.Core
             return ret;
         }
 
+        private object downloadSingleFile(IStringFilter nf, Uri single, FileInfo toFile)
+        {
+            var from = new UriFileInfo(single);
+            var ff = from.Name;
+            if (string.IsNullOrEmpty(ff))
+                ff = toFile.FullName;
+            if (nf != null && (!nf.IsMatch(ff)))
+            {
+                VerboseMessage("{0} did not pass filter", single);
+                return null;
+            }
+            
+            var to = new FileOrDirectoryInfo(toFile);
+            bool skip = false;
+            object ret = ProcessPrepare(from, to,
+                delegate
+                {
+                    if (toFile.Directory != null && !toFile.Directory.Exists)
+                    {
+                        bool created;
+                        object r = createDir(new DirectoryInfo(Path.GetTempPath()), toFile.Directory, out created);
+                        if (!created || r != null)
+                            return r;
+                    }
+
+
+                    bool overwrite = (Overwrite == OverwriteMode.Always);
+                    if (Overwrite == OverwriteMode.IfNewer)
+                    {
+                        if (toFile.Exists && toFile.LastWriteTimeUtc > from.LastWriteTimeUtc)
+                        {
+                            VerboseMessage("Ignoring never file {0} ", toFile.FullName);
+                            return null;
+                        }
+                        overwrite = true;
+                    }
+
+                    skip = (toFile.Exists && !overwrite);
+                    return null;
+                });
+            if (ret != null)
+                return ret;
+            if (skip && Overwrite != OverwriteMode.Confirm)
+            {
+                VerboseMessage("Ignoring existing file {0} ", toFile.FullName);
+                return null;
+            }
+            ret = ProcessComplete(from, to, skip, delegate(bool skip1)
+            {
+                if (!skip1)
+                {
+                    // Continue with copy
+                    if (toFile.Directory != null && !toFile.Directory.Exists)
+                        toFile.Directory.Create();
+                    VerboseMessage("Downloading {0} => {1}", from.FullName, toFile.FullName);
+                    Download dn = new Download
+                    {
+                        From = single.OriginalString,
+                        To = toFile.FullName,
+                        Transform = TransformRules.None
+                    };
+                    return Context.Execute(dn);
+                }
+                return null;
+            });
+            return ret;
+        }
+    
         private object copySingleFile(IStringFilter nf, FileInfo f, FileInfo toFile)
         {
             if (nf != null && (!nf.IsMatch(f.FullName) || !CheckHidden(f)))
