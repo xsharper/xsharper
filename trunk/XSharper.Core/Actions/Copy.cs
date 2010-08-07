@@ -57,6 +57,11 @@ namespace XSharper.Core
         public DateTime LastAccessTime   { get { return _time; }}
         public DateTime LastAccessTimeUtc { get { return _timeUtc; }}
         #endregion
+
+        public override string ToString()
+        {
+            return _uri.ToString();
+        }
     }
     /// How to deal with already existing files
     public enum OverwriteMode
@@ -252,7 +257,7 @@ namespace XSharper.Core
             var from = new UriFileInfo(single);
             var ff = from.Name;
             if (string.IsNullOrEmpty(ff))
-                ff = toFile.FullName;
+                ff = toFile.Name;
             if (nf != null && (!nf.IsMatch(ff)))
             {
                 VerboseMessage("{0} did not pass filter", single);
