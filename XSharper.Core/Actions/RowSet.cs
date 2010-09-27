@@ -322,9 +322,10 @@ namespace XSharper.Core
                 }
             }
 
+            char sep = string.IsNullOrEmpty(separator) ? '\0' : separator[0];
             // Add these columns
             if (!string.IsNullOrEmpty(colNames))
-                ci.AddParsed(Context, colNames, quoteChar, separator[0], trim);
+                ci.AddParsed(Context, colNames, quoteChar, sep, trim);
 
             // Add extra columns
             if (Cols != null)
@@ -349,7 +350,7 @@ namespace XSharper.Core
                 }
             }
 
-            SortInfos si=new SortInfos(sortOverride,quoteChar,separator[0],trim);
+            SortInfos si=new SortInfos(sortOverride,quoteChar,sep,trim);
             if (!overrideSort && SortCols != null)
             {
                 foreach (var col in SortCols)
