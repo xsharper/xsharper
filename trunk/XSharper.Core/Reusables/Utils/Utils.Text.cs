@@ -243,9 +243,15 @@ namespace XSharper.Core
                 case "utf-32/nobom": return new UTF32Encoding(false, false);
                 case "utf-32/be-bom": return new UTF32Encoding(true, true);
                 case "utf-32/be-nobom": return new UnicodeEncoding(true, false);
+                case "unicode/bom":
                 case "utf-16/bom": return new UnicodeEncoding(false, true);
+                case "unicode/nobom":
                 case "utf-16/nobom": return new UnicodeEncoding(false, false);
+                case "unicode/be-bom":
                 case "utf-16/be-bom": return new UnicodeEncoding(true, true);
+                case "unicode/be":
+                case "unicode/be-nobom":
+                case "utf-16/be":
                 case "utf-16/be-nobom": return new UnicodeEncoding(true, false);
                 default: return Encoding.GetEncoding(encoding);
             }
