@@ -144,6 +144,7 @@ namespace XSharper.Core
         /// Path parameter 
         [Description("Path parameter ")]
         [XsAttribute("path")]
+        [XsAttribute("from")]
         [XsAttribute("value")]
         [XsAttribute("")]
         public string Value { get; set; }

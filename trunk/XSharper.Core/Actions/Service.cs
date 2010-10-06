@@ -26,6 +26,7 @@
 using System;
 using System.ComponentModel;
 using System.ServiceProcess;
+using System.Diagnostics;
 
 namespace XSharper.Core
 {
@@ -198,7 +199,29 @@ namespace XSharper.Core
                             goto case ServiceCommand.WaitForPaused;
                         break;
                     case ServiceCommand.WaitForRunning:
-                        sc.WaitForStatus(ServiceControllerStatus.Running,Utils.ToTimeSpan(Timeout).Value);
+                        var tm=Utils.ToTimeSpan(Timeout).Value;
+                        var swStart=Stopwatch.StartNew();
+                        bool found=false;
+                        do
+                        {
+                            Context.CheckAbort();
+                            try
+                            {
+                                if (tm<TimeSpan.FromSeconds(2))
+                                    sc.WaitForStatus(ServiceControllerStatus.Running, tm);
+                                else
+                                    sc.WaitForStatus(ServiceControllerStatus.Running, TimeSpan.FromSeconds(2));
+                                found = true;
+                                break;
+                            }
+                            catch (System.ServiceProcess.TimeoutException e)
+                            {
+                                if (sc.Status == ServiceControllerStatus.Stopped)
+                                    break;
+                            }
+                        } while (swStart.Elapsed < tm);
+                        if (!found)
+                            throw new InvalidOperationException("Service has failed to start");
                         break;
                     case ServiceCommand.WaitForPaused:
                         sc.WaitForStatus(ServiceControllerStatus.Paused, Utils.ToTimeSpan(Timeout).Value);
