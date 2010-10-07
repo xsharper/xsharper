@@ -152,9 +152,17 @@ namespace XSharper.Core
         [Description("Replace all non-ASCII characters with . (dot)")]
         RemoveControl     = 0x8000000,
 
+        /// Unescape C-styled escape characters. E.g. \n = newline, \r = cr, etc. http://blogs.msdn.com/b/csharpfaq/archive/2004/03/12/88415.aspx
+        [Description("Unescape C# strings, e.g. \n => newline")]
+        UnescapeC = 0x10000000,
+
+        /// Escape C-styled escape characters. E.g. \n = newline, \r = cr, etc. http://blogs.msdn.com/b/csharpfaq/archive/2004/03/12/88415.aspx
+        [Description("Escape C# strings, e.g. newline character => \n etc")]
+        EscapeC = 0x20000000,
+
         /// All replace flags
         [Description("All replace flags")]
-        ReplaceMask        =0xfff0000,
+        ReplaceMask        =0x3fff0000,
 
         /// Default transformation (same as Expand)
         [Description("Default transformation")]
@@ -424,10 +432,10 @@ namespace XSharper.Core
                 ret = ret.Replace("~", " ");
             if ((trim & TransformRules.BackqToDouble) == TransformRules.BackqToDouble)
                 ret = ret.Replace("`", "\"");
-            if ((trim & TransformRules.SquareToAngle) == TransformRules.SquareToAngle)
-                ret = ret.Replace("[", "<").Replace("]", ">");
             if ((trim & TransformRules.CurvedToAngle) == TransformRules.CurvedToAngle)
                 ret = ret.Replace("{", "<").Replace("}", ">");
+            if ((trim & TransformRules.SquareToAngle) == TransformRules.SquareToAngle)
+                ret = ret.Replace("[", "<").Replace("]", ">");
             if ((trim & TransformRules.NewLineToLF) == TransformRules.NewLineToLF)
                 ret = ret.Replace("\r\n", "\n").Replace("\r", "\n");
             if ((trim & TransformRules.NewLineToCRLF) == TransformRules.NewLineToCRLF)
@@ -436,13 +444,12 @@ namespace XSharper.Core
                 ret = ret.Replace("'", "''");
             if ((trim & TransformRules.DoubleDoubleQuotes) == TransformRules.DoubleDoubleQuotes)
                 ret = ret.Replace("\"", "\"\"");
-            if ((trim & TransformRules.QuoteArg) == TransformRules.QuoteArg)
-                ret = QuoteArg(ret);
             if ((trim & TransformRules.EscapeXml) == TransformRules.EscapeXml)
                 ret = SecurityElement.Escape(ret);
+            if ((trim & TransformRules.QuoteArg) == TransformRules.QuoteArg)
+                ret = QuoteArg(ret);
             if ((trim & TransformRules.EscapeRegex) == TransformRules.EscapeRegex)
                 ret = Regex.Escape(ret);
-
             if ((trim & TransformRules.RemoveControl) == TransformRules.RemoveControl)
             {
                 char[] ch = ret.ToCharArray();
@@ -451,9 +458,102 @@ namespace XSharper.Core
                         ch[i] = (char)127;
                 ret = new string(ch);
             }
-
+            if ((trim & TransformRules.EscapeC) == TransformRules.EscapeC)
+            {
+                StringBuilder sb = new StringBuilder(ret.Length+20);
+                foreach (var c in ret)
+                {
+                    switch (c)
+                    {
+                        case '\0': sb.Append(@"\0"); break;
+                        case '\v': sb.Append(@"\v"); break;
+                        case '\a': sb.Append(@"\a"); break;
+                        case '\t': sb.Append(@"\t"); break;
+                        case '\r': sb.Append(@"\r"); break;
+                        case '\n': sb.Append(@"\n"); break;
+                        case '\b': sb.Append(@"\b"); break;
+                        case '\f': sb.Append(@"\f"); break;
+                        case '\"': sb.Append("\\\""); break;
+                        case '\'': sb.Append(@"\'"); break;
+                        case '\\':  sb.Append(@"\\"); break;
+                        default:
+                            if (c < ' ' || c == '\x7f')
+                                sb.Append("\\u" + ((int)(c)).ToString("x4"));
+                            else
+                                sb.Append(c);
+                            break;
+                    }
+                }
+                ret=sb.ToString();
+            }
+            if ((trim & TransformRules.UnescapeC) == TransformRules.UnescapeC)
+            {
+                if (ret.IndexOf('\\')!=-1)
+                {
+                    StringBuilder sb = new StringBuilder(ret.Length + 20);
+                    int pos = 0;
+                    int n;
+                    while ((n=ret.IndexOf('\\',pos))!=-1 && n!=ret.Length-1)
+                    {
+                        sb.Append(ret, pos, n - pos);
+                        switch (ret[n + 1])
+                        {
+                            case 'a': sb.Append('\a'); pos = n + 2; break;
+                            case 'b': sb.Append('\b'); pos = n + 2; break;
+                            case 'f': sb.Append('\f'); pos = n + 2; break;
+                            case 'n': sb.Append('\n'); pos = n + 2; break;
+                            case 'r': sb.Append('\r'); pos = n + 2; break;
+                            case 't': sb.Append('\t'); pos = n + 2; break;
+                            case '0': sb.Append('\0'); pos = n + 2; break;
+                            case '"': sb.Append('\"'); pos = n + 2; break;
+                            case '\'': sb.Append('\''); pos = n + 2; break;
+                            case '\\': sb.Append('\\'); pos = n + 2; break;
+                            case 'u':   
+                            case 'x':
+                                n=pos = n + 2;
+                                for (int i = 0; i < 4; ++i)
+                                    if (ret.Length > n && isHex(ret[n]))
+                                        n++;
+                                    else
+                                        break;
+                                if (n == pos)
+                                    sb.Append(ret[pos-1]);
+                                else
+                                    sb.Append((char)Convert.ToInt16(ret.Substring(pos,n-pos),16));
+                                pos = n;
+                                break;
+                            
+                            case 'U': 
+                                n = pos = n + 2;
+                                for (int i = 0; i < 8; ++i)
+                                    if (ret.Length > n && isHex(ret[n]))
+                                        n++;
+                                    else
+                                        break;
+                                if (n == pos)
+                                    sb.Append("u");
+                                else
+                                    sb.Append(char.ConvertFromUtf32(Convert.ToInt32(ret.Substring(pos, n - pos), 16)));
+                                pos = n;
+                                break;
+                            default:
+                                sb.Append(ret[n + 1]);
+                                pos = n + 1;
+                                break;
+                        }
+                    }
+                    sb.Append(ret, pos, ret.Length - pos);
+                    ret=sb.ToString();
+                }
+            }
+            
             return ret;
 
+        }
+
+        private static bool isHex(char p)
+        {
+            return char.IsDigit(p) || (p >= 'a' && p <= 'f') || (p >= 'A' && p <= 'F');
         }
         private static readonly char[] _charsToEscape = " \t\r\n\"><|&()[]{}^=;!'+,`~%".ToCharArray();
 
