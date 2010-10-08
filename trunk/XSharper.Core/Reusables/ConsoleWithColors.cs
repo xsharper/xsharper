@@ -82,7 +82,7 @@ namespace XSharper.Core
                                 string pn = p.ProcessName;
                                 if (string.IsNullOrEmpty(pn))
                                     pn = "XSH";
-                                pn += "-" + p.StartTime.ToString("yyyyMMddHHmmss") + "-" + p.Id;
+                                pn += "-" + p.StartTime.ToUniversalTime().ToString("yyyyMMddHHmmss") + "-" + p.Id;
                                 log = log.Replace("*", pn);
                             }
                         }
