@@ -72,10 +72,25 @@ namespace XSharper.Core
                 {
                     if (!string.IsNullOrEmpty(value))
                     {
-                        if (value != _logFile)
+                        string log = value;
+                        if (log != null && Directory.Exists(log))
+                            log = Path.Combine(log, "*.log");
+                        if (log != null && log.Contains("*"))
                         {
-                            _log = new StreamWriter(new FileStream(value, FileMode.Create, FileAccess.Write, FileShare.Read));
-                            _logFile = value;
+                            using (Process p = Process.GetCurrentProcess())
+                            {
+                                string pn = p.ProcessName;
+                                if (string.IsNullOrEmpty(pn))
+                                    pn = "XSH";
+                                pn += "-" + p.StartTime.ToString("yyyyMMddHHmmss") + "-" + p.Id;
+                                log = log.Replace("*", pn);
+                            }
+                        }
+            
+                        if (log != _logFile)
+                        {
+                            _log = new StreamWriter(new FileStream(log, FileMode.Create, FileAccess.Write, FileShare.Read));
+                            _logFile = log;
                         }
                     }
                     else

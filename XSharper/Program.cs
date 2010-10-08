@@ -349,7 +349,8 @@ namespace XSharper
 
             
             // Fill console properties
-            cout.LogFile = context.GetString(xs.log, null);
+            string log = context.GetString(xs.log, null);
+            cout.LogFile = log;
             if (context.GetBool(xs.nocolors, false))
                 cout.UseColors = false;
             
