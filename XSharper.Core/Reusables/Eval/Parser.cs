@@ -804,12 +804,13 @@ namespace XSharper.Core
                     case '^': r.Read(); return new QToken(Operators.BinaryXor);
                     case '<': r.Read(); return new QToken(check('=') ? Operators.LessOrEqual : Operators.Less);
                     case '>': r.Read(); return new QToken(check('=') ? Operators.GreaterOrEqual : Operators.Greater);
-                    case '!': r.Read(); return new QToken(check('=') ? Operators.NotEqual : Operators.Not);
-                    case '=': r.Read(); r.ReadAndThrowIfNot('='); return new QToken(Operators.Equal);
-                    case '~': r.Read();
-                        if (r.Peek() == '=') { r.Read(); return new QToken(Operators.EqualIgnoreCase); }
-                        if (r.Peek() == '!') { r.Read(); if (r.Peek() == '=') r.Read();  return new QToken(Operators.NotEqualIgnoreCase); }
-                        return new QToken(Operators.BinaryNot);
+                    case '!': r.Read();
+                        if (r.Peek() == '~') { r.Read(); return new QToken(Operators.NotEqualIgnoreCase); }
+                        return new QToken(check('=') ? Operators.NotEqual : Operators.Not);
+                    case '=': r.Read(); 
+                        if (r.Peek() == '~') { r.Read(); return new QToken(Operators.EqualIgnoreCase); }
+                        return new QToken(Operators.Equal);
+                    case '~': r.Read(); return new QToken(Operators.BinaryNot);
                     case '(': r.Read(); return new QToken(QType.ParenthesisOpen);
                     case ')': r.Read(); return new QToken(QType.ParenthesisClose);
                     case '[': r.Read(); return new QToken(QType.SquareOpen);
