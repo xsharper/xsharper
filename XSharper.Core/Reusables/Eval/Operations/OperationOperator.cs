@@ -50,6 +50,8 @@ namespace XSharper.Core.Operations
         And,
         Equal,
         NotEqual,
+        EqualIgnoreCase,
+        NotEqualIgnoreCase,
         Less,
         LessOrEqual,
         Greater,
@@ -112,6 +114,12 @@ namespace XSharper.Core.Operations
             switch (_operator)
             { 
                 default:
+                    if (_operator == OperatorType.NotEqualIgnoreCase || _operator == OperatorType.EqualIgnoreCase)
+                    {
+                        if (o1 != null && !(o1 is string)) o1 = o1.ToString();
+                        if (o2 != null && !(o2 is string)) o2 = o2.ToString();
+                    }
+                    
                     var o1isStr=(o1 is string || o1 is char || o1 is char?);
                     var o2isStr=(o2 is string || o2 is char || o2 is char?);
                     if (_operator == OperatorType.Plus)
@@ -194,9 +202,16 @@ namespace XSharper.Core.Operations
 
         private object stringMath(string d1, string d2)
         {
-            var r = string.Compare(d1,d2,StringComparison.Ordinal);
+            int r ;
+            if (_operator==OperatorType.EqualIgnoreCase || _operator==OperatorType.NotEqualIgnoreCase)
+                r = string.Compare(d1,d2,StringComparison.InvariantCultureIgnoreCase);
+            else
+                r=string.Compare(d1, d2, StringComparison.Ordinal);
+
             switch (_operator)
             {
+                case OperatorType.EqualIgnoreCase: return r == 0;
+                case OperatorType.NotEqualIgnoreCase: return r != 0;
                 case OperatorType.Equal: return r==0;
                 case OperatorType.NotEqual: return r != 0;
                 case OperatorType.Less: return r < 0;

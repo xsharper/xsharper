@@ -63,7 +63,13 @@ namespace XSharper.Core
 
         /// Output as string "Elapsed time: XX:XX:XX.XXX"
         [Description("Output as string \"Elapsed time: XX:XX:XX.XXX\"")]
-        Elapsed
+        Elapsed,
+
+        
+        /// Output start and stop local times as string 'TIME1 ... TIME2' 
+        [Description("Output start and stop UTC times as string 'TIME1 ... TIME2' ")]
+        TimeRangeUtc,
+
     }
 
     /// Execute block and recprd execution time
@@ -74,6 +80,10 @@ namespace XSharper.Core
         /// Where to output execution time, default null
         [Description("Where to output execution time")]
         public string OutTo { get; set;}
+
+        /// Custom prefix
+        [Description("Prefix")]
+        public string Prefix { get; set; }
 
         /// How to format execution time. Default TimeSpan
         [Description("How to format execution time")]
@@ -120,6 +130,9 @@ namespace XSharper.Core
                     case TimerFormat.TimeRange:
                         v = string.Format(CultureInfo.CurrentCulture, "{0} ... {1}", dt1, dt2);
                         break;
+                    case TimerFormat.TimeRangeUtc:
+                        v = string.Format(CultureInfo.CurrentCulture, "{0} ... {1}", dt1.ToUniversalTime(), dt2.ToUniversalTime());
+                        break;
                     case TimerFormat.Elapsed:
                         v = string.Format(CultureInfo.CurrentCulture, "Elapsed time: {0}" + Environment.NewLine, sw.Elapsed);
                         break;
@@ -133,8 +146,8 @@ namespace XSharper.Core
                         v = ((long)sw.Elapsed.Ticks);
                         break;
                 }
-            
-                Context.OutTo(Context.TransformStr(OutTo, Transform), v);
+                
+                Context.OutTo(Context.TransformStr(OutTo, Transform),   Context.TransformStr(Prefix, Transform)+ v);
             }
             return ret;
                 

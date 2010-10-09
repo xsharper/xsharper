@@ -62,6 +62,8 @@ namespace XSharper.Core
             [Op(7, "BAND")] BinaryAnd,
             [Op(8, "EQ")]   Equal,
             [Op(8, "NEQ")]  NotEqual,
+            [Op(8, "EQI")]   EqualIgnoreCase,
+            [Op(8, "NEQI")]  NotEqualIgnoreCase,
             [Op(9, "LT")]   Less,
             [Op(9, "LE")]   LessOrEqual,
             [Op(9, "GT")]   Greater,
@@ -804,7 +806,10 @@ namespace XSharper.Core
                     case '>': r.Read(); return new QToken(check('=') ? Operators.GreaterOrEqual : Operators.Greater);
                     case '!': r.Read(); return new QToken(check('=') ? Operators.NotEqual : Operators.Not);
                     case '=': r.Read(); r.ReadAndThrowIfNot('='); return new QToken(Operators.Equal);
-                    case '~': r.Read(); return new QToken(Operators.BinaryNot);
+                    case '~': r.Read();
+                        if (r.Peek() == '=') { r.Read(); return new QToken(Operators.EqualIgnoreCase); }
+                        if (r.Peek() == '!') { r.Read(); if (r.Peek() == '=') r.Read();  return new QToken(Operators.NotEqualIgnoreCase); }
+                        return new QToken(Operators.BinaryNot);
                     case '(': r.Read(); return new QToken(QType.ParenthesisOpen);
                     case ')': r.Read(); return new QToken(QType.ParenthesisClose);
                     case '[': r.Read(); return new QToken(QType.SquareOpen);
