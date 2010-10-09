@@ -809,6 +809,7 @@ namespace XSharper.Core
                         return new QToken(check('=') ? Operators.NotEqual : Operators.Not);
                     case '=': r.Read(); 
                         if (r.Peek() == '~') { r.Read(); return new QToken(Operators.EqualIgnoreCase); }
+                        r.ReadAndThrowIfNot('=');
                         return new QToken(Operators.Equal);
                     case '~': r.Read(); return new QToken(Operators.BinaryNot);
                     case '(': r.Read(); return new QToken(QType.ParenthesisOpen);
