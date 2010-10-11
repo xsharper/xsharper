@@ -108,7 +108,7 @@ namespace RunScript
                                     new XS.Print("-- This will print 3 steps, ${=2+1} seconds one after another ---"),
                                     new XS.While
                                         {
-                                            MaxCount = 3,
+                                            MaxCount = "3",
                                             Name = "i",
                                             Items = new List<XS.IScriptAction>
                                                 {
