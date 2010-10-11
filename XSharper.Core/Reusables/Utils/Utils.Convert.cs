@@ -202,10 +202,10 @@ namespace XSharper.Core
 
             if (pt == typeof(bool))
             {
-                int t;
-                if (Int32.TryParse(text, out t))
-                    return t != 0;
-                return Boolean.Parse(text);
+                bool t1;
+                if (bool.TryParse(text, out t1))
+                    return t1;
+                return (long)convertString(text,typeof(long))!=0;
             }
             if (pt == typeof(byte) ||
                 pt == typeof(sbyte) ||
