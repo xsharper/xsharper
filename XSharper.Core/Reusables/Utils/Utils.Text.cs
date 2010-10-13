@@ -36,7 +36,7 @@ namespace XSharper.Core
 {
     /// Transformation rules
     [Flags]
-    public enum TransformRules
+    public enum TransformRules : uint
     {
         /// No expansion
         [Description("No expansion")]
@@ -153,16 +153,29 @@ namespace XSharper.Core
         RemoveControl     = 0x8000000,
 
         /// Unescape C-styled escape characters. E.g. \n = newline, \r = cr, etc. http://blogs.msdn.com/b/csharpfaq/archive/2004/03/12/88415.aspx
-        [Description("Unescape C# strings, e.g. \n => newline")]
+        [Description("Unescape C# strings, e.g. \\n => newline")]
         UnescapeC = 0x10000000,
 
         /// Escape C-styled escape characters. E.g. \n = newline, \r = cr, etc. http://blogs.msdn.com/b/csharpfaq/archive/2004/03/12/88415.aspx
-        [Description("Escape C# strings, e.g. newline character => \n etc")]
+        [Description("Escape C# strings, e.g. newline character => \\n etc")]
         EscapeC = 0x20000000,
+
+
+        /// Tabs to spaces (counting tab as 2 spaces)
+        [Description("Tabs to spaces (counting tab as 2 spaces)")]
+        TabToSpaces2 = 0x40000000,
+
+        /// Tabs to spaces (counting tab as 4 spaces)
+        [Description("Tabs to spaces (counting tab as 4 spaces)")]
+        TabToSpaces4= 0x80000000,
+
+        /// Tabs to spaces (counting tab as 8 spaces)
+        [Description("Tabs to spaces (counting tab as 8 spaces)")]
+        TabToSpaces8 = 0xc0000000,
 
         /// All replace flags
         [Description("All replace flags")]
-        ReplaceMask        =0x3fff0000,
+        ReplaceMask        =0xffff0000U,
 
         /// Default transformation (same as Expand)
         [Description("Default transformation")]
@@ -486,6 +499,8 @@ namespace XSharper.Core
                 }
                 ret=sb.ToString();
             }
+            
+            
             if ((trim & TransformRules.UnescapeC) == TransformRules.UnescapeC)
             {
                 if (ret.IndexOf('\\')!=-1)
@@ -546,6 +561,27 @@ namespace XSharper.Core
                     ret=sb.ToString();
                 }
             }
+
+            if ((trim & TransformRules.TabToSpaces8) != 0)
+            {
+                StringBuilder sb = new StringBuilder(ret.Length + 20);
+                int ts = 8;
+                if ((trim & TransformRules.TabToSpaces4) == TransformRules.TabToSpaces4) ts = 4;
+                if ((trim & TransformRules.TabToSpaces2) == TransformRules.TabToSpaces2) ts = 2;
+                int col = 0;
+                foreach (var ch in ret)
+                {
+                    switch (ch)
+                    {
+                        case '\t': sb.Append(' ', ts - col % ts); col += (ts - col % ts); break;
+                        case '\n':
+                        case '\r': col = 0; sb.Append(ch); break;
+                        default: col++; sb.Append(ch); break;
+                    }
+                }
+                ret = sb.ToString();
+            }
+            
             
             return ret;
 

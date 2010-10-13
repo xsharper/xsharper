@@ -68,8 +68,11 @@ namespace XSharper.Core
 
         /// ZIP file to create
         [Description("ZIP file to create")]
-        [XsRequired]
         public string To { get; set; }
+
+        /// Location where to save the compressed data. 
+        [Description("Location where to save the compressed data. ")]
+        public string OutTo { get; set; }
 
         /// ZIP comment
         [Description("ZIP comment")]
@@ -107,7 +110,7 @@ namespace XSharper.Core
             if (File.Exists(f))
             {
                 src = new DirectoryInfo(new FileInfo(f).DirectoryName);
-                nf = new SelfIgnoreFilenameOnlyFilter(trg,FilterSyntax.Pattern, Regex.Escape(Path.GetFileName(f)));
+                nf = new SelfIgnoreFilenameOnlyFilter(trg, FilterSyntax.Pattern, Regex.Escape(Path.GetFileName(f)));
                 df = new StringFilter(null);
             }
             else
@@ -116,29 +119,47 @@ namespace XSharper.Core
                 nf = new SelfIgnoreFilenameOnlyFilter(trg, Syntax, Context.TransformStr(Filter, Transform));
                 df = new FullPathFilter(Syntax, Context.TransformStr(DirectoryFilter, Transform));
             }
-            
-            if (!src.Exists)
-                throw new DirectoryNotFoundException(string.Format("Directory {0} does not exist",src));
 
-            
+            if (!src.Exists)
+                throw new DirectoryNotFoundException(string.Format("Directory {0} does not exist", src));
+
+            bool deleteTrg = false;
+            Stream str = null; 
+            var outTo = Context.TransformStr(OutTo, Transform);
             try
             {
-                using (Stream fs = Context.CreateStream(trg))
+                if (outTo != null)
+                    str = new MemoryStream();
+                else
                 {
-                    var ret = createZip(fs, src.FullName, nf, df);
-                    if (ReturnValue.IsBreak(ret))
-                        return null;
-                    ReturnValue.RethrowIfException(ret);
-                    return ret;
+                    str = Context.CreateStream(trg);
+                    deleteTrg = true;
                 }
+
+                var ret = createZip(str, src.FullName, nf, df);
+                if (trg != null && outTo != null)
+                {
+                    deleteTrg = true;
+                    using (var ctx2 = Context.CreateStream(trg))
+                        ((MemoryStream)str).WriteTo(ctx2);
+                }
+                if (outTo != null)
+                    Context.OutTo(outTo, ((MemoryStream)str).ToArray());
+                deleteTrg = false;
+                if (ReturnValue.IsBreak(ret))
+                    return null;
+                ReturnValue.RethrowIfException(ret);
+                return ret;
             }
-            catch 
+            finally
             {
-                File.Delete(trg);
-                throw;
+                if (str != null)
+                    str.Dispose();
+
+                if (deleteTrg)
+                    File.Delete(trg);
             }
         }
-
         class SelfIgnoreFilenameOnlyFilter : FileNameOnlyFilter
         {
             private string _except;

@@ -480,7 +480,7 @@ namespace XSharper
                     else
                     {
                         sb1.Append(finfo.Name);
-                        sb.AppendFormat("0x{0:x8} ",(int) finfo.GetValue(null));
+                        sb.AppendFormat("0x{0:x10} ",Convert.ToUInt64( finfo.GetValue(null)));
                         var dd = (DescriptionAttribute[])finfo.GetCustomAttributes(typeof(DescriptionAttribute),true);
                         if (dd != null && dd.Length>0)
                             sb.Append(dd[0].Description.Trim());
