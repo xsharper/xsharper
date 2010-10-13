@@ -223,8 +223,8 @@ namespace XSharper.Core
             var context = ScriptContextScope.Current;
             Delete d = new Delete
                 {
-                    DeleteReadOnly = true,
-                    DeleteRoot = true,
+                    ReadOnly = true,
+                    Root = true,
                     Catch = new Block(),
                     Recursive = true,
                     From = updater.GetWorkingDirectory(Name).FullName,

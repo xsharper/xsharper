@@ -83,6 +83,7 @@ namespace XSharper.Core
                     na.SetValue(To(pt.GetElementType(), obj), 0);
                     return na;
                 }
+                
                 if (obj == null && (pt.IsPrimitive || pt == typeof(decimal)))
                     return Convert.ChangeType(0, pt);
 

@@ -44,11 +44,15 @@ namespace XSharper.Core
 
         /// True, if read only files must be deleted. Default - false.
         [Description("True, if read only files must be deleted. Default - false.")]
-        public bool DeleteReadOnly { get; set; }
+        [XsAttribute("readOnly")]
+        [XsAttribute("deleteReadOnly")]
+        public bool ReadOnly { get; set; }
 
         /// True, if the directory specified in From should be deleted. Default - true
         [Description("True, if the directory specified in From should be deleted. Default - true")]
-        public bool DeleteRoot { get; set; }
+        [XsAttribute("root")]
+        [XsAttribute("deleteRoot")]
+        public bool Root { get; set; }
 
         private class delctx
         {
@@ -59,7 +63,7 @@ namespace XSharper.Core
         /// Constructor
         public Delete()
         {
-            DeleteRoot = true;
+            Root = true;
         }
         /// Execute action
         public override object Execute()
@@ -127,14 +131,14 @@ namespace XSharper.Core
                 }
             }
             object r = null;
-            if ((DeleteRoot || root.FullName != dir.FullName))
+            if ((Root || root.FullName != dir.FullName))
             {
                 if (dir.GetFiles().Length != 0 || dir.GetDirectories().Length != 0)
                     VerboseMessage("Directory {0} contains files. Skipped.", dir.FullName);
                 else
                 {
                     bool skip = false;
-                    if (!DeleteReadOnly && ((dir.Attributes & FileAttributes.ReadOnly) != 0))
+                    if (!ReadOnly && ((dir.Attributes & FileAttributes.ReadOnly) != 0))
                         skip = true;
 
                     r = ProcessComplete(new FileOrDirectoryInfo(dir), null, skip, skNew =>
@@ -161,7 +165,7 @@ namespace XSharper.Core
                 return null;
             }
             bool skip = false;
-            if (!DeleteReadOnly && ((f.Attributes & FileAttributes.ReadOnly) != 0))
+            if (!ReadOnly && ((f.Attributes & FileAttributes.ReadOnly) != 0))
                 skip = true;
 
             object ret = ProcessComplete(new FileOrDirectoryInfo(f), null, skip, skipNew =>
@@ -169,7 +173,7 @@ namespace XSharper.Core
                                                                                    if (!skipNew)
                                                                                    {
                                                                                        VerboseMessage("Deleting {0} ", f.FullName);
-                                                                                       if (DeleteReadOnly)
+                                                                                       if (ReadOnly)
                                                                                            f.Attributes = f.Attributes & ~(FileAttributes.System | FileAttributes.Hidden | FileAttributes.ReadOnly);
                                                                                        f.Delete();
                                                                                    }

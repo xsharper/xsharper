@@ -62,6 +62,11 @@ namespace XSharper.Core
                     var creator = findInstanceCreator(t);
                     return creator();
                 }
+                catch (NotSupportedException)
+                {
+                    // In .NET 2.0 this does not fly
+                    _useFastCreator = false;
+                }
                 catch (MissingMethodException)
                 {
                     // In .NET 2.0 this does not fly
@@ -310,7 +315,7 @@ namespace XSharper.Core
         #region -- Gory details --
 
         private static readonly Dictionary<Type, FastCreateInstance> _fastCreator = new Dictionary<Type, FastCreateInstance>();
-        private static bool _useFastCreator = true;
+        private static bool _useFastCreator = false;
         private delegate object FastCreateInstance();
         private static FastCreateInstance findInstanceCreator(Type type)
         {

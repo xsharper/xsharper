@@ -39,8 +39,8 @@ namespace XSharper.Core
     [Description("Unzip an archive to the specified directory")]
     public class Unzip : ZipBase
     {
-        /// .ZIP archive filename
-        [Description(".ZIP archive filename")]
+        /// .ZIP archive filename or byte[]
+        [Description(".ZIP archive filename or byte[]")]
         public string From { get; set; }
 
         /// Directory where to extract the files
@@ -59,12 +59,17 @@ namespace XSharper.Core
         [Description("True, if path in the archive affects extraction directory")]
         public bool UsePath { get; set; }
 
+        /// false, if files are not to be extracted but just listed
+        [Description("false, if files are not to be extracted but just listed")]
+        public bool Extract { get; set; }
+
 
         /// Constructor
         public Unzip()
         {
             Overwrite = OverwriteMode.Always;
             UsePath = true;
+            Extract = true;
         }
 
         /// Execute action
@@ -74,11 +79,12 @@ namespace XSharper.Core
             d.Create();
             if (Clean)
             {
-                Delete del = new Delete { From = d.ToString(), Recursive = true, DeleteReadOnly = true };
+                Delete del = new Delete { From = d.ToString(), Recursive = true, ReadOnly = true };
                 Context.Execute(del);
             }
 
-            string zip = Context.TransformStr(From, Transform);
+            var zip = Context.Transform(From, Transform);
+            
         
             var nf = new FileNameOnlyFilter(Syntax, Context.TransformStr(Filter,Transform));
             var df = new StringFilter(Syntax, Context.TransformStr(DirectoryFilter,Transform));
@@ -90,12 +96,18 @@ namespace XSharper.Core
             return ret;
         }
 
-        object extractZip(   string zipFileName, string rootDirectory,IStringFilter nf, IStringFilter df)
+        object extractZip(   object zipFileName, string rootDirectory,IStringFilter nf, IStringFilter df)
         {
             object ret = null;
             WindowsNameTransform extractNameTransform = new WindowsNameTransform(rootDirectory);
             Dictionary<string, bool> dirs = new Dictionary<string, bool>(StringComparer.InvariantCultureIgnoreCase);
-            using (ZipFile zip = new ZipFile(new SeekableStream(Context.OpenStream(zipFileName), true)))
+
+            Stream str;
+            if (zipFileName is byte[])
+                str = new MemoryStream((byte[])zipFileName);
+            else
+                str=new SeekableStream(Context.OpenStream(zipFileName.ToString()),true);
+            using (ZipFile zip = new ZipFile(str))
             {
                 if (Password != null)
                     zip.Password = Context.TransformStr(Password, Transform);
@@ -174,7 +186,7 @@ namespace XSharper.Core
                 DirectoryInfo dir = new DirectoryInfo(dirName);
                 object r = ProcessComplete(new ZipFSEntry(entry, ZipTime), new FileOrDirectoryInfo(dir), false, skp=>{
                     dirs[zipDirName] = skip = skp;
-                    if (!skp && !Directory.Exists(dirName))
+                    if (Extract && !skp && !Directory.Exists(dirName))
                     {
                         DirectoryInfo di = Directory.CreateDirectory(dirName);
                         if (entry.IsDirectory)
@@ -209,7 +221,7 @@ namespace XSharper.Core
                 return ProcessComplete(pfrom, pto, false,
                     sk =>
                         {
-                            if (sk)
+                            if (sk || !Extract)
                                 return null;
 
                             if (!fi.Directory.Exists)
