@@ -53,7 +53,7 @@ namespace XSharper.Core.Operations
             if (t == null)
                 throw new TypeLoadException("Failed to resolve type '" + _typeName + "'");
             if (p == null || !t.IsAssignableFrom(p.GetType()))
-                stack.Push(false);
+                stack.Push(null);
             else
                 stack.Push(p);
         }
