@@ -71,16 +71,21 @@ namespace XSharper.Core
     /// </summary>
     public class FullPathFilter : StringFilter
     {
+        BackslashOption _backslash;
+
         /// constructor
-        public FullPathFilter(FilterSyntax syntax, string filter)
+        public FullPathFilter(FilterSyntax syntax, string filter, BackslashOption backslash)
             : base(syntax, filter)
         {
+            _backslash = backslash;
         }
 
         /// True if name matches filter
         public override bool IsMatch(string name)
         {
             var z = Path.GetFullPath(name);
+            if (_backslash != BackslashOption.AsIs)
+                z = Utils.Backslash(z, _backslash);
             return base.IsMatch(z);
         }
     }
@@ -146,7 +151,7 @@ namespace XSharper.Core
         {
         }
 
-       private void processFilter(string filter,bool convert)
+        private void processFilter(string filter,bool convert)
         {
             bool included = true;
             if (filter.StartsWith("-", StringComparison.Ordinal))

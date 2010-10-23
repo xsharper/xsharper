@@ -73,7 +73,7 @@ namespace XSharper.Core
                 return null;
 
             delctx ctx = new delctx();
-            ctx.dirFilter=new FullPathFilter(Syntax, Context.TransformStr(DirectoryFilter, Transform));
+            ctx.dirFilter=new FullPathFilter(Syntax, Context.TransformStr(DirectoryFilter, Transform),BackslashOption.Add);
             ctx.nameFilter=new FileNameOnlyFilter(Syntax, Context.TransformStr(Filter, Transform));
             
             object ret=null;
@@ -100,20 +100,15 @@ namespace XSharper.Core
 
         private object delete(delctx ctx, DirectoryInfo root, DirectoryInfo dir)
         {
-            bool processFiles = true;
             bool isRoot = (root == dir);
             bool isVisible = (isRoot || CheckHidden(dir));
-
-            if (!isVisible || (ctx.dirFilter != null && !ctx.dirFilter.IsMatch(dir.FullName)))
+            bool processFiles = isVisible;
+            
+            if (processFiles && (ctx.dirFilter != null && !ctx.dirFilter.IsMatch(dir.FullName)))
             {
-                if (!isRoot)
-                {
-                    VerboseMessage("{0} did not pass directory filter", dir.FullName);
-                    return null;
-                }
                 processFiles = false;
+                VerboseMessage("{0} did not pass directory filter", dir.FullName);
             }
-
             if (processFiles)
                 foreach (FileInfo f in dir.GetFiles())
                 {
@@ -131,9 +126,10 @@ namespace XSharper.Core
                 }
             }
             object r = null;
-            if ((Root || root.FullName != dir.FullName))
+            if (processFiles && (Root || root.FullName != dir.FullName))
             {
-                if (dir.GetFiles().Length != 0 || dir.GetDirectories().Length != 0)
+                bool notEmpty = (dir.GetFiles().Length != 0 || dir.GetDirectories().Length != 0);
+                if (notEmpty)
                     VerboseMessage("Directory {0} contains files. Skipped.", dir.FullName);
                 else
                 {

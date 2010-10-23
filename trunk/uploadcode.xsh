@@ -21,13 +21,13 @@
 	<set back='${=new string(8,100)}${=new string(32,100)}${=new string(8,100)}' />
 
 	<zip from="." to="${allSrc}" recursive='true' 
-								directoryFilter='-*\.svn;-*\obj;-*\bin;-*\_*;-*\XSharper\Embedded;-*\lib' 
+								directoryFilter='-*\.svn\*;-*\obj\*;-*\bin\*;-*\_*;-*\XSharper\Embedded\*;-*\lib\*' 
 								filter='-*.res;-*.user;-*.idc;-*.aps;-*.cache;-uploadcode.xsh;-*.suo;-*.resharper' >
-		<print nl='0'>${back}${}</print>
+		<print nl='0'>${back}${=}</print>
 	</zip>
 
 	<zip from="." to="${coreSrc}" recursive='true' 
-								directoryFilter='-*\.svn;-*\obj;-*\bin;-*\_*;-*\XSharper\Embedded;-*\lib;*\XSharper.Core;*\XSharper.Core\*' 
+								directoryFilter='-*\.svn\*;-*\obj\*;-*\bin\*;-*\_*;-*\XSharper\Embedded\*;-*\lib\*;*\XSharper.Core\*;*\XSharper.Core\*' 
 								filter='-*.res;-*.user;-*.idc;-*.aps;-*.cache;-uploadcode.xsh;-*.suo;-*.resharper' >
 		<print nl='0'>${back}${}</print>
 	</zip>

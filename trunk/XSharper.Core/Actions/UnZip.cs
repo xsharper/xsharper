@@ -114,6 +114,7 @@ namespace XSharper.Core
 
                 foreach (ZipEntry entry in zip)
                 {
+                    
                     string targetName = null;
                     if (entry.IsFile)
                     {
@@ -130,9 +131,9 @@ namespace XSharper.Core
                     }
                     if (string.IsNullOrEmpty(targetName))
                         continue;
-                    if (!Hidden && entry.IsDOSEntry)
+                    if (!Hidden)
                     {   
-                        if ((((FileAttributes) entry.ExternalFileAttributes) & (FileAttributes.System | FileAttributes.Hidden)) != 0)
+                        if (isDos(entry) && (((FileAttributes) entry.ExternalFileAttributes) & (FileAttributes.Hidden)) != 0)
                             continue;
                     }
                     var n = new ZipFSEntry(entry, ZipTime);
@@ -184,22 +185,26 @@ namespace XSharper.Core
             if (entry.IsDirectory)
             {
                 DirectoryInfo dir = new DirectoryInfo(dirName);
-                object r = ProcessComplete(new ZipFSEntry(entry, ZipTime), new FileOrDirectoryInfo(dir), false, skp=>{
-                    dirs[zipDirName] = skip = skp;
-                    if (Extract && !skp && !Directory.Exists(dirName))
-                    {
-                        DirectoryInfo di = Directory.CreateDirectory(dirName);
-                        if (entry.IsDirectory)
+                var zz = new ZipFSEntry(entry, ZipTime);
+                var to=new FileOrDirectoryInfo(dir);
+                object r = ProcessPrepare(zz, to, () => null);
+                if (r==null)
+                    r = ProcessComplete(new ZipFSEntry(entry, ZipTime), new FileOrDirectoryInfo(dir), skip, skp=>{
+                        dirs[zipDirName] = skip = skp;
+                        if (Extract && !skp)
+                        {
+                            DirectoryInfo di = Directory.CreateDirectory(dirName);
                             setAttributes(di,entry);
-                    }
-                    return null;
-                });
+                        }
+                        return null;
+                    });
                 if (r != null || skip)
                     return r;                
             }
             if (entry.IsFile)
             {
-
+                
+                
                 var pfrom = new ZipFSEntry(entry, ZipTime);
                 var fi = new FileInfo(targetName);
                 var pto = new FileOrDirectoryInfo(fi);
@@ -218,7 +223,11 @@ namespace XSharper.Core
 
                 if ((skip && Overwrite != OverwriteMode.Confirm))
                     return null;
-                return ProcessComplete(pfrom, pto, false,
+                object r = ProcessPrepare(pfrom, pto, () => null);
+                if (r != null)
+                    return r;
+                    
+                return ProcessComplete(pfrom, pto, skip,
                     sk =>
                         {
                             if (sk || !Extract)
@@ -230,11 +239,10 @@ namespace XSharper.Core
                                 if (dirZipEntry != null)
                                     setAttributes(di,dirZipEntry);
                             }
-                            if (fi.Exists)
-                            {
-                                const FileAttributes mask = (FileAttributes.ReadOnly | FileAttributes.Hidden | FileAttributes.System);
+
+                            const FileAttributes mask = (FileAttributes.ReadOnly | FileAttributes.Hidden | FileAttributes.System);
+                            if (fi.Exists && (fi.Attributes & mask)!=0)
                                 fi.Attributes = fi.Attributes & ~mask;
-                            }
 
                             using (Stream outputStream = Context.CreateStream(targetName))
                             {
@@ -243,19 +251,23 @@ namespace XSharper.Core
                             }
 
                             setAttributes(fi, entry);
-                            
                             return null;
                         });
             }
             return null;
         }
 
+        bool isDos(ZipEntry entry)
+        {
+            // There is some opaque bug with InfoZip or SharpZipLib where zipEntry header is written as PK 0B 17 0A 00
+            return entry.IsDOSEntry || entry.HostSystem == 0xb;
+        }
         private void setAttributes(FileSystemInfo fi, ZipEntry entry)
         {
             DateTime? entryTimeUtc = getEntryTimeUtc(entry);
             if (entryTimeUtc != null)
                 fi.LastWriteTimeUtc = fi.LastAccessTimeUtc = fi.CreationTimeUtc = entryTimeUtc.Value;
-            if (entry.IsDOSEntry && (entry.ExternalFileAttributes != -1))
+            if (isDos(entry) && (entry.ExternalFileAttributes != -1))
             {
                 const FileAttributes mask = (FileAttributes.Archive | FileAttributes.Normal | FileAttributes.ReadOnly | FileAttributes.Hidden | FileAttributes.System);
                 var entryAttributes = (FileAttributes) entry.ExternalFileAttributes;

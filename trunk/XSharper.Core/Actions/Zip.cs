@@ -29,6 +29,8 @@ using System.IO;
 using System.Text.RegularExpressions;
 using ICSharpCode.SharpZipLib.Core;
 using ICSharpCode.SharpZipLib.Zip;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace XSharper.Core
 {
@@ -117,7 +119,7 @@ namespace XSharper.Core
             {
                 src = new DirectoryInfo(f);
                 nf = new SelfIgnoreFilenameOnlyFilter(trg, Syntax, Context.TransformStr(Filter, Transform));
-                df = new FullPathFilter(Syntax, Context.TransformStr(DirectoryFilter, Transform));
+                df = new FullPathFilter(Syntax, Context.TransformStr(DirectoryFilter, Transform), BackslashOption.Add);
             }
 
             if (!src.Exists)
@@ -203,47 +205,129 @@ namespace XSharper.Core
                     zip.SetComment(Context.TransformStr(Password, Transform));
                 if (Password != null)
                     zip.Password = Context.TransformStr(Password, Transform);
-                zip.SetLevel(Level);    
-
-
-                return scanDir(sourceDirectory, sourceDirectory, new scanDirParams(zip, entryFactory, progress, nf, df));
+                zip.SetLevel(Level);
+                
+                return scanDir(sourceDirectory, new scanDirParams(zip, sourceDirectory, entryFactory, progress, nf, df));
             }
         }
 
         class scanDirParams
         {
-            public scanDirParams(ZipOutputStream zip, ZipEntryFactory entryFactory, ProgressHandler progress, IStringFilter nf, IStringFilter df)
+            public scanDirParams(ZipOutputStream zip, string sourceDirectory, ZipEntryFactory entryFactory, ProgressHandler progress, IStringFilter nf, IStringFilter df)
             {
                 Zip = zip;
                 EntryFactory = entryFactory;
                 Progress = progress;
                 NameFilter = nf;
                 DirFilter = df;
+                DirEntries = new Dictionary<string, ZipFSEntry>(StringComparer.InvariantCultureIgnoreCase);
+                SourceDirectory = Utils.BackslashAdd(new DirectoryInfo(sourceDirectory).FullName);
+                Buffer = new byte[16384];
             }
-            public ZipOutputStream Zip { get; private set; }
-            public ZipEntryFactory EntryFactory { get; private set; }
-            public ProgressHandler Progress { get; private set; }
-            public IStringFilter NameFilter { get; private set; }
-            public IStringFilter DirFilter { get; private set; }
+            public readonly IDictionary<string, ZipFSEntry> DirEntries ;
+            public readonly ZipOutputStream Zip;
+            public readonly ZipEntryFactory EntryFactory;
+            public readonly ProgressHandler Progress;
+            public readonly IStringFilter NameFilter;
+            public readonly IStringFilter DirFilter;
+            public readonly string SourceDirectory;
+            public readonly byte[] Buffer;
         }
 
-        object scanDir(string sourceDirectory, string directory, scanDirParams scanDirParams)
+        object scanDir(string directory, scanDirParams scanDirParams)
         {
-            bool isRoot = (sourceDirectory == directory);
+            directory = Utils.BackslashAdd(directory);
+            bool isRoot = (scanDirParams.SourceDirectory == directory);
+            
+            DirectoryInfo di = new DirectoryInfo(directory);
+            if (!CheckHidden(di) && !isRoot)
+                return null;
+            
             bool processFiles = true;
             if (!scanDirParams.DirFilter.IsMatch(directory))
             {
-                if (!isRoot)
-                {
-                    VerboseMessage("{0} did not pass directory filter", directory);
-                    return null;
-                }
                 processFiles = false;
+                VerboseMessage("{0} did not pass directory filter", directory);
             }
 
+            // Process files in this directory
+            if (processFiles)
+            {
+                foreach (FileInfo f in di.GetFiles())
+                {
+                    object r = compressSingleFile(f,scanDirParams);
+                    if (r != null)
+                        return r;
+                }
+                if (EmptyDirectories)
+                {
+                    object r = ensureDirectoryExists(di, scanDirParams);
+                    if (r != null)
+                        return r;
+                }
+            }
+            if (Recursive)
+            {
+                foreach (DirectoryInfo d in di.GetDirectories())
+                {
+                    object r = scanDir(d.FullName, scanDirParams);
+                    if (r != null)
+                        return r;
+                }
+            }
 
-            // Process this directory
-            DirectoryInfo di = new DirectoryInfo(directory);
+            return null;
+        }
+
+        object compressSingleFile(FileInfo fi, scanDirParams scanDirParams)
+        {
+            if (!CheckHidden(fi) || !scanDirParams.NameFilter.IsMatch(fi.FullName))
+                return null;
+
+            object r=ensureDirectoryExists(fi.Directory, scanDirParams);
+            if (r != null || scanDirParams.DirEntries[Utils.BackslashAdd(fi.Directory.FullName)] == null)
+                return r;
+
+            var ze=new ZipFSEntry(scanDirParams.EntryFactory, fi, ZipTime);
+            r = ProcessPrepare(new FileOrDirectoryInfo(fi), ze, () => null);
+            if (r != null)
+                return r;
+            
+            r = ProcessComplete(new FileOrDirectoryInfo(fi), ze, false,
+                                          skip2 =>
+                                          {
+                                              if (!skip2)
+                                              {
+                                                  using (Stream stream = Context.OpenStream(fi.FullName))
+                                                  {
+                                                      ZipEntry zentry = scanDirParams.EntryFactory.MakeFileEntry(fi.FullName);
+                                                      scanDirParams.Zip.PutNextEntry(zentry);
+                                                      StreamUtils.Copy(stream, scanDirParams.Zip, scanDirParams.Buffer, scanDirParams.Progress, ProgressInterval, this, fi.FullName);
+                                                  }
+                                              }
+                                              return null;
+                                          });
+            return r;
+        }
+        object ensureDirectoryExists(DirectoryInfo di, scanDirParams scanDirParams)
+        {
+            var s = Utils.BackslashAdd( di.FullName);
+            if (scanDirParams.DirEntries.ContainsKey(s))
+                return null;
+
+            bool isRoot = (scanDirParams.SourceDirectory == s);
+            object r;
+            if (!isRoot)
+            {
+                var p = di.Parent;
+                if (p != null)
+                {
+                    r = ensureDirectoryExists(di.Parent, scanDirParams);
+                    if (r != null || scanDirParams.DirEntries[Utils.BackslashAdd(di.Parent.FullName)] == null)
+                        return r;
+                }
+            }
+
             ZipFSEntry ze = null;
             if (isRoot)
             {
@@ -252,88 +336,22 @@ namespace XSharper.Core
                 ze = new ZipFSEntry(zen, ZipTime);
             }
             else
-            {
-                if (!CheckHidden(di))
-                    return null;
                 ze = new ZipFSEntry(scanDirParams.EntryFactory, di, ZipTime);
-            }
 
-            return ProcessPrepare(new FileOrDirectoryInfo(di), ze, () => prepareDir(di, sourceDirectory, directory, scanDirParams, processFiles));
-        }
-
-        object prepareDir(DirectoryInfo di, string sourceDirectory, string directory, scanDirParams scanDirParams, bool processFiles)
-        {
-            var entries = di.GetFileSystemInfos();
-            bool match = false;
-            for (int i = 0; i < entries.Length; ++i)
+            r=ProcessPrepare(new FileOrDirectoryInfo(di), ze, () =>
             {
-                if (!CheckHidden(entries[i]))
+                scanDirParams.DirEntries[s] = ze;
+                return null;
+            });
+            if (r == null)
+                r = ProcessComplete(new FileOrDirectoryInfo(di), ze, false, skip => 
                 {
-                    entries[i] = null;
-                    continue;
-                }
-
-                FileInfo fi = entries[i] as FileInfo;
-                if (fi != null && processFiles && scanDirParams.NameFilter.IsMatch(fi.FullName))
-                {
-                    match = true;
-                    continue;
-                }
-
-                DirectoryInfo dir = entries[i] as DirectoryInfo;
-                if (Recursive && dir != null && scanDirParams.DirFilter.IsMatch(dir.FullName))
-                {
-                    match = true;
-                    continue;
-                }
-                entries[i] = null;
-            }
-
-            if (sourceDirectory != directory && (match || EmptyDirectories))
-            {
-                ZipEntry entry = scanDirParams.EntryFactory.MakeDirectoryEntry(directory);
-                scanDirParams.Zip.PutNextEntry(entry);
-            }
-            
-            for (int i = 0; i < entries.Length; ++i)
-            {
-                FileInfo fi = entries[i] as FileInfo;
-                DirectoryInfo dir = entries[i] as DirectoryInfo;
-                object r = null;
-                if (fi != null)
-                {
-                    r = ProcessComplete(new FileOrDirectoryInfo(fi), new ZipFSEntry(scanDirParams.EntryFactory, fi, ZipTime), false,
-                                          skip2 =>
-                                              {
-                                                  if (!skip2)
-                                                  {
-                                                      using (Stream stream = Context.OpenStream(fi.FullName))
-                                                      {
-                                                          byte[] buffer=new byte[16384];
-                                                          ZipEntry zentry = scanDirParams.EntryFactory.MakeFileEntry(fi.FullName);
-                                                          scanDirParams.Zip.PutNextEntry(zentry);
-                                                          StreamUtils.Copy(stream, scanDirParams.Zip, buffer, scanDirParams.Progress, ProgressInterval, this, fi.FullName);
-                                                      }
-                                                  }
-                                                  return null;
-                                              });
-                }
-                else if (dir != null)
-                {
-                    r = ProcessComplete(new FileOrDirectoryInfo(dir), new ZipFSEntry(scanDirParams.EntryFactory, dir, ZipTime), false,
-                                          skip2 =>
-                                              {
-                                                  if (!skip2)
-                                                  {
-                                                      return scanDir(sourceDirectory, dir.FullName, scanDirParams);
-                                                  }
-                                                  return null;
-                                              });
-                }
-                if (r != null)
-                    return r;
-            }
-            return null;
+                    scanDirParams.DirEntries[s] = skip?null:ze;
+                    if (!skip)
+                        scanDirParams.Zip.PutNextEntry(isRoot?new ZipEntry(string.Empty):scanDirParams.EntryFactory.MakeDirectoryEntry(s));
+                    return null;
+                });
+            return r;
         }
     }
 }
