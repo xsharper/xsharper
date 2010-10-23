@@ -347,7 +347,7 @@ namespace XSharper.Core
                 r = ProcessComplete(new FileOrDirectoryInfo(di), ze, false, skip => 
                 {
                     scanDirParams.DirEntries[s] = skip?null:ze;
-                    if (!skip)
+                    if (!skip && !isRoot)
                         scanDirParams.Zip.PutNextEntry(isRoot?new ZipEntry(string.Empty):scanDirParams.EntryFactory.MakeDirectoryEntry(s));
                     return null;
                 });
