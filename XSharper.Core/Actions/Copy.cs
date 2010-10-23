@@ -129,7 +129,7 @@ namespace XSharper.Core
             string toExpanded = Context.TransformStr(To, Transform);
 
             var nf = new FileNameOnlyFilter(Syntax, Context.TransformStr(Filter, Transform));
-            var df = new FullPathFilter(Syntax, Context.TransformStr(DirectoryFilter, Transform));
+            var df = new FullPathFilter(Syntax, Context.TransformStr(DirectoryFilter, Transform), BackslashOption.Add);
 
             object ret = null;
             Uri uri;
@@ -185,35 +185,32 @@ namespace XSharper.Core
 
         private object copy(DirectoryInfo rootFrom, DirectoryInfo fromDir, DirectoryInfo toDir,IStringFilter nf, IStringFilter df)
         {
-            bool processFiles = true;
             bool isRoot = (rootFrom == fromDir);
             bool isVisible = (isRoot || CheckHidden(fromDir));
-
-            if (df != null && (!df.IsMatch(fromDir.FullName) || !isVisible))
+            bool processFiles = isVisible;
+            
+            if (processFiles && (df != null && !df.IsMatch(fromDir.FullName)))
             {
-                if (isRoot)
-                    processFiles = false;
-                else
-                {
-                    VerboseMessage("{0} did not pass directory filter", fromDir.FullName);
-                    return null;
-                }
+                processFiles = false;
+                VerboseMessage("{0} did not pass directory filter", fromDir.FullName);
             }
+
             var from = new FileOrDirectoryInfo(fromDir);
             var to = new FileOrDirectoryInfo(toDir);
                 
             return ProcessPrepare(from, to,
                 delegate
                     {
-                        if (EmptyDirectories && !to.Exists)
-                        {
-                            bool created;
-                            object r = createDir(fromDir, toDir, out created);
-                            if (r != null || !created)
-                                return r;
-                        }
-
                         if (processFiles)
+                        {
+                            if (EmptyDirectories && !to.Exists)
+                            {
+                                bool created;
+                                object r = createDir(fromDir, toDir, out created);
+                                if (r != null || !created)
+                                    return r;
+                            }
+
                             foreach (FileInfo f in fromDir.GetFiles())
                             {
                                 FileInfo toFile = new FileInfo(Path.Combine(to.FullName, f.Name));
@@ -221,6 +218,7 @@ namespace XSharper.Core
                                 if (r != null)
                                     return r;
                             }
+                        }
                         if (Recursive)
                         {
                             foreach (DirectoryInfo d in fromDir.GetDirectories())
@@ -369,6 +367,10 @@ namespace XSharper.Core
                                           // Continue with copy
                                           if (toFile.Directory != null && !toFile.Directory.Exists)
                                               toFile.Directory.Create();
+
+                                          if (toFile.Exists && (toFile.Attributes & (FileAttributes.Hidden | FileAttributes.ReadOnly | FileAttributes.System)) != 0)
+                                              toFile.Attributes &= ~(FileAttributes.Hidden | FileAttributes.ReadOnly | FileAttributes.System);
+
                                           if (Move)
                                           {
                                               if (toFile.FullName != f.FullName)

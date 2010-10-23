@@ -18,7 +18,7 @@
 	<setAttr actionId="r" options="multiline|${regex|=null}" />
 		
 	<set count="0" />
-	<dir id="dir" from="${directory}" filter="${filter}" options="files">
+	<dir id="dir" from="${directory}" filter="${filter}">
 		<readText from="${from}" encoding="${encoding|=null}" outTo="original" />
 		<if isSet="regex">
 				<regex id="r" pattern="${search}" replace="${replace}" options="multiline" value="${original}" outTo="changed" />
@@ -51,4 +51,4 @@
 
     
 	
-<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#WithComments"><InclusiveNamespaces PrefixList="Sign" xmlns="http://www.w3.org/2001/10/xml-exc-c14n#" /></CanonicalizationMethod><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>bK8tp+gjacpLDkxr5qr3QszaSDg=</DigestValue></Reference></SignedInfo><SignatureValue>jNJDNpCuHbIHzC/g6nrh8LXJrBzc+FJqRidcMFBXngI+uQJNVQ2zroSwlQQfDHFq+lYzUBUfG3DKfOYIxBkakBLxxBvPyvstB/n9Xz8kjVZaKLfW0632JenSD4yu0wCAOEMq2ZZ/bb7urlbrqBKqhmuqCZx48y9//AXWIzOXMK4=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>oCKTg0Lq8MruXHnFdhgJA8hS98P5rJSABfUFHicssx0mltfqeuGsgzzpk8gLpNPkmJV+ca+pqPILiyNmMfLnTg4w99zH3FRNd6sIoN1veU87OQ5a0Ren2jmlgAAscHy2wwgjxx8YuP/AIfROTtGVaqVT+PhSvl09ywFEQ+0vlnk=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue></KeyInfo></Signature></xsharper>  
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#WithComments"><InclusiveNamespaces PrefixList="Sign" xmlns="http://www.w3.org/2001/10/xml-exc-c14n#" /></CanonicalizationMethod><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>bTxx8V/L/W8F9CYa4LiMonTtssw=</DigestValue></Reference></SignedInfo><SignatureValue>gOkfcP5JPqg4g7LrccwXlTRYaMmQskysNTHTPM+wAz0aA93b70/MTJhKXDT3SxGYqJ985jwU8BDjtymxEr34Ssw8f4zLIK/qHQ/zRSfBWZRzz6AlfHLlJLu2BCQ86/pL1i4QrzspOU51xB43rAJEMMj6K1GGdpB5nEBj7RYFXIY=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>oCKTg0Lq8MruXHnFdhgJA8hS98P5rJSABfUFHicssx0mltfqeuGsgzzpk8gLpNPkmJV+ca+pqPILiyNmMfLnTg4w99zH3FRNd6sIoN1veU87OQ5a0Ren2jmlgAAscHy2wwgjxx8YuP/AIfROTtGVaqVT+PhSvl09ywFEQ+0vlnk=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue></KeyInfo></Signature></xsharper>  

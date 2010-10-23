@@ -30,32 +30,6 @@ using System.Collections.Generic;
 
 namespace XSharper.Core
 {
-    /// What to include in the directory output
-    [Flags]
-    public enum DirOptions
-    {
-        /// Nothing
-        [Description("Nothing")]
-        None=0,
-
-        /// Include directories
-        [Description("Include directories")]
-        Directories=1,
-
-        /// Include files
-        [Description("Include files")]
-        Files=2,
-
-        /// Include everything (currently only directories and files)
-        [Description("Include everything (currently only directories and files)")]
-        All=63,
-
-        /// Default option (files)
-        [Description("Default option (files)")]
-        Default = Files
-    }
-
-
     /// Run a callback block for every matching file or directory
     [XsType("dir", ScriptActionBase.XSharperNamespace)]
     [Description("Run a callback block for every matching file or directory")]
@@ -69,9 +43,13 @@ namespace XSharper.Core
         [Description("true, if directories should be scanned recursively")]
         public bool Recursive { get; set; }
 
-        /// Directory scanning options
-        [Description("Directory scanning options")]
-        public DirOptions Options { get; set; }
+        /// true, if files should be included
+        [Description("true, if directories should be scanned recursively")]
+        public bool Files { get; set; }
+
+        /// true, if directories should be included
+        [Description("true, if directories should be scanned recursively")]
+        public bool Directories { get; set; }
 
         /// <summary>
         /// How to sort the found files and directories. Uses the same letters as CMD.EXE DIR 
@@ -100,7 +78,7 @@ namespace XSharper.Core
         /// Constructor
         public Dir()
         {
-            Options = DirOptions.Default;
+            Files = true;
             Sort = "GN";
             From = ".";
         }
@@ -130,7 +108,7 @@ namespace XSharper.Core
             object ret = null;
             Dirctx ctx = new Dirctx
                              {
-                                 DirFilter = new FullPathFilter(Syntax, Context.TransformStr(DirectoryFilter, Transform)), 
+                                 DirFilter = new FullPathFilter(Syntax, Context.TransformStr(DirectoryFilter, Transform), BackslashOption.Add), 
                                  NameFilter = new FileNameOnlyFilter(Syntax, Context.TransformStr(Filter, Transform)), 
                                  Entries = 0
                              };
@@ -181,7 +159,7 @@ namespace XSharper.Core
                                                 if (di != null)
                                                 {
                                                     r = listEntry(ctx, di);
-                                                    if (Recursive && ctx.DirFilter.IsMatch(di.FullName) && CheckHidden(di))
+                                                    if (Recursive && CheckHidden(di))
                                                         rec.Add(di);
                                                     if (r != null)
                                                         return r;
@@ -272,7 +250,7 @@ namespace XSharper.Core
             
             if (fsi is FileInfo)
             {
-                if ((Options & DirOptions.Files) == 0)
+                if (!Files)
                     return null;
 
                 if (ctx.NameFilter != null && !ctx.NameFilter.IsMatch(fsi.FullName))
@@ -282,7 +260,7 @@ namespace XSharper.Core
             }
             if (fsi is DirectoryInfo)
             {
-                if ((Options & DirOptions.Directories) == 0)
+                if (!Directories)
                     return null;
                 if (ctx.DirFilter != null && !ctx.DirFilter.IsMatch(fsi.FullName))
                 {
@@ -294,7 +272,5 @@ namespace XSharper.Core
             object r = ProcessComplete(new FileOrDirectoryInfo(fsi), null, false, delegate(bool s) {return null; });
             return r;
         }
-        
-
     }
 }
