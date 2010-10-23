@@ -136,6 +136,8 @@ namespace XSharper.Core
                         if (isDos(entry) && (((FileAttributes) entry.ExternalFileAttributes) & (FileAttributes.Hidden)) != 0)
                             continue;
                     }
+                    if (string.IsNullOrEmpty(entry.Name))
+                        continue;
                     var n = new ZipFSEntry(entry, ZipTime);
                     if ((entry.IsFile && df.IsMatch(Path.GetDirectoryName(n.FullName)) && nf.IsMatch(n.Name)) ||
                         (entry.IsDirectory && df.IsMatch(n.FullName)))
