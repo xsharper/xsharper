@@ -211,7 +211,8 @@ namespace XSharper.Core
             }
             return null;
         }
-        
+
+        /// Open file for reading
         public Stream OpenStream(string fileName)
         {
             return OpenStream(fileName, FileMode.Open, true);
@@ -353,13 +354,13 @@ namespace XSharper.Core
             }
         }
 
-        /// Write the given byte array to a file, using <see cref="OpenStream"/> to open the file
+        /// Write the given byte array to a file, using <see cref="OpenStream(string, System.IO.FileMode, bool)"/> to open the file
         public void WriteBytes(string fileName, byte[] data)
         {
             WriteBytes(fileName, data, 0,true);
         }
 
-        /// Write the given byte array to a file, starting from the specified file offset, using <see cref="OpenStream"/> to open the file
+        /// Write the given byte array to a file, starting from the specified file offset, using <see cref="OpenStream(string, System.IO.FileMode, bool)"/> to open the file
         public void WriteBytes(string fileName, byte[] data, long fileOffset, bool overwrite)
         {
             using (Stream fs = OpenStream(fileName, overwrite ? FileMode.Create : FileMode.OpenOrCreate, false))

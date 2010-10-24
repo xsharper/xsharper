@@ -29,8 +29,8 @@ using System.IO;
 
 namespace XSharper.Core
 {
-    // Fake file info for URIs
-    public class UriFileInfo : IFileSystemInfo
+    /// Fake file info for URIs
+    internal class UriFileInfo : IFileSystemInfo
     {
         Uri _uri;
         DateTime _time,_timeUtc;
@@ -242,6 +242,8 @@ namespace XSharper.Core
                        if (!skip)
                        {
                            toDir.Create();
+                           toDir.Attributes = fromDir.Attributes;
+                           toDir.LastWriteTimeUtc = fromDir.LastWriteTimeUtc;
                            createdTmp = true;
                        }
                        return null;

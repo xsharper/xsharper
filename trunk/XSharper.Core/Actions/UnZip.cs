@@ -268,7 +268,7 @@ namespace XSharper.Core
         {
             DateTime? entryTimeUtc = getEntryTimeUtc(entry);
             if (entryTimeUtc != null)
-                fi.LastWriteTimeUtc = fi.LastAccessTimeUtc = fi.CreationTimeUtc = entryTimeUtc.Value;
+                fi.LastWriteTimeUtc = entryTimeUtc.Value;
             if (isDos(entry) && (entry.ExternalFileAttributes != -1))
             {
                 const FileAttributes mask = (FileAttributes.Archive | FileAttributes.Normal | FileAttributes.ReadOnly | FileAttributes.Hidden | FileAttributes.System);

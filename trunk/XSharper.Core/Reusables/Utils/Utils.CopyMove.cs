@@ -153,58 +153,59 @@ namespace XSharper.Core
             }
 
             bool cancel = false;
-            bool ret;
-            try
+
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
-
-                if (move)
+                try
                 {
-                    NativeMethods.MoveFileExFlags fm = NativeMethods.MoveFileExFlags.MOVEFILE_COPY_ALLOWED;
-                    if (overwrite)
-                        fm |= NativeMethods.MoveFileExFlags.MOVEFILE_REPLACE_EXISTING;
-
-                    ret = NativeMethods.MoveFileWithProgress(source, destination, cpr, IntPtr.Zero, (int)fm);
-                }
-                else
-                {
-                    NativeMethods.CopyFileExFlags f = NativeMethods.CopyFileExFlags.COPY_FILE_ALLOW_DECRYPTED_DESTINATION;
-                    if (!overwrite)
-                        f |= NativeMethods.CopyFileExFlags.COPY_FILE_FAIL_IF_EXISTS;
-
-                    ret = NativeMethods.CopyFileEx(source, destination, cpr, IntPtr.Zero, ref cancel, (int)f);
-
-                }
-            }
-            catch (Exception e)
-            {
-                if (e is MissingMethodException || e is SecurityException)
-                {
-                    // The old fashioned way
-                    if (source != destination)
+                    bool ret = true;
+                    if (move)
                     {
-                        if (move)
-                        {
-                            if (overwrite)
-                                File.Delete(destination);
-                            File.Move(source, destination);
-                        }
-                        else
-                            File.Copy(source, destination, overwrite);
-                        return;
-                    }
-                }
-                Utils.Rethrow(e);
-                return; // never happens
-            }
-            if (progData != null && progData.Exception != null)
-                Utils.Rethrow( progData.Exception);
+                        NativeMethods.MoveFileExFlags fm = NativeMethods.MoveFileExFlags.MOVEFILE_COPY_ALLOWED;
+                        if (overwrite)
+                            fm |= NativeMethods.MoveFileExFlags.MOVEFILE_REPLACE_EXISTING;
 
-            if (!ret)
+                        ret = NativeMethods.MoveFileWithProgress(source, destination, cpr, IntPtr.Zero, (int)fm);
+                    }
+                    else
+                    {
+                        NativeMethods.CopyFileExFlags f = NativeMethods.CopyFileExFlags.COPY_FILE_ALLOW_DECRYPTED_DESTINATION;
+                        if (!overwrite)
+                            f |= NativeMethods.CopyFileExFlags.COPY_FILE_FAIL_IF_EXISTS;
+
+                        ret = NativeMethods.CopyFileEx(source, destination, cpr, IntPtr.Zero, ref cancel, (int)f);
+                    }
+                    if (progData != null && progData.Exception != null)
+                        Utils.Rethrow(progData.Exception);
+
+                    if (!ret)
+                    {
+                        var w = new Win32Exception();
+                        if (w.NativeErrorCode == 2)
+                            throw new FileNotFoundException(w.Message, source);
+                        throw new IOException(w.Message, w);
+                    }
+                    return;
+                }
+                catch (MissingMethodException) { }
+                catch (SecurityException) { }
+            }
+            
+            // The old fashioned way
+            if (source != destination)
             {
-                var w = new Win32Exception();
-                if (w.NativeErrorCode == 2)
-                    throw new FileNotFoundException(w.Message, source);
-                throw new IOException(w.Message, w);
+                if (overwrite)
+                {
+                    var fi = new FileInfo(destination);
+                    if (fi.Exists && (fi.Attributes & (FileAttributes.Hidden | FileAttributes.ReadOnly | FileAttributes.System))!=0)
+                        fi.Attributes&=~(FileAttributes.Hidden | FileAttributes.ReadOnly | FileAttributes.System);
+                    fi.Delete();
+                }
+                if (move)
+                    File.Move(source, destination);
+                else
+                    File.Copy(source, destination, overwrite);
+                return;
             }
         }
 
