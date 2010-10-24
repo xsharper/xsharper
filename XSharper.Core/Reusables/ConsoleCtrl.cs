@@ -87,14 +87,17 @@ namespace XSharper.Core
         public ConsoleCtrl()
         {
             // save this to a private var so the GC doesn't collect it...
-            try
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
-                eventHandler = new NativeMethods.ConsoleControlEventHandler(handler);
-                NativeMethods.SetConsoleCtrlHandler(eventHandler, true);
-            }
-            catch (System.EntryPointNotFoundException)
-            {
-                eventHandler = null;
+                try
+                {
+                    eventHandler = new NativeMethods.ConsoleControlEventHandler(handler);
+                    NativeMethods.SetConsoleCtrlHandler(eventHandler, true);
+                }
+                catch (System.EntryPointNotFoundException)
+                {
+                    eventHandler = null;
+                }
             }
         }
 

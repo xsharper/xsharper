@@ -169,7 +169,6 @@ namespace XSharper.Core
                 {
                 }
             }
-
         }
 
         class RegW64Helper : IDisposable
@@ -220,6 +219,9 @@ namespace XSharper.Core
                     if (Environment.OSVersion.Version.Major > 5)
                         _extraFlags = NativeMethods.RegSAM.WOW64_64Key;
                 }
+
+                if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+                    _extraFlags = null;
 
                 switch (s)
                 {
@@ -281,20 +283,23 @@ namespace XSharper.Core
             public RegistryKey Create(RegistryKeyPermissionCheck permissionCheck)
             {
                 if (_extraFlags.HasValue)
-                {
-                    IntPtr hTargetKey;
-                    NativeMethods.RegSAM flags;
-                    UIntPtr x = getBaseHKey(true, out flags);
-
-                    NativeMethods.RegResult dwDisp;
-
-                    int l = NativeMethods.RegCreateKeyEx(x, KeyName, 0, null, NativeMethods.RegOption.NonVolatile, flags, IntPtr.Zero, out hTargetKey, out dwDisp);
-                    if (l == 0)
-                        return fromHandle(hTargetKey, KeyName, true);
-                    checkSecurityErrorCode(l,KeyName);
-                    throw new Win32Exception(l);
-                }
+                    return createNative(permissionCheck);
                 return _baseKey.CreateSubKey(KeyName, permissionCheck);
+            }
+
+            private RegistryKey createNative(RegistryKeyPermissionCheck permissionCheck)
+            {
+                IntPtr hTargetKey;
+                NativeMethods.RegSAM flags;
+                UIntPtr x = getBaseHKey(true, out flags);
+
+                NativeMethods.RegResult dwDisp;
+
+                int l = NativeMethods.RegCreateKeyEx(x, KeyName, 0, null, NativeMethods.RegOption.NonVolatile, flags, IntPtr.Zero, out hTargetKey, out dwDisp);
+                if (l == 0)
+                    return fromHandle(hTargetKey, KeyName, true);
+                checkSecurityErrorCode(l, KeyName);
+                throw new Win32Exception(l);
             }
 
             private static void checkSecurityErrorCode(int l,string name)
