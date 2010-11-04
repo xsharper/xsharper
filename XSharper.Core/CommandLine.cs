@@ -86,7 +86,9 @@ namespace XSharper.Core
         public object Default { get; set; }
 
         /// Convert the passed argument to this type
-        [Description("typeName")]
+        [Description("Convert the passed argument to this type")]
+        [XsAttribute("type")]
+        [XsAttribute("typeName")]
         public string TypeName { get; set; }
         
         /// Ignore any switches after this one
