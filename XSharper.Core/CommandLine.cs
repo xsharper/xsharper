@@ -90,6 +90,10 @@ namespace XSharper.Core
         [XsAttribute("type")]
         [XsAttribute("typeName")]
         public string TypeName { get; set; }
+
+        /// Hint
+        [Description("Hint")]
+        public string Hint { get; set; }
         
         /// Ignore any switches after this one
         [Description("Ignore any switches after this one")]
