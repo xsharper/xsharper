@@ -248,7 +248,7 @@ namespace XSharper
                     };
                 if (context.IsSet(xs.genexe) || context.IsSet(xs.genwinexe))
                 {
-                    if (script.RequireAdmin)
+                    if (script.RequireAdmin!=RequireAdminMode.User)
                     {
                         copt.Compiled = AppDomainLoader.TryLoadResourceStream(@"Manifests.requireAdministrator.res").ToArray();
                         copt.Manifest = AppDomainLoader.TryLoadResourceStream(@"Manifests.requireAdministrator.manifest").ToArray();

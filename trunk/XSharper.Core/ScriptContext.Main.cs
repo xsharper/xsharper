@@ -290,7 +290,9 @@ namespace XSharper.Core
                if (!location.EndsWith(".xsh",StringComparison.OrdinalIgnoreCase))
                    location += ".xsh";
                origLocation = location;
+#if !DEBUG
                validateSignature = true;
+#endif
            }
 
            string sLoc = SearchPath(location, ".;"+ScriptPath);
@@ -1219,7 +1221,8 @@ namespace XSharper.Core
 
                 if ((rules & TransformRules.ExpandAfterTrim) == TransformRules.ExpandAfterTrim)
                 {
-                    s = Utils.TransformStr(Utils.To<string>(s), rules & TransformRules.TrimMask);
+                    if (s!=null)
+                        s = Utils.TransformStr(Utils.To<string>(s), rules & TransformRules.TrimMask);
                     rules = (rules & ~TransformRules.ExpandAfterTrim & ~TransformRules.TrimMask) | TransformRules.Expand;
                 }
                 if ((rules & TransformRules.Expand) != 0)
@@ -1229,7 +1232,10 @@ namespace XSharper.Core
                 if ((rules & TransformRules.ExpandTrimOnly) == TransformRules.ExpandTrimOnly)
                     rules &= ~TransformRules.TrimMask;
                 if ((rules & ~TransformRules.ExpandMask) != TransformRules.None)
-                    s = Utils.TransformStr(Utils.To<string>(s), rules & ~TransformRules.Expand);
+                {
+                    if (s != null)
+                        s = Utils.TransformStr(Utils.To<string>(s), rules & ~TransformRules.Expand);
+                }
             }
             return s;
         }

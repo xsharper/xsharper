@@ -96,7 +96,7 @@ public class ExecutorForm : Form
         {
             if (string.IsNullOrEmpty(p.Var))
             {
-                if (cat != null && !string.IsNullOrEmpty(p.Value))
+                if (!string.IsNullOrEmpty(p.Value))
                 {
                     cat = p.Value;
                     catNo++;
@@ -1023,4 +1023,4 @@ public class CustomProperty
 	
 ?>
 </sub>
-<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#WithComments"><InclusiveNamespaces PrefixList="Sign" xmlns="http://www.w3.org/2001/10/xml-exc-c14n#" /></CanonicalizationMethod><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>CeDFdE6R9HjESQMzXrB54y+fILo=</DigestValue></Reference></SignedInfo><SignatureValue>b88hntUDUb/7Tsdul43YQa5EXHHrydyTDFoELbg9kki9qbjZWJn+GwQh6LL8+/hhE4Nr9EpPwK2zQwf+A21r3cFHjaMGvre/hesSieKaWnDiP6Upy6unyQsQ+HlUGC8pewFyC+Pj3Tv2HThDtq4uKACuuSmerUx7FAH9/7qCBDs=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>oCKTg0Lq8MruXHnFdhgJA8hS98P5rJSABfUFHicssx0mltfqeuGsgzzpk8gLpNPkmJV+ca+pqPILiyNmMfLnTg4w99zH3FRNd6sIoN1veU87OQ5a0Ren2jmlgAAscHy2wwgjxx8YuP/AIfROTtGVaqVT+PhSvl09ywFEQ+0vlnk=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue></KeyInfo></Signature></xsharper>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#WithComments"><InclusiveNamespaces PrefixList="Sign" xmlns="http://www.w3.org/2001/10/xml-exc-c14n#" /></CanonicalizationMethod><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>vOPUv8/oDisMjVrnXomE3OTedTQ=</DigestValue></Reference></SignedInfo><SignatureValue>PIv+TAHNpvZWSFUbp4ZG8AdRqKh6X6VyznnRcqDRXUL+jNKPcODA5lqDQsZdLVg+7XTgypJ7dUF68iCvsfne05dHe85SJGaDJslYDksP9pXO+0QyaujRbtX8QmkYfSKgRP4k8php5Cn2Woy7JxIOCoyp05930YHlcR+D50U48Nk=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>oCKTg0Lq8MruXHnFdhgJA8hS98P5rJSABfUFHicssx0mltfqeuGsgzzpk8gLpNPkmJV+ca+pqPILiyNmMfLnTg4w99zH3FRNd6sIoN1veU87OQ5a0Ren2jmlgAAscHy2wwgjxx8YuP/AIfROTtGVaqVT+PhSvl09ywFEQ+0vlnk=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue></KeyInfo></Signature></xsharper>

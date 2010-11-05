@@ -171,7 +171,7 @@ namespace XSharper
                     
                     AppDomainLoader.progress("MainWithContext: Processing options");
                     // Process the remaining options
-                    context.Compiler.AddRequireAdmin(context.GetBool(xs.requireAdmin, false));
+                    context.Compiler.AddRequireAdmin(Utils.To<RequireAdminMode>(context.GetStr(xs.requireAdmin, RequireAdminMode.User.ToString())));
                     if (context.IsSet(xs.codeout))
                         context.CodeOutputDirectory = Path.GetFullPath(context.GetString(xs.codeout));
                     if (context.IsSet(xs.genconfig) || context.IsSet(xs.gensample))
@@ -222,10 +222,12 @@ namespace XSharper
                             script.Items.Insert(n++, list);
 
                         AppDomainLoader.BaseDirectory = script.DirectoryName;
-                        if (context.Compiler.RequireAdmin &&
-                            (!context.IsAdministrator || context.GetBool(xs.testElevation, false)) &&
-                            !isCodeGeneration(context))
-                            return restartAsAdmin(context, args);
+
+                        RequireAdminMode mode = context.Compiler.RequireAdmin;
+                        if ((!context.IsAdministrator || context.GetBool(xs.testElevation, false)) && !isCodeGeneration(context))
+                        {
+                            return restartAsAdmin(context, args, mode==RequireAdminMode.Hidden && !(context.GetBool(xs.testElevation, false)));
+                        }
 
                         AppDomainLoader.progress("MainWithContext: Before script initialization");
                         if (isCodeGeneration(context))
@@ -356,7 +358,7 @@ namespace XSharper
             
         }
 
-        private static int restartAsAdmin(ScriptContext context, string[] args)
+        private static int restartAsAdmin(ScriptContext context, string[] args, bool hidden)
         {
             context.WriteLine(OutputType.Info, "** Administrative privileges are required to run this script.\n** Please confirm to continue.");
             if (context.IsSet(xs.testElevation))
@@ -385,8 +387,7 @@ namespace XSharper
                             {
                                 ScriptContextScope.DefaultContext = null;
                             }
-                        },
-                    !context.GetBool(xs.testElevation, false));
+                        }, hidden );
             if (n== -1)
                 throw new ScriptRuntimeException("An error occured while granting administrative privileges.");
             if (n != 0)
