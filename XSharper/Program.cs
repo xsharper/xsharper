@@ -172,6 +172,7 @@ namespace XSharper
                     AppDomainLoader.progress("MainWithContext: Processing options");
                     // Process the remaining options
                     context.Compiler.AddRequireAdmin(Utils.To<RequireAdminMode>(context.GetStr(xs.requireAdmin, RequireAdminMode.User.ToString())));
+                    
                     if (context.IsSet(xs.codeout))
                         context.CodeOutputDirectory = Path.GetFullPath(context.GetString(xs.codeout));
                     if (context.IsSet(xs.genconfig) || context.IsSet(xs.gensample))
@@ -224,7 +225,7 @@ namespace XSharper
                         AppDomainLoader.BaseDirectory = script.DirectoryName;
 
                         RequireAdminMode mode = context.Compiler.RequireAdmin;
-                        if ((!context.IsAdministrator || context.GetBool(xs.testElevation, false)) && !isCodeGeneration(context))
+                        if ((!context.IsAdministrator || context.GetBool(xs.testElevation, false)) && !isCodeGeneration(context) && mode!=RequireAdminMode.User)
                         {
                             return restartAsAdmin(context, args, mode==RequireAdminMode.Hidden && !(context.GetBool(xs.testElevation, false)));
                         }
