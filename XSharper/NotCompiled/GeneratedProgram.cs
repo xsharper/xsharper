@@ -139,10 +139,10 @@ namespace ${GENERATED_NAMESPACE}
                     }
                     else
                     {
-                        context.Compiler.AddRequireAdmin(context.GetBool(xs.requireAdmin, false));
+                        context.Compiler.AddRequireAdmin(XS.Utils.To<XS.RequireAdminMode>(context.GetStr(xs.requireAdmin, XS.RequireAdminMode.User.ToString())));
                         context.Compiler.AddRequireAdmin(s.RequireAdmin);
-                        if (context.Compiler.RequireAdmin && !context.IsAdministrator)
-                            return restartAsAdmin(context, args);
+                        if (context.Compiler.RequireAdmin!=XS.RequireAdminMode.User && !context.IsAdministrator)
+                            return restartAsAdmin(context, args, context.Compiler.RequireAdmin==XS.RequireAdminMode.Hidden);
 
                         AppDomainLoader.progress("MainWithContext: Before initialization --------------------"); 
                         context.Initialize(s);
@@ -222,7 +222,7 @@ namespace ${GENERATED_NAMESPACE}
             if (context.GetBool(xs.nocolors, false))
                 cout.UseColors = false;
         }
-        private static int restartAsAdmin(XS.ScriptContext context  , string[] args)
+        private static int restartAsAdmin(XS.ScriptContext context  , string[] args, bool hidden)
         {
             context.WriteLine(XS.OutputType.Info, "** Administrative privileges are required to run this script.\n** Please confirm to continue.");
             
@@ -238,7 +238,7 @@ namespace ${GENERATED_NAMESPACE}
                         {
                             XS.ScriptContextScope.DefaultContext = null;
                         }
-                    },true);
+                    },hidden);
             if (n== -1)
                 throw new XS.ScriptRuntimeException("An error occured while granting administrative privileges.");
             if (n != 0)

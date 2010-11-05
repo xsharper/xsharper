@@ -75,7 +75,10 @@ namespace XSharper.Core
             {
                 using (var rk=rn.Create(RegistryKeyPermissionCheck.Default))
                 {
-                    rk.SetValue(rn.ValueName,value,kind);    
+                    if (value == null)
+                        rk.DeleteValue(rn.ValueName,false);
+                    else
+                        rk.SetValue(rn.ValueName,value,kind);    
                 }
                 
             }
@@ -220,7 +223,7 @@ namespace XSharper.Core
                         _extraFlags = NativeMethods.RegSAM.WOW64_64Key;
                 }
 
-                if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+                if (Environment.OSVersion.Platform != PlatformID.Win32NT)
                     _extraFlags = null;
 
                 switch (s)

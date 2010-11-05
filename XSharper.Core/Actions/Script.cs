@@ -32,6 +32,24 @@ using System.Reflection;
 
 namespace XSharper.Core
 {
+
+    /// Whether script requires admin mode
+    [Description("Whether script requires admin mode")]
+    public enum RequireAdminMode
+    {
+        /// User privileges are enough
+        [Description("User privileges are enough")]
+        User = 0,
+
+        /// Run an elevated process hidden, reusing the console
+        [Description("Run an elevated process hidden, reusing the console")]
+        Hidden = 1,
+
+        /// Display an elevated process window normally, still reusing the console 
+        [Description("Display an elevated process window normally, still reusing the console ")]
+        Admin = 2
+    }
+
     /// XSharper script
     [XsType("xsharper", ScriptActionBase.XSharperNamespace)]
     [XsType("script", ScriptActionBase.XSharperNamespace)]
@@ -52,9 +70,9 @@ namespace XSharper.Core
         [Description(".NET version required to run this script")]
         public string NetVersion { get; set; }
 
-        /// true if administrative privileges must be requested before running the script
-        [Description("true if administrative privileges must be requested before running the script")]
-        public bool RequireAdmin { get; set; }
+        /// Request administrative privileges before running the script
+        [Description("Request administrative privileges before running the script")]
+        public RequireAdminMode RequireAdmin { get; set; }
 
         /// true if Ctrl+C should be ignored during script execution, and treated as input instead
         [Description("true if Ctrl+C should be ignored during script execution, and treated as input instead")]

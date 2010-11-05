@@ -127,6 +127,8 @@ namespace XSharper.Core
         /// Write test to verbose output
         public void WriteVerbose(string text) { }
     }
+
+
     /// <summary>
     /// Class that handles code requirements and does C# module compilation
     /// </summary>
@@ -214,7 +216,7 @@ namespace XSharper.Core
         }
 
         /// True, if administrative privileges are required for script execution
-        public bool RequireAdmin { get; private set; }
+        public RequireAdminMode RequireAdmin { get; private set; }
 
         /// Get default .NET version
         public Version DefaultNETVersion
@@ -270,10 +272,10 @@ namespace XSharper.Core
         }
 
         /// Make note that administator privileges are required
-        public void AddRequireAdmin(bool elevate)
+        public void AddRequireAdmin(RequireAdminMode mode)
         {
-            if (elevate)
-                RequireAdmin = true;
+            if (mode!=RequireAdminMode.User)
+                RequireAdmin = mode;
         }
 
         /// Add minimal .NET version request

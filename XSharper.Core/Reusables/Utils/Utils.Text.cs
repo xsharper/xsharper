@@ -400,7 +400,7 @@ namespace XSharper.Core
         public static string TransformStr(string arguments, TransformRules trim)
         {
             if (arguments == null)
-                return String.Empty;
+                return null;
             if ((trim & TransformRules.Expand) != 0)
                 throw new ArgumentOutOfRangeException("trim", "Expand flag cannot be specified");
             string ret;
