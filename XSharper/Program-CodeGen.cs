@@ -372,7 +372,7 @@ namespace XSharper
                     for (int i = 1; i < args.Length;++i)
                         filteredArgs.Add(args[i]);
                 }
-                if (context.IsSet(xs.execRestD) && s[0] == '?')
+                if (context.IsSet(xs.execRestD) && s.Length > 0 && s[0] == '?')
                     s = s.Substring(1);
                 if (context.IsSet(xs.execRestD))
                     return execGenerator(context, s, "c.Dump(", ")");
