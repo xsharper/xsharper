@@ -30,9 +30,43 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
+using System.ComponentModel;
 
 namespace XSharper.Core
 {
+    /// Output type
+    public enum OutputType
+    {
+        /// Null stream
+        [Description("Null stream")]
+        Nul,
+
+        /// Null stream
+        [Description("Null stream")]
+        Null = Nul,
+
+        /// Debug output
+        [Description("Debug output")]
+        Debug,
+
+        /// Information output
+        [Description("Information output")]
+        Info,
+
+        /// Normal output
+        [Description("Normal output")]
+        Out,
+
+        /// Normal output in bold
+        [Description("Normal output in bold")]
+        Bold,
+
+        /// Error output
+        [Description("Error output")]
+        Error,
+    }
+
+
     #region Console with color output
 
 

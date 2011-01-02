@@ -31,6 +31,7 @@ using System.Net.Cache;
 using System.Reflection;
 using System.Text;
 using System.Threading;
+using System.Security.AccessControl;
 
 namespace XSharper.Core
 {
@@ -498,7 +499,27 @@ namespace XSharper.Core
                     {
                         if (File.Exists(toExpanded))
                             File.Delete(toExpanded);
-                        Context.MoveFile(tmp, toExpanded, true);
+                        
+                        // Copy manually, as normal File.Move is likely to copy ACL from text directory as well
+                        byte[] buf = new byte[65536];
+                        try
+                        {
+                            using (var from = File.OpenRead(tmp))
+                            using (var to = File.OpenRead(toExpanded))
+                            {
+                                int n;
+                                while ((n = from.Read(buf, 0, buf.Length)) != 0)
+                                {
+                                    Context.CheckAbort();
+                                    to.Write(buf, 0, n);
+                                }
+                            }
+                            File.Delete(tmp);
+                        }
+                        catch
+                        {
+                            File.Delete(toExpanded);
+                        }
                     }
                 }
                 catch (Exception e)
