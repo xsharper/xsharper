@@ -36,38 +36,6 @@ using System.Xml;
 
 namespace XSharper.Core
 {
-    /// Output type
-    public enum OutputType
-    {
-        /// Null stream
-        [Description("Null stream")]
-        Nul,
-
-        /// Null stream
-        [Description("Null stream")]
-        Null = Nul,
-
-        /// Debug output
-        [Description("Debug output")]
-        Debug,
-
-        /// Information output
-        [Description("Information output")]
-        Info,
-
-        /// Normal output
-        [Description("Normal output")]
-        Out,
-
-        /// Normal output in bold
-        [Description("Normal output in bold")]
-        Bold,
-
-        /// Error output
-        [Description("Error output")]
-        Error,
-    }
-
     /// Script signature verification status
     public enum ScriptSignatureStatus
     {
