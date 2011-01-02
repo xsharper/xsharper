@@ -501,11 +501,12 @@ namespace XSharper.Core
                             File.Delete(toExpanded);
                         
                         // Copy manually, as normal File.Move is likely to copy ACL from text directory as well
+                        VerboseMessage("Copying file '{0}' to '{1}'", tmp,toExpanded);
                         byte[] buf = new byte[65536];
                         try
                         {
                             using (var from = File.OpenRead(tmp))
-                            using (var to = File.OpenRead(toExpanded))
+                            using (var to = File.OpenWrite(toExpanded))
                             {
                                 int n;
                                 while ((n = from.Read(buf, 0, buf.Length)) != 0)
@@ -514,10 +515,12 @@ namespace XSharper.Core
                                     to.Write(buf, 0, n);
                                 }
                             }
+                            VerboseMessage("Copying completed. Deleting '{0}'", tmp);
                             File.Delete(tmp);
                         }
                         catch
                         {
+                            VerboseMessage("Copying failed. Deleting '{0}'", toExpanded);
                             File.Delete(toExpanded);
                         }
                     }
