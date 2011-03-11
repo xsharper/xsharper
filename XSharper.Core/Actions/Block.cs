@@ -119,8 +119,15 @@ namespace XSharper.Core
             }
             finally
             {
-                // Execute final portion
-                Context.Execute(Finally);
+                try
+                {
+                    Context.CheckAbort();
+                }
+                finally
+                {
+                    // Execute final portion
+                    Context.Execute(Finally);
+                }
             }
             return ret;
         }
