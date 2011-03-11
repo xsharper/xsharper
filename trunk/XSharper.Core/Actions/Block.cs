@@ -115,7 +115,14 @@ namespace XSharper.Core
             }
             catch (Exception ex)
             {
-                ret = OnError(ex);
+                try
+                {
+                    Context.CheckAbort();
+                }
+                finally
+                {
+                    ret = OnError(ex);
+                }
             }
             finally
             {
