@@ -143,12 +143,16 @@ public class ExecutorForm : Form
             bool regex = false;
             if (!string.IsNullOrEmpty(p.Pattern) && p.Pattern.StartsWith("^(") && p.Pattern.EndsWith(")$"))
             {
-                regex = true;
-                foreach (string s in p.Pattern.Substring(2, p.Pattern.Length - 4).Split('|'))
-                {
-                    string un = System.Text.RegularExpressions.Regex.Unescape(s);
-                    possV.Add(un);
-                }
+                regex = true;                
+				foreach (string s in p.Pattern.Substring(2, p.Pattern.Length - 4).Split('|'))
+					if (System.Text.RegularExpressions.Regex.IsMatch(s,"[^a-zA-Z0-9_]"))
+						regex=false;
+				if (regex)
+	                foreach (string s in p.Pattern.Substring(2, p.Pattern.Length - 4).Split('|'))
+    	            {
+        	            string un = System.Text.RegularExpressions.Regex.Unescape(s);
+            	        possV.Add(un);
+	                }
             }
             if (ret.DefaultValue != null)
                 possV.Add(XS.Utils.To<string>(ret.DefaultValue));
@@ -1023,4 +1027,4 @@ public class CustomProperty
 	
 ?>
 </sub>
-<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#WithComments"><InclusiveNamespaces PrefixList="Sign" xmlns="http://www.w3.org/2001/10/xml-exc-c14n#" /></CanonicalizationMethod><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>vOPUv8/oDisMjVrnXomE3OTedTQ=</DigestValue></Reference></SignedInfo><SignatureValue>PIv+TAHNpvZWSFUbp4ZG8AdRqKh6X6VyznnRcqDRXUL+jNKPcODA5lqDQsZdLVg+7XTgypJ7dUF68iCvsfne05dHe85SJGaDJslYDksP9pXO+0QyaujRbtX8QmkYfSKgRP4k8php5Cn2Woy7JxIOCoyp05930YHlcR+D50U48Nk=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>oCKTg0Lq8MruXHnFdhgJA8hS98P5rJSABfUFHicssx0mltfqeuGsgzzpk8gLpNPkmJV+ca+pqPILiyNmMfLnTg4w99zH3FRNd6sIoN1veU87OQ5a0Ren2jmlgAAscHy2wwgjxx8YuP/AIfROTtGVaqVT+PhSvl09ywFEQ+0vlnk=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue></KeyInfo></Signature></xsharper>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#WithComments"><InclusiveNamespaces PrefixList="Sign" xmlns="http://www.w3.org/2001/10/xml-exc-c14n#" /></CanonicalizationMethod><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>H0C+zGdwDHHM2VZlMS8p5zTz330=</DigestValue></Reference></SignedInfo><SignatureValue>OlfF/ZFNHlOcFjTmrsU57tw0AR0vXw0J8xL9DtxBr29YZ05npeHPtHRdGeezL5q2xLRwZaDJDXgY2Oyv6x3ZRi0f0qnYSOVBJLhf/iMVV9aYStOQluL3+NTnbro+Tdqevy8DqojKOJFE7SS4FBn53+gfQg1mQ1ksD2ImhY7EBV8=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>oCKTg0Lq8MruXHnFdhgJA8hS98P5rJSABfUFHicssx0mltfqeuGsgzzpk8gLpNPkmJV+ca+pqPILiyNmMfLnTg4w99zH3FRNd6sIoN1veU87OQ5a0Ren2jmlgAAscHy2wwgjxx8YuP/AIfROTtGVaqVT+PhSvl09ywFEQ+0vlnk=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue></KeyInfo></Signature></xsharper>

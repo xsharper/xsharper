@@ -711,7 +711,14 @@ namespace XSharper.Core
                         tokensRead.Push(Pop());
                         var n = Peek();
                         if (n == null || n.TokenType != QType.SquareClose)
+                        {
+                            if (tokensRead.Count > 1)
+                            {
+                                Push(tokensRead.Pop());
+                                break;
+                            }
                             return null;
+                        }
                         tokensRead.Push(Pop());
                     }
                     
