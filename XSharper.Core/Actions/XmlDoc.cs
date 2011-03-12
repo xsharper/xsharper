@@ -78,6 +78,28 @@ namespace XSharper.Core
             RsUseAttributes = true;
         }
 
+        /// Create from document
+        public XmlDoc(XmlDocument doc) : this()
+        {
+            _xmlDocument = doc;
+        }
+
+        /// Create from stream
+        public XmlDoc(Stream stream)
+            : this()
+        {
+            _xmlDocument = new XmlDocument();
+            _xmlDocument.Load(stream);
+        }
+
+        /// Create from text xml
+        public XmlDoc(string xml)
+            : this()
+        {
+            _xmlDocument = new XmlDocument();
+            _xmlDocument.LoadXml(xml);
+        }
+
         /// <summary>
         /// Write element text
         /// </summary>
@@ -367,6 +389,20 @@ namespace XSharper.Core
             From = null;
             Value = null;
             RowsetId = null;
+        }
+        /// Replace internal XML document with another document
+        public void ReplaceDocument(Stream stream)
+        {
+            var x= new XmlDocument();
+            x.Load(stream);
+            ReplaceDocument(x);
+        }
+        /// Replace internal XML document with another document
+        public void ReplaceDocument(string xml)
+        {
+            var x = new XmlDocument();
+            x.LoadXml(xml);
+            ReplaceDocument(x);
         }
     }
 }
