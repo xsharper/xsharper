@@ -63,7 +63,7 @@ namespace XSharper.Core
             if (!base.ProcessAttribute(context, attribute, value, previouslyProcessed))
             {
                 if (Name != null)
-                    throw new ParsingException("Only a single variable may be set by set command.");
+                    throw new ParsingException("Only a single variable may be set by set action.");
                 Name = attribute;
                 Value = value;
                 if (previouslyProcessed!=null && !string.IsNullOrEmpty(attribute))

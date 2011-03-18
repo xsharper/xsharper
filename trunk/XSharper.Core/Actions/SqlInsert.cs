@@ -133,7 +133,7 @@ namespace XSharper.Core
         public string Timeout { get; set; }
 
         /// Where to output SQL statements. Default is SQL server, but can output to console instead
-        [Description("/// Where to output SQL statements. Default is SQL server, but can output to console instead")]
+        [Description("Where to output SQL statements. Default is SQL server, but can output to console instead")]
         public string SqlTo { get; set; }
 
         /// Where to output SQL messages (like PRINT). Default: ^info
