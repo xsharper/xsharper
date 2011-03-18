@@ -69,6 +69,7 @@
     <Compile Include="Actions\If.cs" />
     <Compile Include="Actions\Row.cs" />
     <Compile Include="Actions\Transaction.cs" />
+    <Compile Include="Actions\Using.cs" />
     <Compile Include="Actions\While.cs" />
     <Compile Include="Reusables\ConcatStream.cs" />
     <Compile Include="Reusables\ConsoleWithColors.cs" />

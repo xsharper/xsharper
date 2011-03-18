@@ -287,18 +287,19 @@ namespace XSharper.Core
         }
 
 
-        /// Convert string timespan (can be in milliseconds, or 00:00:00.33) to a TimeSpan.
+        /// Convert string timespan (can be in milliseconds, or 00:00:00.33, or P120D) to a TimeSpan.
         static public TimeSpan? ToTimeSpan(string timeout)
         {
             TimeSpan ts;
             double t;
             if (String.IsNullOrEmpty(timeout))
                 return null;
+            if (timeout[0] == 'P' || (timeout[0] == '-' && timeout.Length > 2 && timeout[1] == 'P'))
+                return System.Xml.XmlConvert.ToTimeSpan(timeout);
             if (Double.TryParse(timeout, out t))
                 return TimeSpan.FromMilliseconds(t);
             if (TimeSpan.TryParse(timeout, out ts))
                 return ts;
-
             throw new ParsingException(String.Format("Invalid timespan {0}", timeout));
         }
     }
