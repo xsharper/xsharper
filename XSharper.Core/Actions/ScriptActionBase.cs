@@ -487,15 +487,11 @@ namespace XSharper.Core
                         break;
                     }
 
-                    collProperty = FindCollectionForNode(reader);
-
+                    
                     if (a == null)
                         throw new XsException(reader, string.Format("Unexpected processing instruction {0}", reader.Name));
                     
 
-                    IList coll = null;
-                    if (collProperty!=null)
-                        coll=collProperty.GetValue(this, null) as IList;
                     if (this is Code)
                     {
                         if (a is Code)
@@ -503,13 +499,21 @@ namespace XSharper.Core
                         else
                             ((Code) this).Add(a);
                     }
-                    else if (coll == null)
-                    {
-                        if (!(a is Rem))
-                            throw new XsException(reader, string.Format("Unexpected position of processing instruction {0}", reader.Name));
-                    }
                     else
-                        coll.Add(a);
+                    {
+                        collProperty = FindCollectionForNode(reader);
+                        try
+                        {
+                            SetChildObject(reader, a, null, collProperty);
+                        }
+                        catch (XsException)
+                        {
+                            if (!(a is Rem))
+                                throw;
+
+                        }
+                    }
+                    //    coll.Add(a);
                     
                     reader.Read();
                     break;

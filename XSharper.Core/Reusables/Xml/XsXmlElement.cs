@@ -332,7 +332,6 @@ namespace XSharper.Core
                     return;
                 }
             }
-
             throw new XsException(reader, string.Format("Failed to add child element {0}", newObject.GetType().FullName));
         }
 

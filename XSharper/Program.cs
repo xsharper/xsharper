@@ -424,7 +424,7 @@ namespace XSharper
                         new CommandLineParameter(xs.path, CommandLineValueCount.Single, null, "") {Value = "; separated list of directories to search for scripts", Description = "directories", Default = Environment.GetEnvironmentVariable("XSH_PATH")},
                         new CommandLineParameter(xs.@ref, CommandLineValueCount.Single, null, "") {Value = "; separated list of assemblies or assembly filenames to load", Description = "references", Default = Environment.GetEnvironmentVariable("XSH_REF")},
                         new CommandLineParameter(xs.log, CommandLineValueCount.Single, null, "xsharper.log") {Value = "Copy all output to the specified file", Description = "log.txt"},
-                        new CommandLineParameter(xs.requireAdmin, CommandLineValueCount.None, null, "true") {Value = "Force process elevation to obtain admin privileges (RunAs)"},
+                        new CommandLineParameter(xs.requireAdmin, CommandLineValueCount.None, null, "Admin") {Value = "Force process elevation to obtain admin privileges (RunAs)"},
                         new CommandLineParameter(xs.validate, CommandLineValueCount.None, null, "true") {Value = "Validate script signature"},
                         new CommandLineParameter(xs.last, CommandLineValueCount.None, null, "true") {Last = true, Value = "Stop looking for //* parameters after this"},
 
