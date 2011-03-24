@@ -511,7 +511,7 @@ namespace XSharper.Core
 
         private static bool isRightAssociative(Operators o)
         {
-            return o == Operators.UnaryMinus || o == Operators.UnaryPlus || o==Operators.New;
+            return o == Operators.UnaryMinus || o == Operators.UnaryPlus || o==Operators.New || o==Operators.Not || o==Operators.BinaryNot;
         }
         private static void cleanStack(Queue<IOperation> queue, Stack<QToken> stack, Operators o1)
         {

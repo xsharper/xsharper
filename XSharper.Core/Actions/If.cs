@@ -441,8 +441,8 @@ namespace XSharper.Core
         /// <param name="collProperty">If not null, <paramref name="newObject"/> must be added to this IList-derived collection property</param>
         protected override void SetChildObject(System.Xml.XmlReader reader, object newObject, System.Reflection.PropertyInfo setToProperty, System.Reflection.PropertyInfo collProperty)
         {
-            if (Else!=null)
-                Else.Add((IScriptAction)newObject);
+            if (Else != null)
+                Else.SetChildObjectAccessor(reader, newObject, setToProperty, collProperty);
             else
                 base.SetChildObject(reader, newObject, setToProperty, collProperty);
         }

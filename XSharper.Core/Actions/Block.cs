@@ -215,5 +215,10 @@ namespace XSharper.Core
             if (Items.Count!=itemsBefore && (Try != null || Catch != null || Finally != null))
                 throw new XsException(reader, "actions after try block are NOT allowed!");
         }
+
+        internal void SetChildObjectAccessor(System.Xml.XmlReader reader, object newObject, System.Reflection.PropertyInfo setToProperty, System.Reflection.PropertyInfo collProperty)
+        {
+            SetChildObject(reader, newObject, setToProperty, collProperty);
+        }
     }
 }
