@@ -142,6 +142,7 @@
 					while ((len=fs.Read(buf,0,buf.Length))!=0)
 					{
 					    c.CheckAbort();
+						c.OnProgress(1);
 						strm.Write(buf,0,len);
 						writeSince+=len;
 						if (writeSince>1024*10)

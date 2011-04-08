@@ -34,13 +34,14 @@
 			}
 			catch (WebException e)
 			{
-				try {	
-					XS.XmlDoc xs=new XS.XmlDoc(((HttpWebResponse)e.Response).GetResponseStream());
-					c.Error.WriteLine("Error message: {0}",xs.V("/Error/Message/text()"));
-				}
-				catch 
-				{
-				}
+				if (e.Response!=null)
+					try {	
+						XS.XmlDoc xs=new XS.XmlDoc(((HttpWebResponse)e.Response).GetResponseStream());
+						c.Error.WriteLine("Error message: {0}",xs.V("/Error/Message/text()"));
+					}
+					catch 
+					{
+					}
 				throw;
 			}
 		</code>

@@ -216,10 +216,11 @@ namespace XSharper.Core
                         skip = true;
                     if (Overwrite == OverwriteMode.IfNewer)
                     {
-                        if (entryTimeUtc == null)
+                        if (entryTimeUtc == null || entryTimeUtc < File.GetLastWriteTimeUtc(targetName))
+						{
+                            VerboseMessage("Ignoring never file {0}", targetName);
                             skip = true;
-                        if (entryTimeUtc >= File.GetLastWriteTimeUtc(targetName))
-                            skip = true;
+						}
                     }
                 }
 
