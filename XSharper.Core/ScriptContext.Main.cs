@@ -1108,6 +1108,12 @@ namespace XSharper.Core
             _abort = true;
         }
 
+        /// Return true if script is being aborted
+        public bool IsAborted
+        {
+            get { return _abort; }
+        }
+
         /// Reset internal abort flag. 
         public void ResetAbort()
         {
