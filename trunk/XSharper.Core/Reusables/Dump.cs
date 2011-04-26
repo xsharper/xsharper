@@ -38,17 +38,17 @@ namespace XSharper.Core
         /// <summary>
         /// Maximum number of list or IEnumerable items to display
         /// </summary>
-        public int MaxItems=50;
+        public int MaxItems = 50;
 
         /// <summary>
         /// true = display private members of the class/struct
         /// </summary>
-        public bool DisplayPrivate=false;
+        public bool DisplayPrivate = false;
 
         /// <summary>
         /// Limit tree depth to this (default 5)
         /// </summary>
-        public int MaxDepth=5;
+        public int MaxDepth = 5;
 
         /// <summary>
         /// Use full class names
@@ -64,7 +64,8 @@ namespace XSharper.Core
         #region --- Constructors ---
 
         /// Constructor
-        public Dump(object objectToDump) : this(objectToDump, null, null, 0)
+        public Dump(object objectToDump)
+            : this(objectToDump, null, null, 0)
         {
         }
 
@@ -107,10 +108,10 @@ namespace XSharper.Core
                 if (objectToDump != null)
                     _type = objectToDump.GetType();
                 else
-                    _type = typeof (object);
+                    _type = typeof(object);
             _name = name;
             _level = level;
-            _settings = settings??s_defaultSettings;
+            _settings = settings ?? s_defaultSettings;
         }
 
         #endregion
@@ -129,13 +130,13 @@ namespace XSharper.Core
                 return "??? thrown " + e.GetType().FullName;
             }
         }
-        
+
         #region --- ToDump static methods ---
 
         /// Dump object to string
         public static string ToDump<T>(T objectToDump)
         {
-            return ToDump<T>(objectToDump, null,null);
+            return ToDump<T>(objectToDump, null, null);
         }
 
 
@@ -149,7 +150,7 @@ namespace XSharper.Core
         /// Dump object to string, adding 'name=' prefix before output
         public static string ToDump<T>(T objectToDump, string name)
         {
-            return ToDump(objectToDump, name,null);
+            return ToDump(objectToDump, name, null);
         }
 
         /// Dump object to string, adding 'name=' prefix before output
@@ -304,10 +305,10 @@ namespace XSharper.Core
                     prop = new Dictionary<string, bool>();
                     s_propertyHints.Add(type, prop);
                 }
-                prop[propertyName]=sideEffect;
+                prop[propertyName] = sideEffect;
             }
         }
-        
+
         private class ReferenceComparer : IEqualityComparer<object>
         {
             bool IEqualityComparer<object>.Equals(object x, object y)
@@ -326,7 +327,7 @@ namespace XSharper.Core
         private static readonly Dictionary<string, bool> s_bloatTypes = initBloatTypes();
 
         // For each special store true=side effect, false=bloat
-        private static readonly Dictionary<Type, Dictionary<string,bool>> s_propertyHints = initPropertyHints();
+        private static readonly Dictionary<Type, Dictionary<string, bool>> s_propertyHints = initPropertyHints();
         private static readonly Dictionary<Type, string> s_friendlyName = initFriendlyNames();
 
         private static Dictionary<string, bool> initBloatTypes()
@@ -334,6 +335,7 @@ namespace XSharper.Core
             Dictionary<string, bool> ret = new Dictionary<string, bool>();
             foreach (string s in new string[] {"System.DateTime",
                                             "System.Type",
+                                            "System.Guid",
                                             "System.Security.Principal.SecurityIdentifier",
                                             "System.Xml.Linq.XElement",
                                             "System.Xml.Linq.XDocument",
@@ -351,8 +353,8 @@ namespace XSharper.Core
 
         private static Dictionary<Type, string> initFriendlyNames()
         {
-            Dictionary<Type, string> r=new Dictionary<Type, string>();
-            r.Add(typeof(string),"string");
+            Dictionary<Type, string> r = new Dictionary<Type, string>();
+            r.Add(typeof(string), "string");
             r.Add(typeof(int), "int");
             r.Add(typeof(uint), "uint");
             r.Add(typeof(long), "long");
@@ -368,7 +370,7 @@ namespace XSharper.Core
             return r;
         }
 
-        private static Dictionary<Type, Dictionary<string,bool>> initPropertyHints()
+        private static Dictionary<Type, Dictionary<string, bool>> initPropertyHints()
         {
             Dictionary<Type, Dictionary<string, bool>> s = new Dictionary<Type, Dictionary<string, bool>>();
 
@@ -387,12 +389,12 @@ namespace XSharper.Core
         void process2(string name, Type t, object o, int depth)
         {
 
-            string typeName = GetFriendlyTypeName(t,_settings.UseFullClassNames);
+            string typeName = GetFriendlyTypeName(t, _settings.UseFullClassNames);
 
-            _out.Append(new string(' ', depth*2));
+            _out.Append(new string(' ', depth * 2));
             if (!string.IsNullOrEmpty(name))
                 _out.Append(name + " = ");
-            
+
             _out.Append("(" + typeName + ") ");
 
             if (o == null)
@@ -403,35 +405,35 @@ namespace XSharper.Core
 
             if ((t != typeof(string) && (o is string)) || _settings.MaxDepth <= depth)
             {
-                _out.Append("\"" + toEscapedString(o)+"\" /* ToString */");
+                _out.Append("\"" + toEscapedString(o) + "\" /* ToString */");
                 return;
             }
 
-            if (t == typeof (string) || (o is string))
+            if (t == typeof(string) || (o is string))
             {
                 _out.Append("\"" + toEscapedString(o) + "\"");
                 return;
             }
 
-            
-            BindingFlags flags = BindingFlags.Instance | BindingFlags.FlattenHierarchy;
-            if (!_settings.DisplayPrivate)
-                flags |= BindingFlags.Public;
+
+            BindingFlags flags = BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.Public;
+            if (_settings.DisplayPrivate)
+                flags |= BindingFlags.NonPublic;
             PropertyInfo[] props = t.GetProperties(flags | BindingFlags.GetProperty);
             FieldInfo[] fi = t.GetFields(flags);
 
-            
-            if (t.IsPrimitive || t.IsEnum || (t.IsValueType && props.Length == 0 && fi.Length == 0) || s_bloatTypes.ContainsKey(t.FullName) || t== typeof(decimal))
+
+            if (t.IsPrimitive || t.IsEnum || (t.IsValueType && props.Length == 0 && fi.Length == 0) || s_bloatTypes.ContainsKey(t.FullName) || t == typeof(decimal))
             {
-                if ((t == typeof (int)) || (t == typeof (byte)) || (t == typeof (uint)) || t == typeof (long) ||
-                    t == typeof (ulong))
+                if ((t == typeof(int)) || (t == typeof(byte)) || (t == typeof(uint)) || t == typeof(long) ||
+                    t == typeof(ulong))
                     _out.AppendFormat(" {0} (0x{0:x})", o);
-                else if (t == typeof (DateTime) || t == typeof(DateTime?))
-                    _out.AppendFormat("{0:o} ({1})", o,((DateTime)o).Kind);
-                else if (t == typeof (Guid))
-                    _out.Append(((Guid) o).ToString("B"));
+                else if (t == typeof(DateTime) || t == typeof(DateTime?))
+                    _out.AppendFormat("{0:o} ({1})", o, ((DateTime)o).Kind);
+                else if (t == typeof(Guid))
+                    _out.Append(((Guid)o).ToString("B"));
                 else if (t == typeof(bool))
-                    _out.Append(((bool)o)?"true":"false");
+                    _out.Append(((bool)o) ? "true" : "false");
                 else if (t.IsEnum)
                     _out.AppendFormat("[{0}] /* 0x{0:x} */", o);
                 else
@@ -441,20 +443,20 @@ namespace XSharper.Core
             if (t.IsClass)
             {
                 int id;
-                if (_usedMap.TryGetValue(o,out id))
+                if (_usedMap.TryGetValue(o, out id))
                 {
                     _out.AppendFormat("<see #{0}, {1:x8} above>", id, o.GetHashCode());
                     return;
                 }
                 _usedMap[o] = ++_counter;
             }
-            if (t.IsArray && ((Array) o).Rank == 1)
+            if (t.IsArray && ((Array)o).Rank == 1)
             {
                 Array arr;
                 if (t.IsArray)
                     arr = (o as Array);
                 else
-                    arr = t.GetMethod("ToArray").Invoke(o, new object[] {}) as Array;
+                    arr = t.GetMethod("ToArray").Invoke(o, new object[] { }) as Array;
                 processArray(t, arr, depth);
             }
             else if (o as IEnumerable != null)
@@ -466,9 +468,9 @@ namespace XSharper.Core
             {
                 writeBrace(o);
 
-                Dictionary<string,bool> propNames=null;
-                foreach (KeyValuePair<Type, Dictionary<string,bool>> info in s_propertyHints)
-                    if (t==info.Key || t.IsSubclassOf(info.Key))
+                Dictionary<string, bool> propNames = null;
+                foreach (KeyValuePair<Type, Dictionary<string, bool>> info in s_propertyHints)
+                    if (t == info.Key || t.IsSubclassOf(info.Key))
                     {
                         propNames = info.Value;
                         break;
@@ -483,7 +485,7 @@ namespace XSharper.Core
                             dumpProperty(p, o, depth + 1, true);
                         else
                         {
-                            process2(p.Name, p.PropertyType, "<ignored>", depth+1);
+                            process2(p.Name, p.PropertyType, "<ignored>", depth + 1);
                             _out.AppendLine();
                         }
                     }
@@ -494,14 +496,14 @@ namespace XSharper.Core
                     dumpField(f, o, depth + 1);
 
             }
-            _out.Append(new string(' ', depth*2));
+            _out.Append(new string(' ', depth * 2));
             _out.Append("}");
-            
+
         }
 
         private static string toEscapedString(object o)
         {
-            
+
             return o.ToString().Replace("\r", "\\r").Replace("\n", "\\n").Replace("\b", "\\b").Replace("\t", "\\t");
         }
 
@@ -519,7 +521,7 @@ namespace XSharper.Core
                 {
                     object obj = p.GetValue(o, null);
                     if (asString)
-                        process2(p.Name, (obj == null) ? p.PropertyType : obj.GetType(), (obj??"<null>").ToString(), level);
+                        process2(p.Name, (obj == null) ? p.PropertyType : obj.GetType(), (obj ?? "<null>").ToString(), level);
                     else
                         process2(p.Name, (obj == null) ? p.PropertyType : obj.GetType(), obj, level);
                     _out.AppendLine();
@@ -527,13 +529,13 @@ namespace XSharper.Core
                 else
                 {
                     _out.Append(new string(' ', level * 2));
-                    _out.AppendLine(p.Name + " = " + "("+GetFriendlyTypeName(p.PropertyType)+") ??? indexed property ignored");
+                    _out.AppendLine(p.Name + " = " + "(" + GetFriendlyTypeName(p.PropertyType) + ") ??? indexed property ignored");
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 _out.Append(new string(' ', level * 2));
-                _out.AppendLine(p.Name + " = "+ "??? thrown "+e.GetType().FullName);
+                _out.AppendLine(p.Name + " = " + "??? thrown " + e.GetType().FullName);
             }
         }
 
@@ -542,7 +544,7 @@ namespace XSharper.Core
             try
             {
                 object obj = p.GetValue(o);
-                process2(p.Name, (obj == null) ? p.FieldType: obj.GetType(), obj, level);
+                process2(p.Name, (obj == null) ? p.FieldType : obj.GetType(), obj, level);
                 _out.AppendLine();
             }
             catch (Exception e)
@@ -552,13 +554,13 @@ namespace XSharper.Core
             }
         }
 
-        
+
         private void processEnumerables(IEnumerable enumerable, int nLevel)
         {
             int index = 0;
             foreach (object info in enumerable)
             {
-                Type tinside=info == null ? typeof(object) : info.GetType();
+                Type tinside = info == null ? typeof(object) : info.GetType();
                 process2("[" + index + "]", tinside, info, nLevel + 1);
                 _out.AppendLine();
                 if (index++ > _settings.MaxItems)
@@ -566,7 +568,7 @@ namespace XSharper.Core
                     _out.AppendLine("...");
                     break;
                 }
-            }   
+            }
         }
 
         private void processArray(Type t, Array arr, int nLevel)
@@ -592,12 +594,9 @@ namespace XSharper.Core
             }
             _out.Append(" array[" + arr.Length + "] ");
             writeBrace(arr);
-            processEnumerables(arr,nLevel);
+            processEnumerables(arr, nLevel);
         }
 
-#endregion
-
-        
+        #endregion
     }
-
 }
