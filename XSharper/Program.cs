@@ -53,7 +53,7 @@ namespace XSharper
         public readonly static string genwinexe = "xs.genwinexe";
         public readonly static string genlibrary = "xs.genlibrary";
         public readonly static string trace = "xs.trace";
-        public readonly static string forceansi = "xs.forceansi";
+        public readonly static string utf8 = "xs.utf8";
         public readonly static string noSrc = "xs.nosrc";
         public readonly static string icon = "xs.icon";
         public readonly static string genxsd = "xs.genxsd";
@@ -137,10 +137,10 @@ namespace XSharper
             
             ConsoleRedirector redir = null;
             AppDomainLoader.progress("MainWithContext: Entering --------------------");
-            bool utf8 = true;
+            bool utf8 = false;
             foreach (string arg in args)
-                if (arg.Equals(xs.forceansi.Replace("xs.", "//"),StringComparison.OrdinalIgnoreCase))
-                    utf8 = false;
+                if (arg.Equals(xs.utf8.Replace("xs.", "//"), StringComparison.OrdinalIgnoreCase))
+                    utf8 = true;
             using (ConsoleWithColors cout = new ConsoleWithColors(Environment.GetEnvironmentVariable("XSH_COLORS"),utf8))
             using (CtrlCInterceptor ctrl = new CtrlCInterceptor())
             {
@@ -431,7 +431,7 @@ namespace XSharper
                         new CommandLineParameter(xs.log, CommandLineValueCount.Single, null, "xsharper.log") {Value = "Copy all output to the specified file", Description = "log.txt"},
                         new CommandLineParameter(xs.requireAdmin, CommandLineValueCount.None, null, "Admin") {Value = "Force process elevation to obtain admin privileges (RunAs)"},
                         new CommandLineParameter(xs.validate, CommandLineValueCount.None, null, "true") {Value = "Validate script signature"},
-                        new CommandLineParameter(xs.forceansi, CommandLineValueCount.None, "false", "true") {Value = "Force default console output codepage. UTF-8 if not specified."},
+                        new CommandLineParameter(xs.utf8, CommandLineValueCount.None, "false", "true") {Value = "Force UTF8 console output. ANSI is used if not specified."},
                         new CommandLineParameter(xs.last, CommandLineValueCount.None, null, "true") {Last = true, Value = "Stop looking for //* parameters after this"},
                         
 

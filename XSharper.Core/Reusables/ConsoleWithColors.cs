@@ -141,7 +141,7 @@ namespace XSharper.Core
 
         /// Constructor
         public ConsoleWithColors()
-            : this(true)
+            : this(false)
         {
         }
 
@@ -183,7 +183,7 @@ namespace XSharper.Core
         }
 
         /// Constructor
-        public ConsoleWithColors(string overrideColors) : this(overrideColors,true)
+        public ConsoleWithColors(string overrideColors) : this(overrideColors,false)
         {
         }
         /// Constructor
