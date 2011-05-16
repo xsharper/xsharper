@@ -43,6 +43,7 @@ namespace ${GENERATED_NAMESPACE}
             public const string save = "xs.save";
             public const string log = "xs.log";
             public const string wait = "xs.wait";
+            public const string forceansi = "xs.forceansi";
             public const string last = "xs.last";
             public readonly static string nocolors = "xs.nocolors";
             public const string requireAdmin = "xs.requireAdmin";
@@ -93,6 +94,7 @@ namespace ${GENERATED_NAMESPACE}
                 new XS.CommandLineParameter(xs.log,          XS.CommandLineValueCount.Single, null,"xsharper.log" ) ,
                 new XS.CommandLineParameter(xs.requireAdmin, XS.CommandLineValueCount.None, null,"true" ) ,
                 new XS.CommandLineParameter(xs.last,         XS.CommandLineValueCount.None, null,"true") ,
+                new XS.CommandLineParameter(xs.forceansi,    XS.CommandLineValueCount.None, "false", "true"),
                 new XS.CommandLineParameter(xs.scriptargs,   null, XS.CommandLineValueCount.Multiple, null,null) 
              };
             param[param.Length - 1].Last = true;
@@ -106,7 +108,11 @@ namespace ${GENERATED_NAMESPACE}
             
             int exitCode = 0;
 
-            using (XS.ConsoleWithColors cout = new XS.ConsoleWithColors(Environment.GetEnvironmentVariable("XSH_COLORS")))
+            bool utf8=true;
+            foreach (string arg in args)
+                if (arg.Equals(xs.forceansi.Replace("xs.", "//"),StringComparison.OrdinalIgnoreCase))
+                    utf8=false;
+            using (XS.ConsoleWithColors cout = new XS.ConsoleWithColors(Environment.GetEnvironmentVariable("XSH_COLORS"),utf8))
             using (XS.CtrlCInterceptor ctrl = new XS.CtrlCInterceptor())
             {
                 context.Output += cout.OnOutput;
