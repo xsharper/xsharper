@@ -78,8 +78,8 @@ namespace XSharper.Core
         private readonly Dictionary<OutputType, ConsoleColor> _colors = new Dictionary<OutputType, ConsoleColor>();
         private readonly object _lock = new object();
         private TextWriter _log;
-        private readonly TextWriter _out = Console.Out;
-        private readonly TextWriter _error = Console.Error;
+        private readonly TextWriter _out;
+        private readonly TextWriter _error;
 
         private OutputType _prevType = OutputType.Null;
         private bool _unevenOutput;
@@ -141,7 +141,19 @@ namespace XSharper.Core
 
         /// Constructor
         public ConsoleWithColors()
+            : this(true)
         {
+        }
+
+        /// Constructor
+        public ConsoleWithColors(bool utf8)
+        {
+            if (utf8)
+                Console.OutputEncoding = Encoding.UTF8;
+
+            _out = Console.Out;
+            _error = Console.Error;
+
             Colors[OutputType.Debug] = ConsoleColor.Cyan;
             Colors[OutputType.Out] = ConsoleColor.Gray;
             Colors[OutputType.Bold] = ConsoleColor.White;
@@ -171,7 +183,11 @@ namespace XSharper.Core
         }
 
         /// Constructor
-        public ConsoleWithColors(string overrideColors) : this()
+        public ConsoleWithColors(string overrideColors) : this(overrideColors,true)
+        {
+        }
+        /// Constructor
+        public ConsoleWithColors(string overrideColors, bool utf8) : this(utf8)
         {
             string s=overrideColors;
             if (s != null)
