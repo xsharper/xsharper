@@ -426,7 +426,7 @@ XSH_COLORS          : ${%XSH_COLORS%|''}"
         {
             Script script;
             string[] s = context.GetStringArray(xs.unzip);
-            if (s.Length < 1 || s.Length > 3)
+            if (s.Length < 1)
                 throw new ArgumentException("Invalid arguments to " + xs.unzip + " command");
 
             script = createEmptyScript(context, "xsharper //unzip");

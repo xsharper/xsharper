@@ -281,7 +281,7 @@ namespace XSharper.Core
                     bool overwrite = (Overwrite == OverwriteMode.Always);
                     if (Overwrite == OverwriteMode.IfNewer)
                     {
-                        if (toFile.Exists && toFile.LastWriteTimeUtc > from.LastWriteTimeUtc)
+                        if (toFile.Exists && toFile.LastWriteTimeUtc >= from.LastWriteTimeUtc)
                         {
                             VerboseMessage("Ignoring never file {0} ", toFile.FullName);
                             return null;
@@ -345,7 +345,7 @@ namespace XSharper.Core
                         bool overwrite = (Overwrite == OverwriteMode.Always);
                         if (Overwrite == OverwriteMode.IfNewer)
                         {
-                            if (toFile.Exists && toFile.LastWriteTimeUtc > f.LastWriteTimeUtc)
+                            if (toFile.Exists && toFile.LastWriteTimeUtc >= f.LastWriteTimeUtc)
                             {
                                 VerboseMessage("Ignoring never file {0} ", toFile.FullName);
                                 return null;
