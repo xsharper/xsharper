@@ -381,6 +381,7 @@ namespace XSharper.Core
         /// <exception cref="KeyNotFoundException">Thrown if property with the specified name is not found</exception>
         public object GetAttr(string name)
         {
+            name = name ?? string.Empty;
             var props = GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.GetProperty);
             foreach (PropertyInfo c in props)
             {
@@ -403,6 +404,7 @@ namespace XSharper.Core
         /// <exception cref="KeyNotFoundException">Thrown if property with the specified name is not found</exception>
         public void SetAttr(string name, object value)
         {
+            name = name ?? string.Empty;
             var props = GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.GetProperty);
             foreach (PropertyInfo c in props)
             {

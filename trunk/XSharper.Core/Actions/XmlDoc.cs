@@ -283,10 +283,13 @@ namespace XSharper.Core
                     using (var str = Context.OpenStream(fromts))
                         _xmlDocument.Load(str);
                 }
-                else 
-                    if (!string.IsNullOrEmpty(GetTransformedValueStr()))
-                        using (StringReader sr = new StringReader(GetTransformedValueStr()))
+                else
+                {
+                    string s = GetTransformedValueStr();
+                    if (!string.IsNullOrEmpty(s))
+                        using (StringReader sr = new StringReader(s))
                             _xmlDocument.Load(sr);
+                }
             }
         }
 
