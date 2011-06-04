@@ -637,7 +637,5 @@ namespace XSharper
         }
     }
 
-    internal class XsDescriptionAttribute
-    {
-    }
+ 
 }

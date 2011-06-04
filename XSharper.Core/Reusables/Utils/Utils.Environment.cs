@@ -40,8 +40,12 @@ namespace XSharper.Core
 
     public partial class Utils
     {
-        private static int s_realConsole = -1;
+        private static int s_realConsole = (Environment.OSVersion.Platform==PlatformID.Win32NT)? -1:0;
 
+        public static bool IsWindows
+        {
+            get { return Environment.OSVersion.Platform == PlatformID.Win32NT; }
+        }
         /// True if Console is attached and real (Console app) and false if console is fake (Console.Title or Console.BufferWidth calls will throw an exception)
         public static bool HasRealConsole
         {

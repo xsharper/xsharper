@@ -35,7 +35,7 @@ namespace XSharper.Core
     [Serializable]
     public class CommandLineParameters : List<CommandLineParameter>
     {
-        private readonly string _switchPrefixes="/;-";
+        private readonly string _switchPrefixes=Utils.IsWindows?"/;-":"-";
         private readonly bool _unknownSwitches;
         
         /// Default constructor

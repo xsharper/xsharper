@@ -56,7 +56,7 @@ namespace XSharper.Core
     [Description("XSharper script")]
     public class Script : Block
     {
-        private string _switchPrefixes = "/;-";
+        private string _switchPrefixes = Utils.IsWindows?"/;-":"-";
         UsageGenerator _usage = new UsageGenerator();
         List<CommandLineParameter> _parameters = new List<CommandLineParameter>();
         VersionInfo _version = new VersionInfo();
