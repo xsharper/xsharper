@@ -377,9 +377,12 @@ namespace XSharper.Core
             }
             if (DebugMode)
                 if (Debugger.IsLogging())
-                    Debugger.Log(0,null,text);
+                    Debugger.Log(0, null, text);
                 else
-                    OutputDebugString(text);
+                {
+                    if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+                        OutputDebugString(text);
+                }
         }
 
         [DllImport("kernel32.dll")]
