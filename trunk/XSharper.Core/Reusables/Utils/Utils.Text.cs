@@ -286,12 +286,12 @@ namespace XSharper.Core
             bool w = true;
             foreach (char c in text)
             {
-                if (c == '\r') continue;
                 if (w)
                 {
                     sw.Write(prefix);
                     w = false;
                 }
+                if (c == '\r') continue;
                 sw.Write(c);
                 if (c == '\n')
                     w = true;

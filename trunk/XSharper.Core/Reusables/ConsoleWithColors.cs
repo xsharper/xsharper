@@ -347,7 +347,10 @@ namespace XSharper.Core
                 }
                 outputInternal(type, text);
                 _prevType = type;
-                _unevenOutput = !text.EndsWith("\n", StringComparison.Ordinal);
+                _unevenOutput = !(text.EndsWith("\n", StringComparison.Ordinal) ||
+                                    text.EndsWith("\b\b\b", StringComparison.Ordinal) ||
+                                    text.EndsWith("   \r", StringComparison.Ordinal));
+
             }
         }
 
