@@ -38,10 +38,12 @@
   <if exists="${siteFile}">
 		  <readtext from="${siteFile}" outTo="site" encoding="ascii" />  
 		  <exec includeId="ftp" isolation="high">
+			<param>/passive</param>
 			<param value="ftp://${site}/xsharper-source-${version}.zip" />
 			<param value="${allSrc}" />
 		  </exec>
 		  <exec includeId="ftp" isolation="high">
+			<param>/passive</param>
 			<param value="ftp://${site}/xsharper-source-core-${version}.zip" />
 			<param value="${coreSrc}" />
 		  </exec>

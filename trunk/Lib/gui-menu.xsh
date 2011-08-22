@@ -1,40 +1,40 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xsharper xmlns="http://www.xsharper.com/schemas/1.0" id="gui_menu">
-	<usage options="none" />
-	<throw>This script must be executed only from another script</throw>
-	
+    <usage options="none" />
+    <throw>This script must be executed only from another script</throw>
+    
 <sub id="gui-menu">
-	<param name="title" />
-	<param name="description" />
-	<param name="scriptNames" required="true" />
+    <param name="title" />
+    <param name="description" />
+    <param name="scriptNames" required="true" />
 
 <?_ Application.EnableVisualStyles();
-	Application.SetCompatibleTextRenderingDefault(false); 
-	ScriptMenu f1=new ScriptMenu();
-	f1.Context=c;
-	f1.Title=c.GetString("title");
-	f1.Description=c.GetString("description");
-	foreach (string s in c.GetString("scriptNames").Split(';'))
-		f1.Scripts.Add(c.Find<Script>(s,true));
-	
-	Application.Run(f1);
+    Application.SetCompatibleTextRenderingDefault(false); 
+    ScriptMenu f1=new ScriptMenu();
+    f1.Context=c;
+    f1.Title=c.GetString("title");
+    f1.Description=c.GetString("description");
+    foreach (string s in c.GetString("scriptNames").Split(';'))
+        f1.Scripts.Add(c.Find<Script>(s,true));
+    
+    Application.Run(f1);
 ?>
 
 
 <reference name="System.Windows.Forms" />
 <reference name="System.Drawing" />
 <?header using System;
-	using System.Collections.Generic;
-	using System.Diagnostics;
-	using System.Drawing;
-	using System.IO;
-	using System.Threading;
-	using System.Windows.Forms;
-	using XSharper.Core;
-	using System.Runtime.InteropServices;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Drawing;
+    using System.IO;
+    using System.Threading;
+    using System.Windows.Forms;
+    using XSharper.Core;
+    using System.Runtime.InteropServices;
 
 
-	public partial class ScriptMenu : Form
+    public partial class ScriptMenu : Form
     {
         private ManualResetEvent _running = new ManualResetEvent(false);
         private ManualResetEvent _stopEvent = new ManualResetEvent(false);
@@ -60,7 +60,7 @@
 
         private void Form1_Load(object sender, EventArgs e)
         {
-		    this.Icon=Icon.ExtractAssociatedIcon(Process.GetCurrentProcess().MainModule.FileName);
+            this.Icon=Icon.ExtractAssociatedIcon(Process.GetCurrentProcess().MainModule.FileName);
             layButtons.RowCount = Scripts.Count + 2;
             for (int i = 0; i < Scripts.Count + 1; ++i)
             {
@@ -139,9 +139,9 @@
                 Context.Info.WriteLine("--- Executing " + script.Id +" ---");
                 using (XS.ConsoleRedirector r=new XS.ConsoleRedirector(Context)) 
                 {
-                   	Context.In=TextReader.Null;
-	                ret = Context.ExecuteScript(script, null, CallIsolation.High);
-	            }
+                    Context.In=TextReader.Null;
+                    ret = Context.ExecuteScript(script, null, CallIsolation.High);
+                }
             }
             catch(Exception ex)
             {
@@ -150,23 +150,23 @@
                 ret = -1;
             }
             finally 
-	{
-            	Context.Info.WriteLine("--- Completed in "+sw.Elapsed+" with return value="+ret+" ---");
-            	Directory.SetCurrentDirectory(oldDir);
-            	_running.Reset();
-            	reOut.ScrollToBottom();
-            	foreach (var button in _buttons)
-                	button.Enabled = true;
-            	b.Focus();
-            	btnExit.Text = oldText;
-            	
-            	Context.Progress=oldProgress;
-            	Context.Output=oldOut;
+    {
+                Context.Info.WriteLine("--- Completed in "+sw.Elapsed+" with return value="+ret+" ---");
+                Directory.SetCurrentDirectory(oldDir);
+                _running.Reset();
+                reOut.ScrollToBottom();
+                foreach (var button in _buttons)
+                    button.Enabled = true;
+                b.Focus();
+                btnExit.Text = oldText;
+                
+                Context.Progress=oldProgress;
+                Context.Output=oldOut;
                         
-            	statusText.Text = "Completed in " + sw.Elapsed + ", return value=" + ret;
-            	Cursor = Cursors.Arrow;
-            	if (_closeOnStop)
-	                Close();
+                statusText.Text = "Completed in " + sw.Elapsed + ", return value=" + ret;
+                Cursor = Cursors.Arrow;
+                if (_closeOnStop)
+                    Close();
             }
         }
 
@@ -182,7 +182,7 @@
         
         private void OnOutput(object sender1, OutputEventArgs e1)
         {
-    	    reOut.Output(e1.OutputType,e1.Text);
+            reOut.Output(e1.OutputType,e1.Text);
         }
 
         
@@ -331,97 +331,97 @@
         private System.Windows.Forms.Label lblDescription;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.ToolStripStatusLabel statusText;
-    }		
+    }       
     
     // Extended richedit box, that supports different fonts and backspace character
-	public  class OutputRichTextBox : RichTextBox
-	{
+    public  class OutputRichTextBox : RichTextBox
+    {
         private Font _font,_fontBold;
 
         [DllImport("User32.dll", CharSet = CharSet.Auto)]
         private static extern int SendMessage(IntPtr h, int msg, int wParam, int lParam);
         
-		private Font createFont(bool bold)
-		{
-			Font f=new Font("Consolas", 9, bold?FontStyle.Bold:FontStyle.Regular);
+        private Font createFont(bool bold)
+        {
+            Font f=new Font("Consolas", 9, bold?FontStyle.Bold:FontStyle.Regular);
             if (f.Name != "Consolas")
                 f = new Font("Courier New", 9, bold?FontStyle.Bold:FontStyle.Regular);
             return f;
-		}
-		
-		public void LoadFonts() 
-		{
-			_font=createFont(false);
+        }
+        
+        public void LoadFonts() 
+        {
+            _font=createFont(false);
             _fontBold=createFont(true);
             this.Font = _font;
-		}
-		public void ScrollToBottom()
-		{
-			SendMessage(this.Handle, 0x115, 7, 0);
-		}
+        }
+        public void ScrollToBottom()
+        {
+            SendMessage(this.Handle, 0x115, 7, 0);
+        }
         
         public void Output(OutputType otype, string text)
         {        
-    	    this.Select(this.TextLength,0);
+            this.Select(this.TextLength,0);
             StringBuilder sb=new StringBuilder();
             foreach (char ch in text)
             {
-            	if (ch==(char)8)
-            	{
-            		if (sb.Length>0)
-	            		this.AppendText(sb.ToString());
-	            	while (this.TextLength>0)
-	            	{
-						this.Select(this.TextLength-1,1);	            	
-						string s=this.SelectedText;
-						if (s=="\n" || s=="\r" || s=="")
-						{
-							this.Select(this.TextLength,0);
-							break;
-						}
-						this.Select(this.TextLength-1,1);	            	
-						this.ReadOnly=false;
-						this.SelectedText=string.Empty;
-						this.ReadOnly=true;
-					}
-            		sb.Length=0;
-            	}
-            	else
-            	{
-            		if (sb.Length==0)
-            		{
-						switch (otype)
-						{
-							case OutputType.Debug:	this.SelectionColor = Color.Cyan;	break;
-							case OutputType.Error:  this.SelectionColor = Color.Yellow; break;
-							case OutputType.Info:	this.SelectionColor = Color.LightGreen; break;
-							case OutputType.Bold:   this.SelectionColor = Color.White; break;
-							default:				this.SelectionColor = Color.LightGray; break;
-						}
-						if (otype==OutputType.Bold)
-						{
-							if (this.SelectionFont.Bold!=true)
-								this.SelectionFont=_fontBold;
-						}
-						else if (this.SelectionFont.Bold!=false)
-							this.SelectionFont=_font;
-					}
-            		sb.Append(ch);
-            		if (sb.Length>5000)
-            		{
-      					this.AppendText(sb.ToString());
-      					sb.Length=0;
-      				}
-      					
-            	}
-			}
-			this.AppendText(sb.ToString());
+                if (ch==(char)8)
+                {
+                    if (sb.Length>0)
+                        this.AppendText(sb.ToString());
+                    while (this.TextLength>0)
+                    {
+                        this.Select(this.TextLength-1,1);                   
+                        string s=this.SelectedText;
+                        if (s=="\n" || s=="\r" || s=="")
+                        {
+                            this.Select(this.TextLength,0);
+                            break;
+                        }
+                        this.Select(this.TextLength-1,1);                   
+                        this.ReadOnly=false;
+                        this.SelectedText=string.Empty;
+                        this.ReadOnly=true;
+                    }
+                    sb.Length=0;
+                }
+                else
+                {
+                    if (sb.Length==0)
+                    {
+                        switch (otype)
+                        {
+                            case OutputType.Debug:  this.SelectionColor = Color.Cyan;   break;
+                            case OutputType.Error:  this.SelectionColor = Color.Yellow; break;
+                            case OutputType.Info:   this.SelectionColor = Color.LightGreen; break;
+                            case OutputType.Bold:   this.SelectionColor = Color.White; break;
+                            default:                this.SelectionColor = Color.LightGray; break;
+                        }
+                        if (otype==OutputType.Bold)
+                        {
+                            if (this.SelectionFont.Bold!=true)
+                                this.SelectionFont=_fontBold;
+                        }
+                        else if (this.SelectionFont.Bold!=false)
+                            this.SelectionFont=_font;
+                    }
+                    sb.Append(ch);
+                    if (sb.Length>5000)
+                    {
+                        this.AppendText(sb.ToString());
+                        sb.Length=0;
+                    }
+                        
+                }
+            }
+            this.AppendText(sb.ToString());
 
-			ScrollToBottom();
+            ScrollToBottom();
             Application.DoEvents();
         }
-	}
-	
+    }
+    
 ?>
 </sub>
-<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#WithComments"><InclusiveNamespaces PrefixList="Sign" xmlns="http://www.w3.org/2001/10/xml-exc-c14n#" /></CanonicalizationMethod><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>FrAVyYVqVO7uLm9/PgSUEgPXZCo=</DigestValue></Reference></SignedInfo><SignatureValue>fdGulvNj4UHYTwwkVED9j8kxQX6wGpadgPyzEcxm8v/gs4evQJJVKKsWOfmJhc0vR4Ha3p531ZsGLPjmCI2PYMhSU9Kh00E48pR4ivc5Z+QGD2vGFh9soPyWdv/hFoKcpz01eWYDA2rRfS5qaPzy+T3jD+/pAigm4xQZM70MWxQ=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>oCKTg0Lq8MruXHnFdhgJA8hS98P5rJSABfUFHicssx0mltfqeuGsgzzpk8gLpNPkmJV+ca+pqPILiyNmMfLnTg4w99zH3FRNd6sIoN1veU87OQ5a0Ren2jmlgAAscHy2wwgjxx8YuP/AIfROTtGVaqVT+PhSvl09ywFEQ+0vlnk=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue></KeyInfo></Signature></xsharper>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#WithComments"><InclusiveNamespaces PrefixList="Sign" xmlns="http://www.w3.org/2001/10/xml-exc-c14n#" /></CanonicalizationMethod><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>cBPH7nnzFj0DACc3LSxDZ+XAh+A=</DigestValue></Reference></SignedInfo><SignatureValue>JSXkeGPdc7B03RiUA8ttepnkYogw8bXiWjLeHkhqOn7qd9HLgaRrt0cKGPmia3MF7DcvP058CUkRcojvO/kj7DxawpbbseZhpOV6BKnc7MxaYYsCrMSoaOYe8QjpZaIcOjvXry+kLVRUSrJ1oACdeDr3D8DwAfyHPKQUVJ7twmY=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>oCKTg0Lq8MruXHnFdhgJA8hS98P5rJSABfUFHicssx0mltfqeuGsgzzpk8gLpNPkmJV+ca+pqPILiyNmMfLnTg4w99zH3FRNd6sIoN1veU87OQ5a0Ren2jmlgAAscHy2wwgjxx8YuP/AIfROTtGVaqVT+PhSvl09ywFEQ+0vlnk=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue></KeyInfo></Signature></xsharper>

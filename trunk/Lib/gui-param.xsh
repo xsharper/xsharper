@@ -1,35 +1,35 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xsharper xmlns="http://www.xsharper.com/schemas/1.0" unknownSwitches="true">
-	<versionInfo title="gui-console" value="Run XSharper script requesting parameters in GUI." Version="0.1.0.0" Copyright="(C) 2009 DeltaX Inc." />
-	<usage options="ifNoArguments default" />
-	<param switch="run" required="false" value="Run immediately after loading" count="none" />	
-	<param name="filename" required="true" value="Script to execute" description="filename.xsh" />
-	<param name="args" required="false" value="Command line arguments for the script" count="multiple" description="arguments" last="true" />
+    <versionInfo title="gui-console" value="Run XSharper script requesting parameters in GUI." Version="0.1.0.0" Copyright="(C) 2009 DeltaX Inc." />
+    <usage options="ifNoArguments default" />
+    <param switch="run" required="false" value="Run immediately after loading" count="none" />  
+    <param name="filename" required="true" value="Script to execute" description="filename.xsh" />
+    <param name="args" required="false" value="Command line arguments for the script" count="multiple" description="arguments" last="true" />
 
 
-	<include id="myScript" from="${filename}" dynamic="true" />
-	<call subId="run-in-gui-param">
-		<param>${=$~myScript.IncludedScript}</param>
-		<param>${=.QuoteArgs(${args|=null})}</param>
-	</call>
+    <include id="myScript" from="${filename}" dynamic="true" />
+    <call subId="run-in-gui-param">
+        <param>${=$~myScript.IncludedScript}</param>
+        <param>${=.QuoteArgs(${args|=null})}</param>
+    </call>
 
 <sub id="run-in-gui-param">
-	<param name="script" required="true" />
-	<param name="scriptArgs" required="true" />
+    <param name="script" required="true" />
+    <param name="scriptArgs" required="true" />
 
-	<?_ Application.EnableVisualStyles();
-		Application.SetCompatibleTextRenderingDefault(false);
-		ExecutorForm f1=new ExecutorForm();
-		f1.Context=c;
-		if (c["script"] is XS.Script)
-			f1.Script=(XS.Script)c["script"];
-		else
-			f1.Script=c.Find<XS.Script>(c.GetString("script"),true);
+    <?_ Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
+        ExecutorForm f1=new ExecutorForm();
+        f1.Context=c;
+        if (c["script"] is XS.Script)
+            f1.Script=(XS.Script)c["script"];
+        else
+            f1.Script=c.Find<XS.Script>(c.GetString("script"),true);
 
-		f1.Args=c.GetString("scriptArgs");
-		f1.Autorun=c.GetBool("run",false);
-		Application.Run(f1);
-	?>
+        f1.Args=c.GetString("scriptArgs");
+        f1.Autorun=c.GetBool("run",false);
+        Application.Run(f1);
+    ?>
 
 <reference name="System.Windows.Forms" />
 <reference name="System.Drawing" />
@@ -114,7 +114,7 @@ public class ExecutorForm : Form
         updatePropertyGrid();
 
         if (Autorun)
-			BeginInvoke((MethodInvoker)delegate() { click(); });
+            BeginInvoke((MethodInvoker)delegate() { click(); });
     }
 
     
@@ -144,15 +144,15 @@ public class ExecutorForm : Form
             if (!string.IsNullOrEmpty(p.Pattern) && p.Pattern.StartsWith("^(") && p.Pattern.EndsWith(")$"))
             {
                 regex = true;                
-				foreach (string s in p.Pattern.Substring(2, p.Pattern.Length - 4).Split('|'))
-					if (System.Text.RegularExpressions.Regex.IsMatch(s,"[^a-zA-Z0-9_]"))
-						regex=false;
-				if (regex)
-	                foreach (string s in p.Pattern.Substring(2, p.Pattern.Length - 4).Split('|'))
-    	            {
-        	            string un = System.Text.RegularExpressions.Regex.Unescape(s);
-            	        possV.Add(un);
-	                }
+                foreach (string s in p.Pattern.Substring(2, p.Pattern.Length - 4).Split('|'))
+                    if (System.Text.RegularExpressions.Regex.IsMatch(s,"[^a-zA-Z0-9_]"))
+                        regex=false;
+                if (regex)
+                    foreach (string s in p.Pattern.Substring(2, p.Pattern.Length - 4).Split('|'))
+                    {
+                        string un = System.Text.RegularExpressions.Regex.Unescape(s);
+                        possV.Add(un);
+                    }
             }
             if (ret.DefaultValue != null)
                 possV.Add(XS.Utils.To<string>(ret.DefaultValue));
@@ -202,45 +202,45 @@ public class ExecutorForm : Form
             return false;
         }
     }
-	static bool isDefault(CustomProperty p)
-	{
-		XS.CommandLineParameter pp = (XS.CommandLineParameter)p.Tag;
-		return !(p.Value != null && (pp.Required || p.DefaultValue == null || !XS.Utils.To(p.PropertyType, p.Value).Equals(XS.Utils.To(p.PropertyType, p.DefaultValue))));
-	}
+    static bool isDefault(CustomProperty p)
+    {
+        XS.CommandLineParameter pp = (XS.CommandLineParameter)p.Tag;
+        return !(p.Value != null && (pp.Required || p.DefaultValue == null || !XS.Utils.To(p.PropertyType, p.Value).Equals(XS.Utils.To(p.PropertyType, p.DefaultValue))));
+    }
     void updateCommandLine()
     {
         List<XS.ShellArg> args = new List<XS.ShellArg>();
 
-		CustomPropertyCollection coll=(CustomPropertyCollection)propertyGrid.SelectedObject;
-		for (int i=0;i<coll.Count;++i)
-		{
-			CustomProperty p =coll[i];
+        CustomPropertyCollection coll=(CustomPropertyCollection)propertyGrid.SelectedObject;
+        for (int i=0;i<coll.Count;++i)
+        {
+            CustomProperty p =coll[i];
             XS.CommandLineParameter pp = (XS.CommandLineParameter)p.Tag;
 
             if (isDefault(p))
             {
-				if (string.IsNullOrEmpty(pp.Switch))
-				{
-					for (int j=i+1;j<coll.Count;++j)	
-						if (string.IsNullOrEmpty(((XS.CommandLineParameter)coll[j].Tag).Switch) && !isDefault(coll[j]))
-						{
-							XS.ShellArg a = new XS.ShellArg();
-			                args.Add(a);
-			                if (pp.Count != XS.CommandLineValueCount.None)
-            			        a.Value = p.Value;
-			                a.Transform = XS.TransformRules.None;
-						}
-				}
-			}
-			else
-			{
+                if (string.IsNullOrEmpty(pp.Switch))
+                {
+                    for (int j=i+1;j<coll.Count;++j)    
+                        if (string.IsNullOrEmpty(((XS.CommandLineParameter)coll[j].Tag).Switch) && !isDefault(coll[j]))
+                        {
+                            XS.ShellArg a = new XS.ShellArg();
+                            args.Add(a);
+                            if (pp.Count != XS.CommandLineValueCount.None)
+                                a.Value = p.Value;
+                            a.Transform = XS.TransformRules.None;
+                        }
+                }
+            }
+            else
+            {
                 XS.ShellArg a = new XS.ShellArg();
                 if (!string.IsNullOrEmpty(pp.Switch))
                 {
                     if (!string.IsNullOrEmpty(this.Script.SwitchPrefixes))
                         a.Switch = Script.SwitchPrefixes[0] + pp.Switch;
-					else
-						a.Switch = pp.Switch;
+                    else
+                        a.Switch = pp.Switch;
                 }
                 if (pp.Count != XS.CommandLineValueCount.None)
                     a.Value = p.Value;
@@ -1024,7 +1024,7 @@ public class CustomProperty
 }
 #endregion
 
-	
+    
 ?>
 </sub>
-<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#WithComments"><InclusiveNamespaces PrefixList="Sign" xmlns="http://www.w3.org/2001/10/xml-exc-c14n#" /></CanonicalizationMethod><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>H0C+zGdwDHHM2VZlMS8p5zTz330=</DigestValue></Reference></SignedInfo><SignatureValue>OlfF/ZFNHlOcFjTmrsU57tw0AR0vXw0J8xL9DtxBr29YZ05npeHPtHRdGeezL5q2xLRwZaDJDXgY2Oyv6x3ZRi0f0qnYSOVBJLhf/iMVV9aYStOQluL3+NTnbro+Tdqevy8DqojKOJFE7SS4FBn53+gfQg1mQ1ksD2ImhY7EBV8=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>oCKTg0Lq8MruXHnFdhgJA8hS98P5rJSABfUFHicssx0mltfqeuGsgzzpk8gLpNPkmJV+ca+pqPILiyNmMfLnTg4w99zH3FRNd6sIoN1veU87OQ5a0Ren2jmlgAAscHy2wwgjxx8YuP/AIfROTtGVaqVT+PhSvl09ywFEQ+0vlnk=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue></KeyInfo></Signature></xsharper>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#WithComments"><InclusiveNamespaces PrefixList="Sign" xmlns="http://www.w3.org/2001/10/xml-exc-c14n#" /></CanonicalizationMethod><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>CkmmBP4uxaVMRdOEu3ddN1nZ7LE=</DigestValue></Reference></SignedInfo><SignatureValue>J5uTgF7oreofw/WTwgY1bstfo79LxoLu1yJxCmE++vBMh5k566UuvOVEbuHspMOV5XSHXkBa/7rizHnqJt5M83UlPd8A1eGPGw5Z7pqKEWRBAdNvs+EI4myimrLtwGZbk3o3Mh/bueOOyHjwP9oqo3z9YUB0PiX3jeYkHnwEocI=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>oCKTg0Lq8MruXHnFdhgJA8hS98P5rJSABfUFHicssx0mltfqeuGsgzzpk8gLpNPkmJV+ca+pqPILiyNmMfLnTg4w99zH3FRNd6sIoN1veU87OQ5a0Ren2jmlgAAscHy2wwgjxx8YuP/AIfROTtGVaqVT+PhSvl09ywFEQ+0vlnk=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue></KeyInfo></Signature></xsharper>

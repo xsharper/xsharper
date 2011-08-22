@@ -125,16 +125,19 @@
 				  <print outTo="^bold">Uploading files</print>
 
 				  <exec includeId="ftp" isolation="high">
+					<param>/passive</param>
 					<param value="ftp://${site}/xsharper.exe" />
 					<param value="${exe}" />
 				  </exec>
 				  
 				  <exec includeId="ftp" isolation="high">
+					<param>/passive</param>
 					<param value="ftp://${site}/xsharper.zip" />
 					<param value="${tempFile2}" />
 				  </exec>
 				  
   				  <exec includeId="ftp" isolation="high">
+					<param>/passive</param>
 					<param value="ftp://${site}/XSharper.Core.dll" />
 					<param value="${coredll}" />
 				  </exec>
@@ -142,6 +145,7 @@
 				  
 
 				  <exec includeId="ftp" isolation="high">
+					<param>/passive</param>
   					<param value="ftp://${site}/schemas/1.0" />
 					<param value="/mkdir" />
 					<param value="${tempFile}" />
@@ -149,6 +153,7 @@
 				  
 				  <writetext value="${version}" to="${tempFile}" encoding="ascii" />
 				  <exec includeId="ftp" isolation="high">
+					<param>/passive</param>
 					<param value="ftp://${site}/xsharper-version.txt" />
 					<param value="${tempFile}" />
 				  </exec>
