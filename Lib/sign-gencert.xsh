@@ -1,9 +1,9 @@
 <xsharper xmlns="http://www.xsharper.com/schemas/1.0">
-	<param name="subject">Certificate subject, for example "My Code Signing Cert"</param>
-	<param switch="installRoot" count="none" unspecified="-1" default="0">Install this certificate as root</param>
-	<usage options="default ifNoArguments" />
-	<shell>makecert -r -pe -n "CN=${subject}" -e 01/01/2030 -eku 1.3.6.1.5.5.7.3.3 -ss my -sr currentUser -sky exchange -sp "Microsoft RSA SChannel Cryptographic Provider" -sy 12 "xsh-${subject}.cer"</shell>
-	<if isNotZero="${installRoot}">
-		<shell>certutil -addStore root "xsh-${subject}.cer"</shell>
-	</if>
-<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#WithComments"><InclusiveNamespaces PrefixList="Sign" xmlns="http://www.w3.org/2001/10/xml-exc-c14n#" /></CanonicalizationMethod><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>FfuwGMkQEYfFcm3vaZ4qlXvDWrI=</DigestValue></Reference></SignedInfo><SignatureValue>Fk06TuGB6sPbmtLeH6TPMTX9FrwqPNlLHJCAKvY8Ykh7IThzqfbgpBCuFG3aWB8QBLAX3uw0Rs/a3ncs+5N+BOZ/hv9c5DkKTq2eivP9YBigeTB5/JvF0snagFH1z5FoFthIK1qQvIj3FV8M/xv9Rq+uQzhnyD7zi5qpiIe/CnM=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>oCKTg0Lq8MruXHnFdhgJA8hS98P5rJSABfUFHicssx0mltfqeuGsgzzpk8gLpNPkmJV+ca+pqPILiyNmMfLnTg4w99zH3FRNd6sIoN1veU87OQ5a0Ren2jmlgAAscHy2wwgjxx8YuP/AIfROTtGVaqVT+PhSvl09ywFEQ+0vlnk=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue></KeyInfo></Signature></xsharper>
+    <param name="subject">Certificate subject, for example "My Code Signing Cert"</param>
+    <param switch="installRoot" count="none" unspecified="-1" default="0">Install this certificate as root</param>
+    <usage options="default ifNoArguments" />
+    <shell>makecert -r -pe -n "CN=${subject}" -e 01/01/2030 -eku 1.3.6.1.5.5.7.3.3 -ss my -sr currentUser -sky exchange -sp "Microsoft RSA SChannel Cryptographic Provider" -sy 12 "xsh-${subject}.cer"</shell>
+    <if isNotZero="${installRoot}">
+        <shell>certutil -addStore root "xsh-${subject}.cer"</shell>
+    </if>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#WithComments"><InclusiveNamespaces PrefixList="Sign" xmlns="http://www.w3.org/2001/10/xml-exc-c14n#" /></CanonicalizationMethod><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>+Xpn38O8L6/aBrVKozUH88AVRBY=</DigestValue></Reference></SignedInfo><SignatureValue>hh1U+Q3nDkAQpW4JxdVYSwiQ3FQh38N1zQ1gyTJKy+sEOTqZ3QdoAHCVGi8hqLVDQ5uVreXJBLPrYCzKW6/pOJYHUrZjHtZ4YqQV+I2rfz5PLXvpMfPpYIcI/egA2BuimnSLWDrHreOdjjszLEMVzzGm2ioC0x2PAwbvXeLqIOM=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>oCKTg0Lq8MruXHnFdhgJA8hS98P5rJSABfUFHicssx0mltfqeuGsgzzpk8gLpNPkmJV+ca+pqPILiyNmMfLnTg4w99zH3FRNd6sIoN1veU87OQ5a0Ren2jmlgAAscHy2wwgjxx8YuP/AIfROTtGVaqVT+PhSvl09ywFEQ+0vlnk=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue></KeyInfo></Signature></xsharper>

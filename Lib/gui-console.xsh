@@ -1,57 +1,57 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xsharper xmlns="http://www.xsharper.com/schemas/1.0" unknownSwitches="true">
-	<versionInfo title="gui-console" value="Run XSharper script in a normal Window." Version="0.1.0.0" Copyright="(C) 2009 DeltaX Inc." />
-	<usage options="ifNoArguments default" />
+    <versionInfo title="gui-console" value="Run XSharper script in a normal Window." Version="0.1.0.0" Copyright="(C) 2009 DeltaX Inc." />
+    <usage options="ifNoArguments default" />
 
-	<param switch="run" required="false" value="Run immediately after loading" count="none" />
-	<param name="filename" required="true" value="Script to execute" description="filename.xsh" />
-	<param name="args" required="false" value="Command line arguments for the script" count="multiple" description="arguments" last="true" />
+    <param switch="run" required="false" value="Run immediately after loading" count="none" />
+    <param name="filename" required="true" value="Script to execute" description="filename.xsh" />
+    <param name="args" required="false" value="Command line arguments for the script" count="multiple" description="arguments" last="true" />
 
-	<include id="myScript" from="${filename}" dynamic="true" />
-	<call subId="run-in-gui-console">
-		<param>${=$~myScript.IncludedScript}</param>
-		<param>${=.QuoteArgs(${args|=null})}</param>
-	</call>
+    <include id="myScript" from="${filename}" dynamic="true" />
+    <call subId="run-in-gui-console">
+        <param>${=$~myScript.IncludedScript}</param>
+        <param>${=.QuoteArgs(${args|=null})}</param>
+    </call>
 
 <sub id="run-in-gui-console">
-	<param name="script" required="true" />
-	<param name="scriptArgs" required="true" />
+    <param name="script" required="true" />
+    <param name="scriptArgs" required="true" />
 
-	<?_ Application.EnableVisualStyles();
-		Application.SetCompatibleTextRenderingDefault(false);
-		ExecutorForm f1=new ExecutorForm();
-		f1.Context=c;
-		if (c["script"] is XS.Script)
-			f1.Script=(XS.Script)c["script"];
-		else
-			f1.Script=c.Find<Script>(c.GetString("script"),true);
+    <?_ Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
+        ExecutorForm f1=new ExecutorForm();
+        f1.Context=c;
+        if (c["script"] is XS.Script)
+            f1.Script=(XS.Script)c["script"];
+        else
+            f1.Script=c.Find<Script>(c.GetString("script"),true);
 
-		f1.Args=c.GetString("scriptArgs");
-		f1.Autorun=c.GetBool("run",false);
-		Application.Run(f1);
-	?>
+        f1.Args=c.GetString("scriptArgs");
+        f1.Autorun=c.GetBool("run",false);
+        Application.Run(f1);
+    ?>
 
 <reference name="System.Windows.Forms" />
 <reference name="System.Drawing" />
 
 <?header using System.Windows.Forms;
-	using System.Collections.Generic;
-	using System.ComponentModel;
-	using System.Data;
-	using System.Diagnostics;
-	using System.Drawing;
-	using System.IO;
-	using System.Text;
-	using System.Windows.Forms;
-	using XSharper.Core;
-	using System.Xml;
-	using System.Runtime.InteropServices;
-	using System.Text.RegularExpressions;	
-	using System.Threading;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Data;
+    using System.Diagnostics;
+    using System.Drawing;
+    using System.IO;
+    using System.Text;
+    using System.Windows.Forms;
+    using XSharper.Core;
+    using System.Xml;
+    using System.Runtime.InteropServices;
+    using System.Text.RegularExpressions;   
+    using System.Threading;
 
-	
-	public  class ExecutorForm : Form
-	{
+    
+    public  class ExecutorForm : Form
+    {
         private ManualResetEvent _running = new ManualResetEvent(false);
         private ManualResetEvent _stopEvent = new ManualResetEvent(false);
         private bool _closeOnStop = false;
@@ -67,36 +67,36 @@
             InitializeComponent();
         }
 
-		
+        
         private void Form1_Load(object sender, EventArgs e)
         {
-		    this.Icon=Icon.ExtractAssociatedIcon(Process.GetCurrentProcess().MainModule.FileName);
-	    
+            this.Icon=Icon.ExtractAssociatedIcon(Process.GetCurrentProcess().MainModule.FileName);
+        
             // Change font & tab stops
-			reOut.LoadFonts();            
+            reOut.LoadFonts();            
             
             
             lblDescription.Text = Script.VersionInfo.GenerateInfo(Context,true);
 
             string title=Context.TransformStr(Script.VersionInfo.Title,Script.VersionInfo.Transform);
             if (string.IsNullOrEmpty(title))
-            	title=Script.Id;
-           	if (string.IsNullOrEmpty(title))
-            	title=Script.Location;
+                title=Script.Id;
             if (string.IsNullOrEmpty(title))
-            	Text = "XSharper";
+                title=Script.Location;
+            if (string.IsNullOrEmpty(title))
+                Text = "XSharper";
             else
-	            Text = title+" - XSharper";
+                Text = title+" - XSharper";
             edArgs.Text=Args ?? "";
             edArgs.SelectionStart=0;
             edArgs.SelectionLength=0;
-	        if (Autorun)
-				BeginInvoke((MethodInvoker)delegate() { click(); });
+            if (Autorun)
+                BeginInvoke((MethodInvoker)delegate() { click(); });
         }
 
         void btnRun_Click(object sender, EventArgs e)
         {
-        	click();
+            click();
         }
         
         void click()
@@ -131,15 +131,15 @@
                     if (_stopEvent.WaitOne(0,false))
                     {
                         e1.Cancel = true;
-						_stopEvent.Reset();                      
-					}
+                        _stopEvent.Reset();                      
+                    }
                 };
                 
                 using (XS.ConsoleRedirector r=new XS.ConsoleRedirector(Context)) 
                 {
-                	Context.In=TextReader.Null;
-	                ret = Context.ExecuteScript(Script, XS.Utils.SplitArgs(edArgs.Text), CallIsolation.High);
-				}
+                    Context.In=TextReader.Null;
+                    ret = Context.ExecuteScript(Script, XS.Utils.SplitArgs(edArgs.Text), CallIsolation.High);
+                }
             }
             catch(Exception ex)
             {
@@ -152,9 +152,9 @@
             _running.Reset();
             btnRun.Text = oldText;
             Context.Info.WriteLine("--- Completed in "+sw.Elapsed+" with return value="+ret+" ---");
-			reOut.ScrollToBottom();
-		    Context.Progress=oldProgress;
-           	Context.Output=oldOut;
+            reOut.ScrollToBottom();
+            Context.Progress=oldProgress;
+            Context.Output=oldOut;
             Cursor = Cursors.Arrow;
             Context.Progress = null;
             Context.Output = null;
@@ -166,7 +166,7 @@
 
         private void OnOutput(object sender1, OutputEventArgs e1)
         {
-        	reOut.Output(e1.OutputType,e1.Text);
+            reOut.Output(e1.OutputType,e1.Text);
         }
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -361,95 +361,95 @@
     }
     
     // Extended richedit box, that supports different fonts and backspace character
-	public  class OutputRichTextBox : RichTextBox
-	{
+    public  class OutputRichTextBox : RichTextBox
+    {
         private Font _font,_fontBold;
 
         [DllImport("User32.dll", CharSet = CharSet.Auto)]
         private static extern int SendMessage(IntPtr h, int msg, int wParam, int lParam);
         
-		private Font createFont(bool bold)
-		{
-			Font f=new Font("Consolas", 9, bold?FontStyle.Bold:FontStyle.Regular);
+        private Font createFont(bool bold)
+        {
+            Font f=new Font("Consolas", 9, bold?FontStyle.Bold:FontStyle.Regular);
             if (f.Name != "Consolas")
                 f = new Font("Courier New", 9, bold?FontStyle.Bold:FontStyle.Regular);
             return f;
-		}
-		
-		public void LoadFonts() 
-		{
-			_font=createFont(false);
+        }
+        
+        public void LoadFonts() 
+        {
+            _font=createFont(false);
             _fontBold=createFont(true);
             this.Font = _font;
-		}
-		public void ScrollToBottom()
-		{
-			SendMessage(this.Handle, 0x115, 7, 0);
-		}
+        }
+        public void ScrollToBottom()
+        {
+            SendMessage(this.Handle, 0x115, 7, 0);
+        }
         
         public void Output(OutputType otype, string text)
         {        
-    	    this.Select(this.TextLength,0);
+            this.Select(this.TextLength,0);
             StringBuilder sb=new StringBuilder();
             foreach (char ch in text)
             {
-            	if (ch==(char)8)
-            	{
-            		if (sb.Length>0)
-	            		this.AppendText(sb.ToString());
-	            	while (this.TextLength>0)
-	            	{
-						this.Select(this.TextLength-1,1);	            	
-						string s=this.SelectedText;
-						if (s=="\n" || s=="\r" || s=="")
-						{
-							this.Select(this.TextLength,0);
-							break;
-						}
-						this.Select(this.TextLength-1,1);	            	
-						this.ReadOnly=false;
-						this.SelectedText=string.Empty;
-						this.ReadOnly=true;
-					}
-            		sb.Length=0;
-            	}
-            	else
-            	{
-            		if (sb.Length==0)
-            		{
-						switch (otype)
-						{
-							case OutputType.Debug:	this.SelectionColor = Color.Cyan;	break;
-							case OutputType.Error:  this.SelectionColor = Color.Yellow; break;
-							case OutputType.Info:	this.SelectionColor = Color.LightGreen; break;
-							case OutputType.Bold:   this.SelectionColor = Color.White; break;
-							default:				this.SelectionColor = Color.LightGray; break;
-						}
-						if (otype==OutputType.Bold)
-						{
-							if (this.SelectionFont.Bold!=true)
-								this.SelectionFont=_fontBold;
-						}
-						else if (this.SelectionFont.Bold!=false)
-							this.SelectionFont=_font;
-					}
-            		sb.Append(ch);
-            		if (sb.Length>5000)
-            		{
-      					this.AppendText(sb.ToString());
-      					sb.Length=0;
-      				}
-      					
-            	}
-			}
-			this.AppendText(sb.ToString());
+                if (ch==(char)8)
+                {
+                    if (sb.Length>0)
+                        this.AppendText(sb.ToString());
+                    while (this.TextLength>0)
+                    {
+                        this.Select(this.TextLength-1,1);                   
+                        string s=this.SelectedText;
+                        if (s=="\n" || s=="\r" || s=="")
+                        {
+                            this.Select(this.TextLength,0);
+                            break;
+                        }
+                        this.Select(this.TextLength-1,1);                   
+                        this.ReadOnly=false;
+                        this.SelectedText=string.Empty;
+                        this.ReadOnly=true;
+                    }
+                    sb.Length=0;
+                }
+                else
+                {
+                    if (sb.Length==0)
+                    {
+                        switch (otype)
+                        {
+                            case OutputType.Debug:  this.SelectionColor = Color.Cyan;   break;
+                            case OutputType.Error:  this.SelectionColor = Color.Yellow; break;
+                            case OutputType.Info:   this.SelectionColor = Color.LightGreen; break;
+                            case OutputType.Bold:   this.SelectionColor = Color.White; break;
+                            default:                this.SelectionColor = Color.LightGray; break;
+                        }
+                        if (otype==OutputType.Bold)
+                        {
+                            if (this.SelectionFont.Bold!=true)
+                                this.SelectionFont=_fontBold;
+                        }
+                        else if (this.SelectionFont.Bold!=false)
+                            this.SelectionFont=_font;
+                    }
+                    sb.Append(ch);
+                    if (sb.Length>5000)
+                    {
+                        this.AppendText(sb.ToString());
+                        sb.Length=0;
+                    }
+                        
+                }
+            }
+            this.AppendText(sb.ToString());
 
-			ScrollToBottom();
+            ScrollToBottom();
             Application.DoEvents();
         }
-	}
-	
-	
+    }
+    
+    
 ?>
 </sub>
-<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#WithComments"><InclusiveNamespaces PrefixList="Sign" xmlns="http://www.w3.org/2001/10/xml-exc-c14n#" /></CanonicalizationMethod><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>enAFsEe71/Qap9h73//wo5YBHME=</DigestValue></Reference></SignedInfo><SignatureValue>gz6nFmqvc/qR0ZZmUWM2oBpgtvdYw007+q5M9Uv6xK33Yd3fvY1TXtStyeMTCGidPVTgZG8bVWwtCFVqBgvd2DjII9T0TuUXlQJJFKOgAUNv2JoNXtrzFgMUl616loepdUpY1aQVPdsaxdRkkQc9yB3HwLg1aRa/d7+bBftpXnI=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>oCKTg0Lq8MruXHnFdhgJA8hS98P5rJSABfUFHicssx0mltfqeuGsgzzpk8gLpNPkmJV+ca+pqPILiyNmMfLnTg4w99zH3FRNd6sIoN1veU87OQ5a0Ren2jmlgAAscHy2wwgjxx8YuP/AIfROTtGVaqVT+PhSvl09ywFEQ+0vlnk=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue></KeyInfo></Signature></xsharper>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#WithComments"><InclusiveNamespaces PrefixList="Sign" xmlns="http://www.w3.org/2001/10/xml-exc-c14n#" /></CanonicalizationMethod><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>QUEO18rVkmvM4DVa1ubbXTMWNng=</DigestValue></Reference></SignedInfo><SignatureValue>JQR/SRrabZmG44davyB8jqFoo7F1IAaTUDhAJOfb5Ab/D1OxM6OL0NzasV/vLOD3az5Cgf0a0PuB2FFHmFDYGXlOY9v846bvalGo+CVscApPwmooF/UV0SpiXP1Rxk5d7fOyEIDjipkRti8VH+BPGrEFu8WjjhNQsUJ585cRdNs=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>oCKTg0Lq8MruXHnFdhgJA8hS98P5rJSABfUFHicssx0mltfqeuGsgzzpk8gLpNPkmJV+ca+pqPILiyNmMfLnTg4w99zH3FRNd6sIoN1veU87OQ5a0Ren2jmlgAAscHy2wwgjxx8YuP/AIfROTtGVaqVT+PhSvl09ywFEQ+0vlnk=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue></KeyInfo></Signature></xsharper>

@@ -247,10 +247,18 @@ namespace XSharper.Core
                             if (fi.Exists && (fi.Attributes & mask)!=0)
                                 fi.Attributes = fi.Attributes & ~mask;
 
-                            using (Stream outputStream = Context.CreateStream(targetName))
+                            try
                             {
-                                StreamUtils.Copy(zip.GetInputStream(entry), outputStream, new byte[16384],
-                                                 delegate(object x, ProgressEventArgs y) { Context.OnProgress(1, y.Name); }, ProgressInterval, this, entry.Name, entry.Size);
+                                using (Stream outputStream = Context.CreateStream(targetName))
+                                {
+                                    StreamUtils.Copy(zip.GetInputStream(entry), outputStream, new byte[16384],
+                                                     delegate(object x, ProgressEventArgs y) { Context.OnProgress(1, y.Name); }, ProgressInterval, this, entry.Name, entry.Size);
+                                }
+                            }
+                            catch
+                            {
+                                File.Delete(targetName);
+                                throw;
                             }
 
                             setAttributes(fi, entry);

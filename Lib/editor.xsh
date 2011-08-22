@@ -1,42 +1,42 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xsharper xmlns="http://www.xsharper.com/schemas/1.0" ID="Editor" unknownSwitches="true">
-	<versionInfo title="XSharper Editor" value="Edit any XSharper script in interactive mode." Version="0.1.0.0" Copyright="(C) 2009 DeltaX Inc." />
-	<usage options="ifNoArguments default" />
-	<param name="filename" required="true" value="Script file to edit" />
-	<param name="args" required="false" value="Command line arguments for the edited script" count="multiple" last="true" />
+    <versionInfo title="XSharper Editor" value="Edit any XSharper script in interactive mode." Version="0.1.0.0" Copyright="(C) 2009 DeltaX Inc." />
+    <usage options="ifNoArguments default" />
+    <param name="filename" required="true" value="Script file to edit" />
+    <param name="args" required="false" value="Command line arguments for the edited script" count="multiple" last="true" />
 
 <?_ Application.EnableVisualStyles();
-	Application.SetCompatibleTextRenderingDefault(false);
-	
-	EditorForm f1=new EditorForm();
-	f1.Filename=c.GetString("filename");
-	
-	StringBuilder sb=new StringBuilder();
-	if (c.IsSet("args"))
-		f1.Args=XS.Utils.QuoteArgs(c.GetStringArray("args"));
-	Application.Run(f1);
+    Application.SetCompatibleTextRenderingDefault(false);
+    
+    EditorForm f1=new EditorForm();
+    f1.Filename=c.GetString("filename");
+    
+    StringBuilder sb=new StringBuilder();
+    if (c.IsSet("args"))
+        f1.Args=XS.Utils.QuoteArgs(c.GetStringArray("args"));
+    Application.Run(f1);
 
 ?>
 
 <reference name="System.Windows.Forms" />
 <reference name="System.Drawing" />
 <?header using System.Windows.Forms;
-	using System.Collections.Generic;
-	using System.ComponentModel;
-	using System.Data;
-	using System.Diagnostics;
-	using System.Drawing;
-	using System.IO;
-	using System.Text;
-	using System.Windows.Forms;
-	using XSharper.Core;
-	using System.Xml;
-	using System.Runtime.InteropServices;
-	using System.Text.RegularExpressions;	
-	using System.Threading;
-	
-	public  class EditorForm : Form
-	{
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Data;
+    using System.Diagnostics;
+    using System.Drawing;
+    using System.IO;
+    using System.Text;
+    using System.Windows.Forms;
+    using XSharper.Core;
+    using System.Xml;
+    using System.Runtime.InteropServices;
+    using System.Text.RegularExpressions;   
+    using System.Threading;
+    
+    public  class EditorForm : Form
+    {
         private System.ComponentModel.IContainer components = null;
         protected override void Dispose(bool disposing)
         {
@@ -55,7 +55,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-	        this.Icon=Icon.ExtractAssociatedIcon(Process.GetCurrentProcess().MainModule.FileName);
+            this.Icon=Icon.ExtractAssociatedIcon(Process.GetCurrentProcess().MainModule.FileName);
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.edCode = new MyTextBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
@@ -260,7 +260,7 @@
         }
 
         
-		private void EditorForm_Load(object sender, EventArgs e)
+        private void EditorForm_Load(object sender, EventArgs e)
         {
             // Change font & tab stops
             reOut.LoadFonts();
@@ -269,21 +269,21 @@
 
             this.Text=Path.GetFullPath(Filename);
             if (File.Exists(Filename))
-	   		    this.Icon=Icon.ExtractAssociatedIcon(Filename);
+                this.Icon=Icon.ExtractAssociatedIcon(Filename);
 
            
             ScriptContext ctx=new ScriptContext(null);
             if (File.Exists(Filename))
             {
-           		edCode.Text=ctx.ReadText(Filename);
-           	}
-           	else
-           	{
-           		this.Text+=" (new)";
-           		edCode.Text=@"<?xml version=""1.0"" encoding=""utf-8""?"+">"+@"
+                edCode.Text=ctx.ReadText(Filename);
+            }
+            else
+            {
+                this.Text+=" (new)";
+                edCode.Text=@"<?xml version=""1.0"" encoding=""utf-8""?"+">"+@"
 <xsharper xmlns=""http://www.xsharper.com/schemas/1.0"">
 </xsharper>";
-           	}	
+            }   
             edCode.SelectionStart = 0;
             edCode.SelectionLength = 0;
             
@@ -292,40 +292,40 @@
         }
         private bool Save(bool close)
         {
-        	try {
-				if (edCode.Modified)
-				{
-					using (StreamWriter sw = new StreamWriter(Filename, false))
-					{
-						sw.Write(edCode.Text);
-					}
-					this.Text=Path.GetFullPath(Filename);
-					edCode.Modified=false;
-				}
-			}
-			catch (Exception ex)
-			{
-				
-				MessageBoxButtons btn=MessageBoxButtons.OK;
-				string message=ex.Message;
-				if (close)
-				{
-					message+=Environment.NewLine+Environment.NewLine+"Close without saving?";
-					btn=MessageBoxButtons.YesNo;
-					
-				}
-				DialogResult res=MessageBox.Show(message, "Error when saving script",  btn, MessageBoxIcon.Error, close?MessageBoxDefaultButton.Button2:MessageBoxDefaultButton.Button1);
-				if (close && res!=DialogResult.Yes)
-					return false;
-				return true;
-			}
-			return true;
+            try {
+                if (edCode.Modified)
+                {
+                    using (StreamWriter sw = new StreamWriter(Filename, false))
+                    {
+                        sw.Write(edCode.Text);
+                    }
+                    this.Text=Path.GetFullPath(Filename);
+                    edCode.Modified=false;
+                }
+            }
+            catch (Exception ex)
+            {
+                
+                MessageBoxButtons btn=MessageBoxButtons.OK;
+                string message=ex.Message;
+                if (close)
+                {
+                    message+=Environment.NewLine+Environment.NewLine+"Close without saving?";
+                    btn=MessageBoxButtons.YesNo;
+                    
+                }
+                DialogResult res=MessageBox.Show(message, "Error when saving script",  btn, MessageBoxIcon.Error, close?MessageBoxDefaultButton.Button2:MessageBoxDefaultButton.Button1);
+                if (close && res!=DialogResult.Yes)
+                    return false;
+                return true;
+            }
+            return true;
         }
 
         ScriptContext ctx = new ScriptContext(System.Reflection.Assembly.GetEntryAssembly());
-		private void btnRun_Click(object sender, EventArgs e)
+        private void btnRun_Click(object sender, EventArgs e)
         {
-			Save(false);        	
+            Save(false);            
             if (_running.WaitOne(0,false))
             {
                 _stopEvent.Set();
@@ -359,16 +359,16 @@
                 string text=edCode.SelectedText;
                 if (text.Length==0)
                 {
-                   	text=edCode.Text;
-                   	ctx.Clear();
+                    text=edCode.Text;
+                    ctx.Clear();
                 }
                 Script s = ctx.LoadScript(XmlReader.Create(new StringReader(text),rs), Filename);
                 ctx.Initialize(s);
                 using (XS.ConsoleRedirector r=new XS.ConsoleRedirector(ctx)) 
                 {
-                   	ctx.In=TextReader.Null;
-	                ret=ctx.ExecuteScript(s, XS.Utils.SplitArgs(edArgs.Text), CallIsolation.None);
-	            }
+                    ctx.In=TextReader.Null;
+                    ret=ctx.ExecuteScript(s, XS.Utils.SplitArgs(edArgs.Text), CallIsolation.None);
+                }
             }
             catch(Exception ex)
             {
@@ -398,18 +398,18 @@
         }
         private void OnOutput(object sender1, OutputEventArgs e1)
         {
-    	    reOut.Output(e1.OutputType,e1.Text);
-      	}
+            reOut.Output(e1.OutputType,e1.Text);
+        }
         
         
 
         private void EditorForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-        	if (!Save(true))
-        	{
-        		e.Cancel=true;
-				return;
-        	}
+            if (!Save(true))
+            {
+                e.Cancel=true;
+                return;
+            }
             if (_running.WaitOne(0,false))
             {
                 Text = "Cancelling script...";
@@ -421,110 +421,110 @@
         }
         
         public class MyTextBox : System.Windows.Forms.TextBox
-		{
-			protected override void OnKeyDown(System.Windows.Forms.KeyEventArgs e)
-			{
-				if (e.Control && (e.KeyCode == System.Windows.Forms.Keys.A))
-				{
-					this.SelectAll();
-					e.SuppressKeyPress = true;
-					e.Handled = true;
-				}
-				else
-					base.OnKeyDown(e);
-			}
-		}
+        {
+            protected override void OnKeyDown(System.Windows.Forms.KeyEventArgs e)
+            {
+                if (e.Control && (e.KeyCode == System.Windows.Forms.Keys.A))
+                {
+                    this.SelectAll();
+                    e.SuppressKeyPress = true;
+                    e.Handled = true;
+                }
+                else
+                    base.OnKeyDown(e);
+            }
+        }
 
-	}
-	
-	// Extended richedit box, that supports different fonts and backspace character
-	public  class OutputRichTextBox : RichTextBox
-	{
+    }
+    
+    // Extended richedit box, that supports different fonts and backspace character
+    public  class OutputRichTextBox : RichTextBox
+    {
         private Font _font,_fontBold;
 
         [DllImport("User32.dll", CharSet = CharSet.Auto)]
         private static extern int SendMessage(IntPtr h, int msg, int wParam, int lParam);
         
-		private Font createFont(bool bold)
-		{
-			Font f=new Font("Consolas", 9, bold?FontStyle.Bold:FontStyle.Regular);
+        private Font createFont(bool bold)
+        {
+            Font f=new Font("Consolas", 9, bold?FontStyle.Bold:FontStyle.Regular);
             if (f.Name != "Consolas")
                 f = new Font("Courier New", 9, bold?FontStyle.Bold:FontStyle.Regular);
 
             return f;
-		}
-		
-		public void LoadFonts() 
-		{
-			_font=createFont(false);
+        }
+        
+        public void LoadFonts() 
+        {
+            _font=createFont(false);
             _fontBold=createFont(true);
             this.Font = _font;
-		}
-		public void ScrollToBottom()
-		{
-			SendMessage(this.Handle, 0x115, 7, 0);
-		}
+        }
+        public void ScrollToBottom()
+        {
+            SendMessage(this.Handle, 0x115, 7, 0);
+        }
         
         public void Output(OutputType otype, string text)
         {        
-    	    this.Select(this.TextLength,0);
+            this.Select(this.TextLength,0);
             StringBuilder sb=new StringBuilder();
             foreach (char ch in text)
             {
-            	if (ch==(char)8)
-            	{
-            		if (sb.Length>0)
-	            		this.AppendText(sb.ToString());
-	            	while (this.TextLength>0)
-	            	{
-						this.Select(this.TextLength-1,1);	            	
-						string s=this.SelectedText;
-						if (s=="\n" || s=="\r" || s=="")
-						{
-							this.Select(this.TextLength,0);
-							break;
-						}
-						this.Select(this.TextLength-1,1);	            	
-						this.ReadOnly=false;
-						this.SelectedText=string.Empty;
-						this.ReadOnly=true;
-					}
-            		sb.Length=0;
-            	}
-            	else
-            	{
-            		if (sb.Length==0)
-            		{
-						switch (otype)
-						{
-							case OutputType.Debug:	this.SelectionColor = Color.Cyan;	break;
-							case OutputType.Error:  this.SelectionColor = Color.Yellow; break;
-							case OutputType.Info:	this.SelectionColor = Color.LightGreen; break;
-							case OutputType.Bold:   this.SelectionColor = Color.White; break;
-							default:				this.SelectionColor = Color.LightGray; break;
-						}
-						if (otype==OutputType.Bold)
-						{
-							if (this.SelectionFont.Bold!=true)
-								this.SelectionFont=_fontBold;
-						}
-						else if (this.SelectionFont.Bold!=false)
-							this.SelectionFont=_font;
-					}
-            		sb.Append(ch);
-            		if (sb.Length>5000)
-            		{
-      					this.AppendText(sb.ToString());
-      					sb.Length=0;
-      				}
-      					
-            	}
-			}
-			this.AppendText(sb.ToString());
+                if (ch==(char)8)
+                {
+                    if (sb.Length>0)
+                        this.AppendText(sb.ToString());
+                    while (this.TextLength>0)
+                    {
+                        this.Select(this.TextLength-1,1);                   
+                        string s=this.SelectedText;
+                        if (s=="\n" || s=="\r" || s=="")
+                        {
+                            this.Select(this.TextLength,0);
+                            break;
+                        }
+                        this.Select(this.TextLength-1,1);                   
+                        this.ReadOnly=false;
+                        this.SelectedText=string.Empty;
+                        this.ReadOnly=true;
+                    }
+                    sb.Length=0;
+                }
+                else
+                {
+                    if (sb.Length==0)
+                    {
+                        switch (otype)
+                        {
+                            case OutputType.Debug:  this.SelectionColor = Color.Cyan;   break;
+                            case OutputType.Error:  this.SelectionColor = Color.Yellow; break;
+                            case OutputType.Info:   this.SelectionColor = Color.LightGreen; break;
+                            case OutputType.Bold:   this.SelectionColor = Color.White; break;
+                            default:                this.SelectionColor = Color.LightGray; break;
+                        }
+                        if (otype==OutputType.Bold)
+                        {
+                            if (this.SelectionFont.Bold!=true)
+                                this.SelectionFont=_fontBold;
+                        }
+                        else if (this.SelectionFont.Bold!=false)
+                            this.SelectionFont=_font;
+                    }
+                    sb.Append(ch);
+                    if (sb.Length>5000)
+                    {
+                        this.AppendText(sb.ToString());
+                        sb.Length=0;
+                    }
+                        
+                }
+            }
+            this.AppendText(sb.ToString());
 
-			ScrollToBottom();
+            ScrollToBottom();
             Application.DoEvents();
         }
-	}
+    }
 ?>
-<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#WithComments"><InclusiveNamespaces PrefixList="Sign" xmlns="http://www.w3.org/2001/10/xml-exc-c14n#" /></CanonicalizationMethod><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>ncSKFmqLL76jDeDDWq//pva2HVk=</DigestValue></Reference></SignedInfo><SignatureValue>mg3grTGyBA2bETD8qGNjPr0XDz2K78wsPgrldZpGaKkiuVNDFhOToKkFs95HkJWNsFs2sHcJE8oYzZdXr89hDOQebiJHZkyDSGVo7I4l2Lko3U3TgFcuqIMhJP6D6ngLISkd2fn5qspd20mOV49NKUhcKRFSGUFMltSlaz1s0+A=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>oCKTg0Lq8MruXHnFdhgJA8hS98P5rJSABfUFHicssx0mltfqeuGsgzzpk8gLpNPkmJV+ca+pqPILiyNmMfLnTg4w99zH3FRNd6sIoN1veU87OQ5a0Ren2jmlgAAscHy2wwgjxx8YuP/AIfROTtGVaqVT+PhSvl09ywFEQ+0vlnk=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue></KeyInfo></Signature></xsharper>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#WithComments"><InclusiveNamespaces PrefixList="Sign" xmlns="http://www.w3.org/2001/10/xml-exc-c14n#" /></CanonicalizationMethod><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>xIRrRkDAmUBbfEGaUhgmT7YCeyw=</DigestValue></Reference></SignedInfo><SignatureValue>erUrCWBDacemzEfyHnwD0M0ENn8corFY/stKBWzWn7+jjZDMmyi4WUA2N4D5+NPlkUtuqplJJogQtozJ/SYysOhNrT33FRhNISfzNbzpkSEJMp272/k8GXyD0KFygs4C1TD/8tMh+eWLjmbLyUqeifbHI7ZShIzbf/VCLMJbpsM=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>oCKTg0Lq8MruXHnFdhgJA8hS98P5rJSABfUFHicssx0mltfqeuGsgzzpk8gLpNPkmJV+ca+pqPILiyNmMfLnTg4w99zH3FRNd6sIoN1veU87OQ5a0Ren2jmlgAAscHy2wwgjxx8YuP/AIfROTtGVaqVT+PhSvl09ywFEQ+0vlnk=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue></KeyInfo></Signature></xsharper>

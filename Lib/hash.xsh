@@ -10,14 +10,14 @@
   <foreach in="${files}">
     <set hash="${= $md5 ? MD5.Create() : null }" />
     <set hash="${= $sha256 ? SHA256.Create() : $hash }" />
-	<set hash="${= $hash ?? SHA1.Create()  }" />
+    <set hash="${= $hash ?? SHA1.Create()  }" />
 
-	<set stream="${= ($==&quot;-&quot;)?System.Console.OpenStandardInput():c.OpenStream($)}" />
-	<try>
-		<print>${=.ToHex($hash.ComputeHash($stream)).ToUpper()}</print>
-	</try>
-	<finally>
-		<eval>$stream.Dispose();</eval>
-	</finally>
+    <set stream="${= ($==&quot;-&quot;)?System.Console.OpenStandardInput():c.OpenStream($)}" />
+    <try>
+        <print>${=.ToHex($hash.ComputeHash($stream)).ToUpper()}</print>
+    </try>
+    <finally>
+        <eval>$stream.Dispose();</eval>
+    </finally>
   </foreach>
-<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#WithComments"><InclusiveNamespaces PrefixList="Sign" xmlns="http://www.w3.org/2001/10/xml-exc-c14n#" /></CanonicalizationMethod><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>BBGvvgL1309WcTpHLd5+irmYpMQ=</DigestValue></Reference></SignedInfo><SignatureValue>lIWzSzYp6S9P71g2PPAkTN9XsC0ur5Avg3WzhbZXeJIyihyzzcjOz2s1nr4Tk+R0QJZLhwrIGHTyj9hcxspku+vktHMlDVt1ebCkeU5fa46Q05HF/f96CPEBzN+Vs6tBy7EX2TFVo4wx0RVM4K+qoJRU2d6kV2LgHLzerhnGt24=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>oCKTg0Lq8MruXHnFdhgJA8hS98P5rJSABfUFHicssx0mltfqeuGsgzzpk8gLpNPkmJV+ca+pqPILiyNmMfLnTg4w99zH3FRNd6sIoN1veU87OQ5a0Ren2jmlgAAscHy2wwgjxx8YuP/AIfROTtGVaqVT+PhSvl09ywFEQ+0vlnk=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue></KeyInfo></Signature></xsharper>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#WithComments"><InclusiveNamespaces PrefixList="Sign" xmlns="http://www.w3.org/2001/10/xml-exc-c14n#" /></CanonicalizationMethod><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>KuFIExA/PdsmdE+FUo2O3cRRsx8=</DigestValue></Reference></SignedInfo><SignatureValue>GHUz8KPdC3eLlqI1+VVxh6/g8WbkDyql0/eq5JE0BpX01MdtJuGbWaRfnAtPiDOIuypBGocrJ5O+eSYvM10KxQOQZXIyYk55ar6JYMmAczgvuIpUsrKTMohP0DMLnIjy7xSRAFTP+b8xyyaUDolPjvqlWDEGuWLY5NvUVO0meOI=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>oCKTg0Lq8MruXHnFdhgJA8hS98P5rJSABfUFHicssx0mltfqeuGsgzzpk8gLpNPkmJV+ca+pqPILiyNmMfLnTg4w99zH3FRNd6sIoN1veU87OQ5a0Ren2jmlgAAscHy2wwgjxx8YuP/AIfROTtGVaqVT+PhSvl09ywFEQ+0vlnk=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue></KeyInfo></Signature></xsharper>
