@@ -120,10 +120,17 @@ namespace XSharper.Core
                                 log = log.Replace("*", pn);
                             }
                         }
-            
+
+                        bool append = false;
+                        if (log.StartsWith("+"))
+                        {
+                            log = log.Substring(1);
+                            append = true;
+                        }
                         if (log != _logFile)
                         {
-                            _log = new StreamWriter(new FileStream(log, FileMode.Create, FileAccess.Write, FileShare.Read));
+
+                            _log = new StreamWriter(new FileStream(log, append?FileMode.Append: FileMode.Create, FileAccess.Write, FileShare.Read));
                             _logFile = log;
                         }
                     }
