@@ -129,7 +129,7 @@ namespace XSharper.Core
         {
             if (_cachedClassName == null || Dynamic)
             {
-                using (SHA1 sha = new SHA1Managed())
+                using (SHA1 sha = SHA1.Create())
                 {
                     string text = GetTransformedValueStr();
                     _cachedClassName="XSharperSnippet_" + BitConverter.ToString(

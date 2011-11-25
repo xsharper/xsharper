@@ -266,8 +266,8 @@ namespace XSharper.Core
                 sw.Flush();
                 ms.Position = 0;
 
-                SHA1 sha1Managed = SHA1Managed.Create();
-                return BitConverter.ToString(sha1Managed.ComputeHash(ms.ToArray())).Replace("-","");
+                SHA1 sha1 = SHA1.Create();
+                return BitConverter.ToString(sha1.ComputeHash(ms.ToArray())).Replace("-","");
             }
         }
 

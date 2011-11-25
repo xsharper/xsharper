@@ -459,7 +459,7 @@ namespace XSharper.Core
         /// Calculate SHA1 over file contents
         public byte[] SHA1File(string filename)
         {
-            using (SHA1 hash = SHA1Managed.Create())
+            using (SHA1 hash = SHA1.Create())
             using (var s = OpenStream(filename))
                 return hash.ComputeHash(s);
         }
