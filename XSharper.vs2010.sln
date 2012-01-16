@@ -1,10 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{11286F79-1B60-4729-834A-8DFF21849950}"
-	ProjectSection(SolutionItems) = preProject
-		LocalTestRun.testrunconfig = LocalTestRun.testrunconfig
-		XSharper.vsmdi = XSharper.vsmdi
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XSharper.vs2010", "XSharper\XSharper.vs2010.csproj", "{D6BD662C-3FF7-43F7-BE9E-E600B92FDD79}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -18,9 +14,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gzip.vs2010", "Tools\Gzip\Gzip.vs2010.csproj", "{CCBDAA96-BC4F-4512-B1F6-0E26572235F3}"
 EndProject
 Global
-	GlobalSection(TestCaseManagementSettings) = postSolution
-		CategoryFile = XSharper.vsmdi
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms
