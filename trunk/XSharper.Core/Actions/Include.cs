@@ -40,7 +40,6 @@ namespace XSharper.Core
     {
         /// File from where to load the file
         [XsAttribute("from"), XsAttribute("location")]
-        [XsRequired]
         [Description("File from where to load the file")]
         public string From { get; set; }
 
