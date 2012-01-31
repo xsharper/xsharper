@@ -1145,6 +1145,12 @@ namespace XSharper.Core
                 _redirects.Remove(outputType);
             else
             {
+                bool forceAppend = false;
+                if (redirectTo.StartsWith("+", StringComparison.Ordinal))
+                {
+                    forceAppend = true;
+                    redirectTo = redirectTo.Substring(1);
+                }
                 if (redirectTo.StartsWith("^", StringComparison.Ordinal))
                 {
                     string s = redirectTo.Substring(1);
@@ -1152,12 +1158,8 @@ namespace XSharper.Core
                     // If stream name starts with # treat as file
                     if (s.StartsWith("#", StringComparison.Ordinal))
                     {
-                        // ^#data.txt => Overwrite data.txt. ^#+data.txt => Append to data.txt
-                        if (!s.StartsWith("#+", StringComparison.Ordinal))
-                        {
+                        if (!forceAppend)
                             WriteText(s.Substring(1), null);
-                            redirectTo = "^#+" + s.Substring(1);
-                        }
                     }
                     else 
                     {
@@ -1170,7 +1172,7 @@ namespace XSharper.Core
                         
                     }
                 }
-                _redirects[outputType] = redirectTo;
+                _redirects[outputType] = "+"+redirectTo;
             }
                 
             writeInternal(outputType, string.Empty,true);

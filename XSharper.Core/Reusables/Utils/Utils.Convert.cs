@@ -178,6 +178,17 @@ namespace XSharper.Core
                 obj = ot.InvokeMember("ToArray", BindingFlags.Instance | BindingFlags.Public | BindingFlags.InvokeMethod, null, obj, new object[0]);
                 ot = obj.GetType();
             }
+            if (pt == typeof(Guid?))
+            {
+                try
+                {
+                    var g = new Guid(ot.ToString());
+                    return (Guid?)g;
+                }
+                catch { return (Guid?)null; }
+            }
+            if (pt == typeof(Guid))
+                return new Guid(ot.ToString());
 
             
             throw new InvalidCastException("Cannot convert " + ot + " to " + pt);

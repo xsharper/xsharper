@@ -132,9 +132,9 @@ namespace XSharper.Core
         [Description("Convert ' to '' (useful for SQL)")]
         DoubleSingleQuotes= 0x0400000,
 
-        /// Convert " to "" (useful for C#)
-        [Description("Convert \" to \"\" (useful for C#)")]
-        DoubleDoubleQuotes =0x0800000,
+        /// Escape HTML special characters
+        [Description("Escape HTML special characters")]
+        EscapeHtml =0x0800000,
 
         /// Escape all XML special characters
         [Description("Escape all XML special characters")]
@@ -455,8 +455,25 @@ namespace XSharper.Core
                 ret = ret.Replace("\r\n", "\n").Replace("\r", "\n").Replace("\n", "\r\n");
             if ((trim & TransformRules.DoubleSingleQuotes) == TransformRules.DoubleSingleQuotes)
                 ret = ret.Replace("'", "''");
-            if ((trim & TransformRules.DoubleDoubleQuotes) == TransformRules.DoubleDoubleQuotes)
-                ret = ret.Replace("\"", "\"\"");
+            if ((trim & TransformRules.EscapeHtml) == TransformRules.EscapeHtml)
+            {
+                StringBuilder sb = new StringBuilder(ret.Length * 2);
+                foreach (char ch in ret)
+                {
+                    switch (ch)
+                    {
+                        case '&': sb.Append("&amp;"); break;
+                        case '<': sb.Append("&lt;"); break;
+                        case '>': sb.Append("&gt;"); break;
+                        case '"': sb.Append("&quot;"); break;
+                        case '\'': sb.Append("&#x27;"); break;
+                        case '/': sb.Append("&#x2F;"); break;
+                        default:
+                            sb.Append(ch);break;
+                    }
+                }
+                ret = sb.ToString();
+            }
             if ((trim & TransformRules.EscapeXml) == TransformRules.EscapeXml)
                 ret = SecurityElement.Escape(ret);
             if ((trim & TransformRules.QuoteArg) == TransformRules.QuoteArg)
