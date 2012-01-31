@@ -143,7 +143,7 @@ namespace XSharper
             
             foreach (var pair in d)
             {
-                var tr = context.TransformStr(pair.Value, script.VersionInfo.Transform | TransformRules.Trim | TransformRules.DoubleDoubleQuotes);
+                var tr = context.TransformStr(pair.Value??string.Empty, script.VersionInfo.Transform | TransformRules.Trim ).Replace("\"","\"\"");
                 if (!string.IsNullOrEmpty(tr))
                     sb.AppendLine(pair.Key.Replace("'{}'", "@\"" + tr + "\""));
             }
@@ -255,7 +255,7 @@ class C${guid} {}
                 if (t == typeof(string))
                 {
                     MainCode.Write("@\"");
-                    MainCode.Write(Utils.TransformStr(o.ToString(), TransformRules.NewLineToCRLF | TransformRules.DoubleDoubleQuotes));
+                    MainCode.Write(Utils.TransformStr(o.ToString(), TransformRules.NewLineToCRLF).Replace("\"", "\"\""));
                     MainCode.Write("\"");
                     return true;
                 }
