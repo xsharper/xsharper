@@ -730,14 +730,14 @@ namespace XSharper.Core
             string quote = Context.TransformStr(Quote, Transform);
             string separator = Context.TransformStr(Separator, Transform);
 
-            using (var dt = ToDataTable("data"))
+            using (var dt = ToDataTable())
                 return Utils.ToCsv(dt, withHeader, string.IsNullOrEmpty(quote) ? '"' : quote[0], separator[0]);
         }
 
         /// Convert rowset to a CSV with or without header, and using specified separators and quote characters
         public string ToCSV(bool withHeader, char quote, char separator)
         {
-            using (var dt = ToDataTable("data"))
+            using (var dt = ToDataTable())
                 return Utils.ToCsv(dt, withHeader, quote, separator);
         }
 
