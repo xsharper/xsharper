@@ -62,7 +62,7 @@ namespace XSharper.Core
 
         
         /// <summary>
-        /// Convert the value of the variable as array. Single values are converted to an 1 element arrays. If variable is not set, 0 element array is returned
+        /// Convert the value of the variable as array. Single values are converted to an 1 element arrays. If variable is not set, or is null, 0 element array is returned
         /// </summary>
         /// <typeparam name="T">Type of the array element</typeparam>
         /// <param name="variableName">Variable name</param>
@@ -72,7 +72,7 @@ namespace XSharper.Core
             variableName = variableName ?? string.Empty;
           
             object o;
-            if (!TryGetValue(variableName,out o))
+            if (!TryGetValue(variableName,out o) || o==null)
                 return new T[0];
             Array oa = o as Array;
             if (oa!=null)
