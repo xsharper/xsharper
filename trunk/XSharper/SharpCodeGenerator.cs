@@ -109,7 +109,8 @@ namespace XSharper
             sv["script"] = Compiler.GetTypeName(script.GetType());
             sv["callIsolation"] = Compiler.GetTypeName(typeof (CallIsolation));
             sv["iscriptaction"] = Compiler.GetTypeName(typeof (IScriptAction));
-            sv["usings"] = Compiler.GenerateFileHeader();
+            sv["usings"] = Compiler.GenerateFileHeader(true,false);
+            sv["headers"] = Compiler.GenerateFileHeader(false,true);
             sv["context"] = Compiler.GetTypeName(context.GetType());
             using (StringWriter swCode = new StringWriter())
             using (StringWriter swSnippets = new StringWriter())
