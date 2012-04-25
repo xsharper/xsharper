@@ -1,21 +1,20 @@
 <xsharper>
     <versionInfo title="gui-progress" value="Run XSharper script in a window with a progress bar." Version="0.1.0.0" Copyright="(C) 2009 DeltaX Inc." />
 
-	<param name='filename' required='1' />
-	<param name='arguments' default='${=null}' />
-	<param name='title' default='XSharper script' />
+	<param name="filename" required="1" />
+	<param name="arguments" default="${=null}" />
+	<param name="title" default="XSharper script" />
 
     <include id="myScript" from="${filename}" dynamic="true" />
 	<return>${=
 		gui_Progress('myScript', .SplitArgs($arguments), $title);
 	}</return>
 
-	<sub id='gui_Progress'>
-		<param name='scriptid' required='1' />
-		<param name='arguments' default="${=new string[0]}" />
-		<param name='title' default='XSharper script' />
-	<?_
-	    Application.EnableVisualStyles();
+	<sub id="gui_Progress">
+		<param name="scriptid" required="1" />
+		<param name="arguments" default="${=new string[0]}" />
+		<param name="title" default="XSharper script" />
+	<?_ Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
 		ProgressForm p=new ProgressForm();
 		p.Script=c.Find<XS.Script>(c.GetString("scriptid"),true);
@@ -27,11 +26,9 @@
 	?>
 	</sub>
 
-	<reference name="System.Windows.Forms" addUsing='true' />
-	<reference name="System.Drawing" addUsing='true' />
-	<?h
-
-    class ProgressForm : Form
+	<reference name="System.Windows.Forms" addUsing="true" />
+	<reference name="System.Drawing" addUsing="true" />
+	<?h class ProgressForm : Form
     {
 		public XS.ScriptContext Context { get;set; }
 		public XS.Script Script { get; set; }
@@ -129,4 +126,4 @@
         }
     }
 ?>
-</xsharper>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#WithComments"><InclusiveNamespaces PrefixList="Sign" xmlns="http://www.w3.org/2001/10/xml-exc-c14n#" /></CanonicalizationMethod><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>bycF8nN4mwRivPKPi8cLgrb/d08=</DigestValue></Reference></SignedInfo><SignatureValue>ZJ/GpQZ6dCb44r649XNL/9+jKelwZWH7qXQuFpK5tT38Xg1Nff7VqDJBxtXt1Ce6VcFpJYAtAuEm/QKLssMCHyck74O4Rh4iA1GSuMMXvA9SGFb19UEdUvHQrTmMG1LSfX8gHf+LnbcYm2oeeFFLXbtsdVn9owCcD3N8oXvd98g=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>oCKTg0Lq8MruXHnFdhgJA8hS98P5rJSABfUFHicssx0mltfqeuGsgzzpk8gLpNPkmJV+ca+pqPILiyNmMfLnTg4w99zH3FRNd6sIoN1veU87OQ5a0Ren2jmlgAAscHy2wwgjxx8YuP/AIfROTtGVaqVT+PhSvl09ywFEQ+0vlnk=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue></KeyInfo></Signature></xsharper>
