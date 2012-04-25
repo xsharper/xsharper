@@ -251,16 +251,17 @@ namespace XSharper.Core
 	                sb.AppendLine();
 	            }
 	            sb.AppendLine();
-			}
 
-			if (addHeaders)
-			{
 	            string currentId = GetFileHeaderCodeId();
 	            
 	            sb.AppendFormat("// This attribute is required to prevent unnecessary compilations");
 	            sb.AppendLine();
 	            sb.AppendFormat("[assembly: {0}(\"{1}\")]", typeof(XsHeadersIdentifierAttribute).FullName,currentId);
 	            sb.AppendLine();
+			}
+
+			if (addHeaders)
+			{
 	            foreach (string u in _headers)
 	                sb.AppendLine(u);
 			}
