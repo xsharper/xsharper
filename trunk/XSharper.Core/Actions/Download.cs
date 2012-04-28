@@ -54,6 +54,16 @@ namespace XSharper.Core
             TotalBytesToReceive = init;
             ProgressPercentage = init;
         }
+        public DownloadProgress(long received, long? len)
+        {
+            BytesReceived = received;
+            TotalBytesToReceive = len??-1;
+            ProgressPercentage = 0;
+            if (len!=null)
+                ProgressPercentage = (int)(received*100.0/len.Value);
+        }
+        
+
 
         /// Returns the fully qualified type name of this instance.
         public override string ToString()
@@ -228,7 +238,13 @@ namespace XSharper.Core
             {
                 get { return _progressAvailable;  }
             }
-
+            public void SetProgress(DownloadProgress p)
+            {
+                lock (_dpargs_lock)
+                {
+                    _progress = p;
+                }
+            }
             
             public void ProgressChanged(object sender, DownloadProgressChangedEventArgs e)
             {
@@ -337,41 +353,6 @@ namespace XSharper.Core
 
             VerboseMessage("Downloading {0} => {1}...", Utils.SecureUri(fromExpanded), toExpanded);
 
-            // Downloading from "embed:///" is simple copying really
-            if (uri.Scheme == "embed")
-            {
-                try
-                {
-                    byte[] buf=new byte[16384];
-                    using (Stream stream = Context.OpenStream(fromExpanded))
-                    {
-                        using (Stream fout = string.IsNullOrEmpty(outToExpanded)?Context.CreateStream(toExpanded):new MemoryStream())
-                        {
-                            int n;
-                            while ((n = stream.Read(buf, 0, buf.Length)) != 0)
-                                fout.Write(buf, 0, n);
-
-
-                            if (!string.IsNullOrEmpty(outToExpanded))
-                            {
-                                MemoryStream ms = (MemoryStream) fout;
-                                ms.Position = 0;
-                                if (Binary)
-                                    Context.OutTo(outToExpanded, ms.ToArray());
-                                else
-                                    Context.OutTo(outToExpanded, (enc==null?new StreamReader(ms):new StreamReader(ms, enc)).ReadToEnd());
-                            }
-                        }
-                    }
-                    return null;
-                }
-                catch
-                {
-                    File.Delete(toExpanded);
-                    throw;
-                }
-
-            }
             bool passive = PassiveFtp;
             bool ftpssl = false;
             bool ftp = false;
@@ -386,193 +367,278 @@ namespace XSharper.Core
                 ftpssl = (scheme == "ftps" || scheme == "ftpas" || scheme == "ftpsa");
             }
             var timeout = Utils.ToTimeSpan(Context.TransformStr(Timeout, Transform));
-            
-            using (DownloadState state = new DownloadState(Context))
-            using (WebClientEx webClient = new WebClientEx(passive, Binary))
+
+
+
+            if (uri.IsFile || uri.Scheme == "embed")
             {
-                webClient.KeepAlive = (ftp && !passive);
-                webClient.FtpSsl = ftpssl;
-                webClient.CachePolicy = new RequestCachePolicy(CacheLevel);
-
-                string user = Context.TransformStr(User, Transform);
-                string password = Context.TransformStr(Password, Transform);
-                uri = webClient.SetCredentials(uri, user, password);
-
-                if (!string.IsNullOrEmpty(Post))
-                {
-                    webClient.HttpPost = Context.Transform(Post, Transform);
-                    if (!string.IsNullOrEmpty(PostContentType))
-                        webClient.HttpPostContentType = Context.TransformStr(PostContentType, Transform);
-                }
-                webClient.HttpUserAgent = Context.TransformStr(UserAgent, Transform);
-                webClient.Timeout = timeout;
-
-
-                int oldPercentage = -1;
-                long bytesReceived = -1;
-
-
-                // We must ensure that all script components are executed in a single thread
-                webClient.DownloadProgressChanged += state.ProgressChanged;
-                webClient.DownloadFileCompleted += state.FileCompleted;
-                webClient.DownloadStringCompleted += state.StringCompleted;
-                webClient.DownloadDataCompleted += state.DataCompleted;
-
-                if (enc != null)
-                    webClient.Encoding = enc;
-
-                string tmp = null;
-                if (string.IsNullOrEmpty(outToExpanded))
-                    tmp = Direct ? toExpanded : Path.GetTempFileName();
-
-
-                var lastUpdate = System.Diagnostics.Stopwatch.StartNew();
-                WaitHandle[] wh = new WaitHandle[] {state.Completed, state.ProgressAvailable};
+                VerboseMessage("Local filename '{0}' detected. Copying instead", uri.LocalPath);
                 try
                 {
-                    if (tmp == null)
-                    {
-                        if (Binary)
-                            webClient.DownloadDataAsync(uri);
-                        else
-                            webClient.DownloadStringAsync(uri);
-                    }
-                    else
-                        webClient.DownloadFileAsync(uri, tmp);
-
-                    string pref = Context.TransformStr(Name, Transform);
-                    while (true)
-                    {
-                        int n = WaitHandle.WaitAny(wh, 300, true);
-
-                        if (n == 0 || n == 1)
-                        {
-                            lastUpdate = System.Diagnostics.Stopwatch.StartNew();
-                            DownloadProgress ps = state.Progress;
-                            if (n == 0)
-                            {
-                                ps = state.Progress;
-                                if (Binary && state.Result != null)
-                                    ps.BytesReceived = ((byte[]) state.Result).LongLength;
-                                else if (tmp != null)
-                                    ps.BytesReceived = new FileInfo(tmp).Length;
-                            }
-
-                            if (ps.BytesReceived > 0 && ps.BytesReceived > bytesReceived)
-                            {
-                                VerboseMessage("Received: {0}", ps);
-                                Context.OnProgress(ps.ProgressPercentage, uri.ToString());
-                                oldPercentage = ps.ProgressPercentage;
-
-                                if (base.Items.Count != 0)
-                                {
-                                    Vars sv = new Vars();
-                                    sv.Set("", ps);
-                                    Context.ExecuteWithVars(baseExecute, sv, pref);
-                                }
-                                bytesReceived = ps.BytesReceived;
-                            }
-                        }
-                        else
-                        {
-                            // Sometimes FTP hangs, seen with FileZilla 0.9.31 + VMWare a few times
-                            if (timeout.HasValue && lastUpdate.Elapsed>timeout.Value)
-                                throw new TimeoutException();
-                        }
-                        if (n == 0)
-                        {
-                            break;
-                        }
-                        
-
-                        Context.OnProgress(Math.Max(oldPercentage, 0), uri.ToString());
-                    }
-                    if (state.Error != null)
-                    {
-                        if (state.Error is TargetInvocationException)
-                            Utils.Rethrow(state.Error.InnerException);
-                        else
-                            Utils.Rethrow(state.Error);
-                    }
-
-                    if (tmp != null && toExpanded != tmp)
+                    if (Binary)
                     {
                         if (File.Exists(toExpanded))
                             File.Delete(toExpanded);
-                        
-                        // Copy manually, as normal File.Move is likely to copy ACL from text directory as well
-                        VerboseMessage("Copying file '{0}' to '{1}'", tmp,toExpanded);
-                        byte[] buf = new byte[65536];
-                        try
+                        using (var toStr = Context.CreateStream(toExpanded))
+                            copyFile(uri.LocalPath, toStr, toExpanded, true);
+                    }
+                    else
+                    {
+                        using (var ms = new MemoryStream())
                         {
-                            using (var from = File.OpenRead(tmp))
-                            using (var to = File.OpenWrite(toExpanded))
+                            copyFile(uri.LocalPath, ms, "memory:///", true);
+                            Context.OutTo(outToExpanded, (enc == null ? new StreamReader(ms) : new StreamReader(ms, enc)).ReadToEnd());
+                        }
+                    }
+                }
+                catch
+                {
+                    File.Delete(toExpanded);
+                    throw;
+                }
+                return null;
+            }
+            using (DownloadState state = new DownloadState(Context))
+            {
+                using (WebClientEx webClient = new WebClientEx(passive, Binary))
+                {
+                    webClient.KeepAlive = (ftp && !passive);
+                    webClient.FtpSsl = ftpssl;
+                    webClient.CachePolicy = new RequestCachePolicy(CacheLevel);
+
+                    string user = Context.TransformStr(User, Transform);
+                    string password = Context.TransformStr(Password, Transform);
+                    uri = webClient.SetCredentials(uri, user, password);
+
+                    if (!string.IsNullOrEmpty(Post))
+                    {
+                        webClient.HttpPost = Context.Transform(Post, Transform);
+                        if (!string.IsNullOrEmpty(PostContentType))
+                            webClient.HttpPostContentType = Context.TransformStr(PostContentType, Transform);
+                    }
+                    webClient.HttpUserAgent = Context.TransformStr(UserAgent, Transform);
+                    webClient.Timeout = timeout;
+
+
+                    int oldPercentage = -1;
+                    long bytesReceived = -1;
+
+
+                    // We must ensure that all script components are executed in a single thread
+                    webClient.DownloadProgressChanged += state.ProgressChanged;
+                    webClient.DownloadFileCompleted += state.FileCompleted;
+                    webClient.DownloadStringCompleted += state.StringCompleted;
+                    webClient.DownloadDataCompleted += state.DataCompleted;
+
+                    if (enc != null)
+                        webClient.Encoding = enc;
+
+                    string tmp = null;
+                    if (string.IsNullOrEmpty(outToExpanded))
+                        tmp = Direct ? toExpanded : Path.GetTempFileName();
+
+
+                    var lastUpdate = System.Diagnostics.Stopwatch.StartNew();
+                    WaitHandle[] wh = new WaitHandle[] { state.Completed, state.ProgressAvailable };
+                    try
+                    {
+                        if (tmp == null)
+                        {
+                            if (Binary)
+                                webClient.DownloadDataAsync(uri);
+                            else
+                                webClient.DownloadStringAsync(uri);
+                        }
+                        else
+                            webClient.DownloadFileAsync(uri, tmp);
+
+                        string pref = Context.TransformStr(Name, Transform);
+                        while (true)
+                        {
+                            int n = WaitHandle.WaitAny(wh, 300, true);
+
+                            if (n == 0 || n == 1)
                             {
-                                int n;
-                                while ((n = from.Read(buf, 0, buf.Length)) != 0)
+                                lastUpdate = System.Diagnostics.Stopwatch.StartNew();
+                                DownloadProgress ps = state.Progress;
+                                if (n == 0)
                                 {
-                                    Context.CheckAbort();
-                                    to.Write(buf, 0, n);
+                                    ps = state.Progress;
+                                    if (Binary && state.Result != null)
+                                        ps.BytesReceived = ((byte[])state.Result).LongLength;
+                                    else if (tmp != null)
+                                        ps.BytesReceived = new FileInfo(tmp).Length;
+                                }
+
+                                if (ps.BytesReceived > 0 && ps.BytesReceived > bytesReceived)
+                                {
+                                    VerboseMessage("Received: {0}", ps);
+                                    Context.OnProgress(ps.ProgressPercentage, uri.ToString());
+                                    oldPercentage = ps.ProgressPercentage;
+
+                                    if (base.Items.Count != 0)
+                                    {
+                                        Vars sv = new Vars();
+                                        sv.Set("", ps);
+                                        Context.ExecuteWithVars(baseExecute, sv, pref);
+                                    }
+                                    bytesReceived = ps.BytesReceived;
                                 }
                             }
+                            else
+                            {
+                                // Sometimes FTP hangs, seen with FileZilla 0.9.31 + VMWare a few times
+                                if (timeout.HasValue && lastUpdate.Elapsed > timeout.Value)
+                                    throw new TimeoutException();
+                            }
+                            if (n == 0)
+                            {
+                                break;
+                            }
+
+
+                            Context.OnProgress(Math.Max(oldPercentage, 0), uri.ToString());
+                        }
+                        if (state.Error != null)
+                        {
+                            if (state.Error is TargetInvocationException)
+                                Utils.Rethrow(state.Error.InnerException);
+                            else
+                                Utils.Rethrow(state.Error);
+                        }
+
+                        if (tmp != null && toExpanded != tmp)
+                        {
+                            if (File.Exists(toExpanded))
+                                File.Delete(toExpanded);
+                            using (var toStr = Context.CreateStream(toExpanded))
+                                copyFile(tmp, toStr, toExpanded, false);
                             VerboseMessage("Copying completed. Deleting '{0}'", tmp);
                             File.Delete(tmp);
                         }
-                        catch
-                        {
-                            VerboseMessage("Copying failed. Deleting '{0}'", toExpanded);
-                            File.Delete(toExpanded);
-                        }
                     }
-                }
-                catch (Exception e)
-                {
-                    VerboseMessage("Caught exception: {0}", e.Message);
-                    webClient.CancelAsync();
-                    state.SetCompleted();
-                    throw;
-                }
-                finally
-                {
-                    VerboseMessage("Waiting for download completion");
-
-                    state.Completed.WaitOne(timeout ?? TimeSpan.FromSeconds(30), false);
-
-                    VerboseMessage("Waiting completed");
-
-                    webClient.DownloadProgressChanged -= state.ProgressChanged;
-                    webClient.DownloadFileCompleted -= state.FileCompleted;
-                    webClient.DownloadStringCompleted -= state.StringCompleted;
-                    webClient.DownloadDataCompleted -= state.DataCompleted;
-
-
-                    try
+                    catch (Exception e)
                     {
-                        if (webClient.IsBusy)
-                            webClient.CancelAsync();
+                        VerboseMessage("Caught exception: {0}", e.Message);
+                        webClient.CancelAsync();
+                        state.SetCompleted();
+                        throw;
                     }
-                    catch
+                    finally
                     {
-                    }
+                        VerboseMessage("Waiting for download completion");
 
-                    if (tmp == null)
-                        Context.OutTo(outToExpanded, Binary ? state.Result : state.ResultStr);
-                    else if (tmp != toExpanded)
-                    {
+                        state.Completed.WaitOne(timeout ?? TimeSpan.FromSeconds(30), false);
+
+                        VerboseMessage("Waiting completed");
+
+                        webClient.DownloadProgressChanged -= state.ProgressChanged;
+                        webClient.DownloadFileCompleted -= state.FileCompleted;
+                        webClient.DownloadStringCompleted -= state.StringCompleted;
+                        webClient.DownloadDataCompleted -= state.DataCompleted;
+
+
                         try
                         {
-                            File.Delete(tmp);
+                            if (webClient.IsBusy)
+                                webClient.CancelAsync();
                         }
-                        catch (IOException)
+                        catch
                         {
-                            Thread.Sleep(500);
-                            File.Delete(tmp);
+                        }
+
+                        if (tmp == null)
+                            Context.OutTo(outToExpanded, Binary ? state.Result : state.ResultStr);
+                        else if (tmp != toExpanded)
+                        {
+                            try
+                            {
+                                File.Delete(tmp);
+                            }
+                            catch (IOException)
+                            {
+                                Thread.Sleep(500);
+                                File.Delete(tmp);
+                            }
+                        }
+                    }
+                    VerboseMessage("Download completed.");
+                }
+
+            }
+
+            return null;
+        }
+
+        private void copyFile(string from,Stream toStr, string to, bool withProgress)
+        {
+            // Copy manually, as normal File.Move is likely to copy ACL from text directory as well
+            VerboseMessage("Copying file '{0}' to '{1}'", from, to);
+            long? len = null;
+            try
+            {
+                len = new FileInfo(from).Length;
+            }
+            catch { }
+            byte[] buf = new byte[65536];
+            long copied = 0;
+            string pref = Context.TransformStr(Name, Transform);
+            try
+            {
+                using (var fromStr = Context.OpenStream(from))
+                {
+                    if (withProgress)
+                    {
+                        var ps=new DownloadProgress(0, len);
+                        Context.OnProgress(0, from);
+                        if (base.Items.Count != 0)
+                        {
+                            Vars sv = new Vars();
+                            sv.Set("", ps);
+                            Context.ExecuteWithVars(baseExecute, sv, pref);
+                            
+                        }
+                    }
+
+                    int n;
+                    while ((n = fromStr.Read(buf, 0, buf.Length)) != 0)
+                    {
+                        Context.CheckAbort();
+                        toStr.Write(buf, 0, n);
+                        copied += n;
+                        if (withProgress)
+                        {
+                            var ps=new DownloadProgress(copied, len);
+                            Context.OnProgress(ps.ProgressPercentage, from);
+                            
+                            if (base.Items.Count != 0)
+                            {
+                                Vars sv = new Vars();
+                                sv.Set("", ps);
+                                Context.ExecuteWithVars(baseExecute, sv, pref);
+                            }
+                        }
+                    }
+                    if (withProgress)
+                    {
+                        var ps = new DownloadProgress(copied, copied);
+                        Context.OnProgress(100, from);
+                        if (base.Items.Count != 0)
+                        {
+                            Vars sv = new Vars();
+                            sv.Set("", ps);
+                            Context.ExecuteWithVars(baseExecute, sv, pref);
                         }
                     }
                 }
-                VerboseMessage("Download completed.");
+
+             
             }
-            return null;
+            catch
+            {
+                VerboseMessage("Copying failed. Deleting '{0}'", to);
+                File.Delete(to);
+            }
         }
 
 
