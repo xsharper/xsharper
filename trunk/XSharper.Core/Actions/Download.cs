@@ -375,7 +375,7 @@ namespace XSharper.Core
                 VerboseMessage("Local filename '{0}' detected. Copying instead", uri.LocalPath);
                 try
                 {
-                    if (Binary)
+                    if (Binary && toExpanded!=null)
                     {
                         if (File.Exists(toExpanded))
                             File.Delete(toExpanded);
@@ -387,7 +387,10 @@ namespace XSharper.Core
                         using (var ms = new MemoryStream())
                         {
                             copyFile(uri.LocalPath, ms, "memory:///", true);
-                            Context.OutTo(outToExpanded, (enc == null ? new StreamReader(ms) : new StreamReader(ms, enc)).ReadToEnd());
+                            if (Binary)
+                                Context.OutTo(outToExpanded, ms.ToArray());
+                            else
+                                Context.OutTo(outToExpanded, (enc == null ? new StreamReader(ms) : new StreamReader(ms, enc)).ReadToEnd());
                         }
                     }
                 }
