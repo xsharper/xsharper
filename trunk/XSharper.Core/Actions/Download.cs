@@ -372,7 +372,8 @@ namespace XSharper.Core
 
             if (uri.IsFile || uri.Scheme == "embed")
             {
-                VerboseMessage("Local filename '{0}' detected. Copying instead", uri.LocalPath);
+                var fname = (uri.Scheme == "embed") ? uri.ToString() : uri.LocalPath;
+                VerboseMessage("Local filename '{0}' detected. Copying instead", fname);
                 try
                 {
                     if (Binary && toExpanded!=null)
@@ -380,13 +381,13 @@ namespace XSharper.Core
                         if (File.Exists(toExpanded))
                             File.Delete(toExpanded);
                         using (var toStr = Context.CreateStream(toExpanded))
-                            copyFile(uri.LocalPath, toStr, toExpanded, true);
+                            copyFile(fname, toStr, toExpanded, true);
                     }
                     else
                     {
                         using (var ms = new MemoryStream())
                         {
-                            copyFile(uri.LocalPath, ms, "memory:///", true);
+                            copyFile(fname, ms, "memory:///", true);
                             if (Binary)
                                 Context.OutTo(outToExpanded, ms.ToArray());
                             else
@@ -634,13 +635,18 @@ namespace XSharper.Core
                         }
                     }
                 }
-
-             
             }
-            catch
+            catch (Exception e)
             {
-                VerboseMessage("Copying failed. Deleting '{0}'", to);
-                File.Delete(to);
+                VerboseMessage("Copying failed: {0}. Deleting '{1}'", e.Message, to);
+                try
+                {
+                    File.Delete(to);
+                }
+                catch
+                {
+                }
+                throw;
             }
         }
 
