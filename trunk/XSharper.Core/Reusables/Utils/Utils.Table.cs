@@ -72,6 +72,11 @@ namespace XSharper.Core
         [Description("For trimmed columns put ellipsis at the beginning")]
         EllipsisStart = 0x20000000,
 
+        /// Create HTML table instead of drawing table lines
+        [Description("Create HTML table instead of drawing table lines")]
+        Html = 0x40000000,
+
+
         /// low 8 bits represent max column width
         [Description("low 8 bits represent max column width")]
         MaxColWidthMask = 0xff,
@@ -213,77 +218,122 @@ namespace XSharper.Core
             }
             bool withLines = ((options & TableFormatOptions.Lines) != 0);
             bool withHeader = ((options & TableFormatOptions.Header) != 0);
-
+            bool html = ((options & TableFormatOptions.Html) != 0);
 
 
             // Print header
             StringBuilder brk = new StringBuilder();
-
             int totalWidth = 0;
             foreach (var col in colMaxWidth)
             {
                 totalWidth += col + ((brk.Length == 0) ? 0 : 1);
                 brk.Append(withLines ? "+" : (brk.Length == 0) ? "" : " ");
                 brk.Append(new string('-', col));
-
             }
             if (withLines)
                 brk.Append('+');
             brk.AppendLine();
 
-            if (withLines)
+            if (html)
+                output.Append(withLines ? "<table border='1' class='xshTable'>" : "<table class='xshTable'>");
+            else if (withLines)
                 output.Append(brk.ToString());
 
             if (withHeader)
             {
+                if (html)
+                    output.Append("<thead><tr>");
                 // Print column names
                 for (i = 0; i < colName.Length; ++i)
                 {
-                    string s = " " + colName[i] + " ";
-                    output.Append(withLines ? "|" : (i == 0) ? "" : " ");
-                    if (rightAlign[i])
-                        output.Append(s.PadLeft(colMaxWidth[i]));
+                    if (html)
+                    {
+                        output.Append("<th>");
+                        output.Append(EscapeHtml(colName[i]));
+                        output.Append("</th>");
+                    }
                     else
-                        output.Append(s.PadRight(colMaxWidth[i]));
+                    {
+                        string s = " " + colName[i] + " ";
+                        output.Append(withLines ? "|" : (i == 0) ? "" : " ");
+                        if (rightAlign[i])
+                            output.Append(s.PadLeft(colMaxWidth[i]));
+                        else
+                            output.Append(s.PadRight(colMaxWidth[i]));
+                    }
                 }
-                output.Append(withLines ? "|" : "");
-                output.AppendLine();
+                if (html)
+                    output.AppendLine("</tr></thead>");
+                else
+                {
+                    output.Append(withLines ? "|" : "");
+                    output.AppendLine();
 
-                // Print separator again
-                output.Append(brk.ToString());
+                    // Print separator again
+                    output.Append(brk.ToString());
+                }
             }
 
             // Print rows
+            if (html)
+                output.AppendLine("<tbody>");
             foreach (var r in rows)
             {
+                if (html)
+                    output.Append("<tr>");
+
                 for (i = 0; i < colName.Length; ++i)
                 {
                     string rw = r[i] ?? string.Empty;
-                    output.Append(withLines ? "|" : (i == 0) ? "" : " ");
-                    output.Append(" ");
-                    if (rightAlign[i])
-                        output.Append(rw.PadLeft(colMaxWidth[i] - 2));
+                    if (html)
+                    {
+                        output.Append(rightAlign[i] ? "<td style='text-align:right;'>" : "<td>");
+                        output.Append(EscapeHtml(rw));
+                        output.Append("</td>");
+                    }
                     else
-                        output.Append(rw.PadRight(colMaxWidth[i] - 2));
-                    output.Append(" ");
+                    {
+                        output.Append(withLines ? "|" : (i == 0) ? "" : " ");
+                        output.Append(" ");
+                        if (rightAlign[i])
+                            output.Append(rw.PadLeft(colMaxWidth[i] - 2));
+                        else
+                            output.Append(rw.PadRight(colMaxWidth[i] - 2));
+                        output.Append(" ");
+                    }
                 }
-                output.Append(withLines ? "|" : "");
+                if (html)
+                    output.Append("</tr>");
+                else
+                    output.Append(withLines ? "|" : "");
                 output.AppendLine();
             }
-
+            if (html)
+                output.AppendLine("</tbody>");
+            
             // Print footer - separator again
             bool withCount = ((options & TableFormatOptions.Count) != 0);
             if (withCount)
             {
-                if (withLines || withHeader)
-                    output.Append(brk.ToString());
-                output.Append(withLines ? "|" : "");
-                output.Append((" " + rows.Count + " rows").PadRight(totalWidth, ' '));
-                output.Append(withLines ? "|" : "");
-                if (withLines)
+                if (html)
+                {
+                    output.AppendFormat("<tfoot><tr><th colspan='{0}'>{1} rows</th></tr></tfoot>", colMaxWidth.Length, rows.Count);
                     output.AppendLine();
+                }
+                else
+                {
+                    if (withLines || withHeader)
+                        output.Append(brk.ToString());
+                    output.Append(withLines ? "|" : "");
+                    output.Append((" " + rows.Count + " rows").PadRight(totalWidth, ' '));
+                    output.Append(withLines ? "|" : "");
+                    if (withLines)
+                        output.AppendLine();
+                }
             }
-            if (withLines)
+            if (html)
+                output.AppendLine("</table>");
+            else if (withLines)
                 output.Append(brk.ToString());
             return output.ToString();
         }

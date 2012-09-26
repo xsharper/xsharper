@@ -224,7 +224,32 @@ namespace XSharper.Core
         /// Escape invalid XML chars
         public static string EscapeXml(string text)
         {
+            if (string.IsNullOrEmpty(text))
+                return text;
             return SecurityElement.Escape(text);
+        }
+
+        /// Escape invalid HTML chars
+        public static string EscapeHtml(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return text;
+            StringBuilder sb = new StringBuilder(text.Length * 2);
+            foreach (char ch in text.ToCharArray())
+            {
+                switch (ch)
+                {
+                    case '&': sb.Append("&amp;"); break;
+                    case '<': sb.Append("&lt;"); break;
+                    case '>': sb.Append("&gt;"); break;
+                    case '"': sb.Append("&quot;"); break;
+                    case '\'': sb.Append("&#x27;"); break;
+                    case '/': sb.Append("&#x2F;"); break;
+                    default:
+                        sb.Append(ch); break;
+                }
+            }
+            return sb.ToString();                
         }
 
         /// Lowercase the first letter of a string. "MonkeyBanana"=>"monkeyBanana"
@@ -456,26 +481,9 @@ namespace XSharper.Core
             if ((trim & TransformRules.DoubleSingleQuotes) == TransformRules.DoubleSingleQuotes)
                 ret = ret.Replace("'", "''");
             if ((trim & TransformRules.EscapeHtml) == TransformRules.EscapeHtml)
-            {
-                StringBuilder sb = new StringBuilder(ret.Length * 2);
-                foreach (char ch in ret)
-                {
-                    switch (ch)
-                    {
-                        case '&': sb.Append("&amp;"); break;
-                        case '<': sb.Append("&lt;"); break;
-                        case '>': sb.Append("&gt;"); break;
-                        case '"': sb.Append("&quot;"); break;
-                        case '\'': sb.Append("&#x27;"); break;
-                        case '/': sb.Append("&#x2F;"); break;
-                        default:
-                            sb.Append(ch);break;
-                    }
-                }
-                ret = sb.ToString();
-            }
+                ret = Utils.EscapeHtml(ret);
             if ((trim & TransformRules.EscapeXml) == TransformRules.EscapeXml)
-                ret = SecurityElement.Escape(ret);
+                ret = Utils.EscapeXml(ret);
             if ((trim & TransformRules.QuoteArg) == TransformRules.QuoteArg)
                 ret = QuoteArg(ret);
             if ((trim & TransformRules.EscapeRegex) == TransformRules.EscapeRegex)
