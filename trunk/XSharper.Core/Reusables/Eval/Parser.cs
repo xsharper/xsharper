@@ -39,8 +39,8 @@ namespace XSharper.Core
         class OpAttribute : Attribute
         {
             public OpAttribute(int prec) { Precedence = prec; }
-            public OpAttribute(int prec, string name) { Precedence = prec; Name = name; }
-            public string Name { get; set; }
+            public OpAttribute(int prec, params string[] names) { Precedence = prec; Names = names; }
+            public string[] Names { get; set; }
             public int Precedence { get; set; }
         }
 
@@ -65,9 +65,9 @@ namespace XSharper.Core
             [Op(8, "EQI")]   EqualIgnoreCase,
             [Op(8, "NEQI")]  NotEqualIgnoreCase,
             [Op(9, "LT")]   Less,
-            [Op(9, "LE")]   LessOrEqual,
+            [Op(9, "LE","LTE")]   LessOrEqual,
             [Op(9, "GT")]   Greater,
-            [Op(9, "GE")]   GreaterOrEqual,
+            [Op(9, "GE","GTE")]   GreaterOrEqual,
 
             [Op(12)]    Plus,
             [Op(12)]    Minus,
@@ -144,8 +144,11 @@ namespace XSharper.Core
                 var o = (OpAttribute)Attribute.GetCustomAttribute(e, typeof(OpAttribute), true);
                 Operators op = (Operators)e.GetValue(null);
                 s_precedence[op] = o.Precedence;
-                if (o.Name != null)
-                    s_names[o.Name] = op;
+                if (o.Names != null)
+                {
+                    foreach (var n in o.Names)
+                        s_names[n] = op;
+                }
 
                 var f = typeof(Operations.OperatorType).GetField(op.ToString(), BindingFlags.Static | BindingFlags.Public | BindingFlags.GetField);
                 if (f != null)
