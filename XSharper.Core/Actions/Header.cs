@@ -96,6 +96,10 @@ namespace XSharper.Core
         /// Execute action
         public override object Execute()
         {
+			object o=base.Execute();
+            if (o != null)
+                return o;
+
             if (Dynamic)
             {
                 string text = GetTransformedValueStr();
