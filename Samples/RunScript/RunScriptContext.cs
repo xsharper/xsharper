@@ -89,6 +89,7 @@ namespace RunScript
                     script= _context.LoadScript(_scriptFilename,false);
                 else
                     script= _context.LoadScript(XmlReader.Create(new StringReader(_scriptXml)),"temp.xsh");
+                _context.Initialize(script);
                 var ret = _context.ExecuteScript(script, XSharper.Core.Utils.SplitArgs(_args));
                 lock (_currentHtml)
                 {
