@@ -509,7 +509,7 @@ namespace XSharper.Core
                         {
                             var node = n.SelectSingleNode(col.Value);
                             if (node!=null)
-                                sv[col.Name] = node.Value;
+                                sv[col.Name] = col.AdjustType( node.Value );
                         }
                         
                     }
