@@ -54,6 +54,11 @@ namespace XSharper.Core
         [XsAttribute("deleteRoot")]
         public bool Root { get; set; }
 
+        /// True, if the directory specified in From should be deleted. Default - true
+        [Description("True, if the files need to be wiped rather than just deleted. Default - false")]
+        [XsAttribute("wipe")]
+        public bool Wipe { get; set; }
+
         private class delctx
         {
             public IStringFilter nameFilter;
@@ -165,16 +170,26 @@ namespace XSharper.Core
                 skip = true;
 
             object ret = ProcessComplete(new FileOrDirectoryInfo(f), null, skip, skipNew =>
-                                                                               {
-                                                                                   if (!skipNew)
-                                                                                   {
-                                                                                       VerboseMessage("Deleting {0} ", f.FullName);
-                                                                                       if (ReadOnly)
-                                                                                           f.Attributes = f.Attributes & ~(FileAttributes.System | FileAttributes.Hidden | FileAttributes.ReadOnly);
-                                                                                       f.Delete();
-                                                                                   }
-                                                                                   return null;
-                                                                               });
+            {
+                if (!skipNew)
+                {
+                    VerboseMessage("{0} {1}", Wipe?"Wiping":"Deleting", f.FullName);
+                    if (ReadOnly)
+                        f.Attributes = f.Attributes & ~(FileAttributes.System | FileAttributes.Hidden | FileAttributes.ReadOnly);
+                    if (Wipe)
+                    {
+                        var len = f.Length;
+                        var buf = new byte[16384];
+                        using (var fi = File.OpenWrite(f.FullName))
+                        {
+                            for (var offset = 0L; offset < len; offset += buf.Length)
+                                fi.Write(buf, 0, buf.Length);
+                        }
+                    }
+                    f.Delete();
+                }
+                return null;
+            });
             return ret;
         }
     }
