@@ -184,18 +184,36 @@ namespace XSharper.Core
 
                 // Prepare parameters
                 List<string> p=new List<string>();
-                string v = GetTransformedValueStr();
-                if (!string.IsNullOrEmpty(v))
-                    p.AddRange(Utils.SplitArgs(v));
-                p.AddRange(ShellArg.GetParams(Context, Args));
+                var o = GetTransformedValue();
+                if (o is Array)
+                {
+                    foreach (var elem in (Array)o)
+                        if (elem != null)
+                            p.Add(Utils.To<string>(elem));
+                }
+                else
+                {
+                    string v = Utils.To<string>(o);
+                    if (!string.IsNullOrEmpty(v))
+                        p.AddRange(Utils.SplitArgs(v));
+                    p.AddRange(ShellArg.GetParams(Context, Args));
+                }
 
                 // Choose script
                 string incId = Context.TransformStr(IncludeId, Transform);
                 string scriptId = Context.TransformStr(ScriptId, Transform);
                 if (!string.IsNullOrEmpty(scriptId))
+                {
                     _loadedScript = Context.Find<Script>(scriptId);
+                    if (_loadedScript == null)
+                        throw new ParsingException("A subroutine with id=" + scriptId + " was not found");
+                }
                 else if (!string.IsNullOrEmpty(incId))
+                {
                     _loadedScript = Context.Find<Include>(incId).IncludedScript;
+                    if (_loadedScript == null)
+                        throw new ParsingException("An include directive with id=" + scriptId + " was not found");
+                }
                 else
                 {
                     string f = Context.TransformStr(From, Transform);

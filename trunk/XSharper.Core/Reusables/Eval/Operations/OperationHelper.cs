@@ -65,7 +65,8 @@ namespace XSharper.Core.Operations
                 nullable = true;
                 name = name.Substring(0, name.Length - 1);
             }
-            Type t = context.FindType(name);
+                            
+            Type t = string.IsNullOrEmpty(name)?typeof(object): context.FindType(name);
             if (t != null)
             {
                 if (nullable)
