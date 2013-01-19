@@ -135,12 +135,20 @@ namespace XSharper.Core
             if (Value!=null)
             {
                 var o = GetTransformedValue();
-                List<string> p = new List<string>();
-                string v = GetTransformedValueStr();
-                if (!string.IsNullOrEmpty(v))
-                    p.AddRange(Utils.SplitArgs(v));
-                foreach (var o1 in p)
-                    cp.Add(new CallParam(null,o1,TransformRules.None));
+                if (o is Array)
+                {
+                    foreach (var elem in (Array)o)
+                        cp.Add(new CallParam(null, elem, TransformRules.None));
+                }
+                else
+                {
+                    List<string> p = new List<string>();
+                    string v = Utils.To<string>(o);
+                    if (!string.IsNullOrEmpty(v))
+                        p.AddRange(Utils.SplitArgs(v));
+                    foreach (var o1 in p)
+                        cp.Add(new CallParam(null, o1, TransformRules.None));
+                }
             }
             if (Parameters!=null)
                 cp.AddRange(Parameters);
