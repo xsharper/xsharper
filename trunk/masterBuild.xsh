@@ -48,16 +48,27 @@
 		<regex 	pattern="(PRODUCTVERSION).*$" 	value="${{t}}" options="Multiline"  	replace="PRODUCTVERSION ${{versionComma}}" outTo="t" tr="expandDual" />
 		<regex 	pattern='(\"FileVersion\").*$' 	value="${{t}}" options="Multiline"  	replace='"FileVersion", "${{versionComma}}"' outTo="t" tr="expandDual" />
 		<regex 	pattern='(\"ProductVersion\").*$' 	value="${{t}}" options="Multiline"  	replace='"ProductVersion", "${{versionComma}}"' outTo="t" tr="expandDual" />
-		<writeText to="${fn}|ascii" value="${t}" />
+<!--
+		<writeText to="${fn}|ascii" value="${t}" /> -->
 	</forEach>
 	</if>
+
+	<call subId='build'>
+		<param>0</param>
+	</call>
+
+	<call subId='build'>
+		<param>1</param>
+	</call>
 	
-  <block>  
+  <sub id='build'>  
+		<param name='net4'  required='1' />
+
     	<path operation="getTempFileName" outTo="tempFile" />
     	<path operation="getTempFileName" outTo="tempFile2" />
     
 		<try>
-		  <print outTo="^bold">Building XSharper ${version}...</print>
+		  <print outTo="^bold">Building XSharper ${version} (${=$net4?'.NET 4 version':'.NET 2 version'})...</print>
 		  <path operation="combine" path="${=Environment.GetFolderPath('MyDocuments')}" param="Sites\DeltaX.snk" outTo="snkFile" />
 		  <if exists="${snkFile}">
 			<print outTo="^info">The produced assembly will be signed with a key from ${snkFile}</print>
@@ -66,34 +77,35 @@
 			  <print outTo="^info">The produced assembly will NOT be signed </print>
 		  </else></if>
 
-		  <path operation="combine" path="${=XS.Utils.FindNETFrameworkDirectory(new Version('3.5')).FullName}" param="msbuild.exe" outTo="msbuild" />
-		  
+		  <path operation="combine" path="${=XS.Utils.FindNETFrameworkDirectory(new Version($net4?'4.0.30319':'3.5')).FullName}" param="msbuild.exe" outTo="msbuild" />
 		  <!-- Executing Microsoft Build"  -->
 		  <block>
 			  <try>
+				  <set slnname='${=.script.DirectoryName}xsharper${=$net4?".net4":""}.sln' />
   				  <shell outTo="o1" errorTo="e1" tr="trim trimInternal expandAfterTrim">
-				  								${msbuild} ${=.quoteArg(.script.DirectoryName+'xsharper.sln')}
+				  								${msbuild} ${=.quoteArg($slnName)}
 				  								/t:clean
 				  								/p:Configuration=Release
 				  								/nologo 
 				  								/consoleloggerparameters:summary 
 				  								/verbosity:minimal</shell>
 				  <shell outTo="o2" errorTo="e2" tr="trim trimInternal expandAfterTrim">
-				  								${msbuild} ${=.quoteArg(.script.DirectoryName+'xsharper.sln')}
-				  								/t:xsharper 
+				  								${msbuild} ${=.quoteArg($slnName)}
+				  								/t:XSharper
 				  								/p:Configuration=Release
 				  								/nologo 
 				  								/consoleloggerparameters:summary 
 				  								${extraArgs|''}</shell>
 			  </try>
 			  <catch>
-			  	<print outTo="^error">--- MSBuild failed with the following output ----</print>
+			  	<print outTo="^error">--- MSBuild failed ( ${=.CurrentException.Message} ) with the following output ----</print>
 			  	<print>${o1|''}</print>
 			  	<print outTo="^error">${e1|''}</print>
 			  	<print outTo="^error">---  ----</print>
 			  	<print>${o2|''}</print>
 			  	<print outTo="^error">${e2|''}</print>
 			  	<print outTo="^error">-----------</print>
+			
 			  	<exit value="1">MS Build error</exit>
 			  </catch>
 
@@ -103,9 +115,10 @@
 		  <print outTo="^info">Build completed</print>
 		  <print />			  
 			 
-		  
-		  <path operation="combine" path="${=.script.DirectoryName}" param="xsharper\bin\Release\xsharper.exe" existence="fileExists" outTo="exe"/>
-  		  <path operation="combine" path="${=.script.DirectoryName}" param="xsharper\bin\Release\XSharper.Core.dll" existence="fileExists" outTo="coredll"/>
+		  <set suff='${=$net4?"4":""}' />		  
+
+		  <path operation="combine" path="${=.script.DirectoryName}" param="xsharper\bin\Release${suff}\xsharper.exe" existence="fileExists" outTo="exe"/>
+  		  <path operation="combine" path="${=.script.DirectoryName}" param="xsharper\bin\Release${suff}\XSharper.Core.dll" existence="fileExists" outTo="coredll"/>
 
 		  <print outTo="^bold">Generating XML schema</print>
 		  <shell outTo="^info">
@@ -126,37 +139,39 @@
 
 				  <exec includeId="ftp" isolation="high">
 					<param>/passive</param>
-					<param value="ftp://${site}/xsharper.exe" />
+					<param value="ftp://${site}/xsharper${suff}.exe" />
 					<param value="${exe}" />
 				  </exec>
 				  
 				  <exec includeId="ftp" isolation="high">
 					<param>/passive</param>
-					<param value="ftp://${site}/xsharper.zip" />
+					<param value="ftp://${site}/xsharper${suff}.zip" />
 					<param value="${tempFile2}" />
 				  </exec>
 				  
-  				  <exec includeId="ftp" isolation="high">
-					<param>/passive</param>
-					<param value="ftp://${site}/XSharper.Core.dll" />
-					<param value="${coredll}" />
-				  </exec>
+				  <if isFalse='${net4}'>
+	  				  <exec includeId="ftp" isolation="high">
+						<param>/passive</param>
+						<param value="ftp://${site}/XSharper.Core.dll" />
+						<param value="${coredll}" />
+					  </exec>
 
-				  
+					  
 
-				  <exec includeId="ftp" isolation="high">
-					<param>/passive</param>
-  					<param value="ftp://${site}/schemas/1.0" />
-					<param value="/mkdir" />
-					<param value="${tempFile}" />
-				  </exec>
-				  
-				  <writetext value="${version}" to="${tempFile}" encoding="ascii" />
-				  <exec includeId="ftp" isolation="high">
-					<param>/passive</param>
-					<param value="ftp://${site}/xsharper-version.txt" />
-					<param value="${tempFile}" />
-				  </exec>
+					  <exec includeId="ftp" isolation="high">
+						<param>/passive</param>
+	  					<param value="ftp://${site}/schemas/1.0" />
+						<param value="/mkdir" />
+						<param value="${tempFile}" />
+					  </exec>
+					  
+					  <writetext value="${version}" to="${tempFile}" encoding="ascii" />
+					  <exec includeId="ftp" isolation="high">
+						<param>/passive</param>
+						<param value="ftp://${site}/xsharper-version.txt" />
+						<param value="${tempFile}" />
+					  </exec>
+				  </if>
 				  <print />  		  
 			  </if>
 		  </if>
@@ -168,6 +183,6 @@
 	  	<delete from="${tempFile|''}" />
 	  	<delete from="${tempFile2|''}" />
 	  </finally>
-	</block>
-  
+	</sub>
+	  
 </xsharper>

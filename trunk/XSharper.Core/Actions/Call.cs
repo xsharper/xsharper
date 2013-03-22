@@ -85,7 +85,7 @@ namespace XSharper.Core
     /// <summary>
     /// Call a subroutine by ID
     /// </summary>
-    [XsType("call", ScriptActionBase.XSharperNamespace)]
+    [XsType("call", ScriptActionBase.XSharperNamespace, AnyAttribute = true)]
     [Description("Call a subroutine by ID")]
     public class Call : ValueBase
     {
@@ -113,6 +113,28 @@ namespace XSharper.Core
             Isolation = CallIsolation.Default;
         }
 
+        /// <summary>
+        /// Called when XML Reader reads an attribute or a text field
+        /// </summary>
+        /// <param name="context">Context</param>
+        /// <param name="attribute">Attribute name, or an empty string for element text</param>
+        /// <param name="value">Attribute value</param>
+        /// <param name="previouslyProcessed">List of previously processed attributes, to detect duplicate attributes. May be null if duplicate attributes are allowed.</param>
+        /// <returns> true, if the attribute if correctly processed and false otherwise </returns>
+        protected override bool ProcessAttribute(IXsContext context, string attribute, string value, IDictionary<string, bool> previouslyProcessed)
+        {
+            if (!base.ProcessAttribute(context, attribute, value, previouslyProcessed))
+            {
+                var c=new CallParam();
+                c.Name=attribute;
+                c.Value=value;
+                c.Transform=Transform;
+                Parameters.Add(c);
+                if (previouslyProcessed != null && !string.IsNullOrEmpty(attribute))
+                    previouslyProcessed.Add(attribute, true);
+            }
+            return true;
+        }
         /// <summary>
         /// Initialize action
         /// </summary>

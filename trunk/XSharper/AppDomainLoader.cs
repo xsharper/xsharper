@@ -77,12 +77,12 @@ namespace XSharper
             bool forceAppDomain = shouldForce();
             try
             {
+                AppDomain.CurrentDomain.AssemblyResolve += resolver;
+                AppDomain.CurrentDomain.AssemblyLoad += loadTracer;
+                
                 if (AppDomain.CurrentDomain.FriendlyName.StartsWith(XSharperDomainPrefix))
                 {
                     progress("AppDomainLoader: Already in domain");
-                    AppDomain.CurrentDomain.AssemblyResolve += resolver;
-                    AppDomain.CurrentDomain.AssemblyLoad += loadTracer;
-
                     progress("AppDomainLoader: args:" + string.Join(" ", args));
                     if (args.Length > 0 && args[0] == XsCreateElevatedScriptContext)
                     {
@@ -129,11 +129,11 @@ namespace XSharper
                 else if (!forceAppDomain)
                 {
                     progress("AppDomainLoader: Skipping domain creation");
-                    AppDomain.CurrentDomain.AssemblyResolve += resolver;
-                    AppDomain.CurrentDomain.AssemblyLoad += loadTracer;
                     return null;
                 }
+                progress("AppDomainLoader: Creating domain");
                 newDomain = AppDomain.CreateDomain(XSharperDomainPrefix + System.IO.Path.GetRandomFileName(), null, setup);
+                progress("AppDomainLoader: Domain created");
                 return newDomain.ExecuteAssembly(Assembly.GetExecutingAssembly().Location, null, args);
             }
             catch (ThreadAbortException)
@@ -212,6 +212,7 @@ namespace XSharper
                 if (s!=null && s.ReadByte()=='1')
                     force = false;
             }
+
             if (force)
                 progress("AppDomainLoader> There are assemblies without strong name, so new AppDomain is required");
             else

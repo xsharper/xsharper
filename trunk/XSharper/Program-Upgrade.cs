@@ -162,7 +162,9 @@ namespace XSharper
                     }
 
                     cout.WriteLine(OutputType.Info, "Downloading the latest XSharper binary...");
-                    byte[] exe = wc.DownloadData("http://www.xsharper.com/xsharper.exe");
+                    byte[] exe = wc.DownloadData(Environment.Version.Major>=4?
+                        "http://www.xsharper.com/xsharper4.exe" :
+                        "http://www.xsharper.com/xsharper.exe");
                     Assembly a=Assembly.Load(exe);
 
 

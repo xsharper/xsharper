@@ -45,7 +45,7 @@ namespace XSharper
 
             return tt + " v." + context.CoreVersion + " "+
                 ((cn.Length > 0) ? cn[0].Company : "DeltaX Inc.") +" "+
-                ((cpr.Length > 0) ? cpr[0].Copyright : "(c) 2006-2010");   
+                ((cpr.Length > 0) ? cpr[0].Copyright : "(c) 2006-2013");   
         }
         public static int Help(ScriptContext context, UsageGenerator usage, CommandLineParameters xsParams)
         {
