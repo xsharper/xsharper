@@ -302,7 +302,12 @@ namespace XSharper
             s.EngineVersion = context.CoreVersion.ToString();
 
             if (context.Compiler.DefaultNETVersion>new Version(3,5))
-                s.NetVersion = "3.5";
+            {
+                if (Environment.Version.Major >= 4)
+                    s.NetVersion = "4.0.30319";
+                else
+                    s.NetVersion = "3.5";
+            }
             else
                 s.NetVersion = context.Compiler.DefaultNETVersion.ToString();
 
@@ -399,18 +404,19 @@ namespace XSharper
             Script script = createEmptyScript(context, "xsharper //version"); ;
             script.Id = "version";
             script.Add(new Set("process","${=System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName}"));
-            script.Add(new Set("net","${=string.Join(', ',XS.Utils.GetInstalledNETVersions())}"));
+            script.Add(new Set("net","${=string.Join(', ',(string[])XS.Utils.GetInstalledNETVersions())}"));
             script.Add(new Print { OutTo = "^bold", Value = HelpHelper.GetLogo(context) });
             script.Add(new Print());
             script.Add(new Print {Transform = TransformRules.Trim | TransformRules.Expand, NewLine = false, Value = @"
 Environment: 
 ====================
-Operating system    : ${=Environment.OSVersion.VersionString}
-.NET Framework      : ${net}
-Current directory   : ${=.CurrentDirectory}
-Privileges          : ${=.IsAdministrator?'Administrator':'Not administrator (use //requireAdmin)'}
-XSharper executable : ${process}
-Configuration file  : ${=AppDomain.CurrentDomain.SetupInformation.ConfigurationFile} ${=File.Exists(AppDomain.CurrentDomain.SetupInformation.ConfigurationFile)?'':'(does not exist)'}
+Operating system          : ${=Environment.OSVersion.VersionString}
+Available .NET Frameworks : ${net}
+.NET Framework            : ${=Environment.Version}
+Current directory         : ${=.CurrentDirectory}
+Privileges                : ${=.IsAdministrator?'Administrator':'Not administrator (use //requireAdmin)'}
+XSharper executable       : ${process}
+Configuration file        : ${=AppDomain.CurrentDomain.SetupInformation.ConfigurationFile} ${=File.Exists(AppDomain.CurrentDomain.SetupInformation.ConfigurationFile)?'':'(does not exist)'}
 
 Environment variables: 
 =======================

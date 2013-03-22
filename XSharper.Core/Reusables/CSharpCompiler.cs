@@ -182,7 +182,7 @@ namespace XSharper.Core
         private readonly Dictionary<string, bool> _using;
         private readonly List<Ref> _references;
         private readonly List<string> _headers;
-        private Version _neededVersion = new Version(2,0);
+        private Version _neededVersion = (Environment.Version.Major>=4)? new Version(4,0): new Version(2,0);
         private Version _availableVersion = null;
         private readonly IWriteVerbose _verboseWriter = null;
         private Version _defaultNETVersion=null;
@@ -647,7 +647,10 @@ namespace XSharper.Core
                 else
                 {
                     Dictionary<string, string> providerOptions = new Dictionary<string, string>();
-                    providerOptions.Add("CompilerVersion", string.Format("v{0}", "3.5"));
+                    if (Environment.Version.Major>=4)
+                        providerOptions.Add("CompilerVersion", string.Format("v{0}", "4.0"));
+                    else
+                        providerOptions.Add("CompilerVersion", string.Format("v{0}", "3.5"));
 
                     // Must do it this way, to prevent loading errors on machines with .net 2.0
                     prov = (CSharpCodeProvider) Activator.CreateInstance(typeof (CSharpCodeProvider), new object[] {providerOptions});
@@ -768,7 +771,7 @@ namespace XSharper.Core
                     string ns = "http://schemas.microsoft.com/developer/msbuild/2003";
                     x.WriteStartElement("Project",ns);
                     if (prov35)
-                        x.WriteAttributeString("ToolsVersion", "3.5");
+                        x.WriteAttributeString("ToolsVersion", (Environment.Version.Major>=4)?"4.0.30319": "3.5");
                     x.WriteAttributeString("DefaultTargets", "Build");
                     
                     x.WriteStartElement("PropertyGroup", ns);

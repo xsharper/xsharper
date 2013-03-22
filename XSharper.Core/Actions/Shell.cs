@@ -153,6 +153,11 @@ namespace XSharper.Core
         [Description("Default directory")]
         public string Directory { get; set; }
 
+        /// true (default), if command arguments are to be included into error messages
+        [Description("true (default), if command arguments are to be included into error messages")]
+        [XsAttribute("extendedErrors")]
+        public bool ExtendedErrors  { get; set; }
+
         /// Constructor
         public Shell()
         {
@@ -161,6 +166,7 @@ namespace XSharper.Core
             Wait = true;
             Mode = ShellMode.Auto;
             LoadUserProfile = true;
+            ExtendedErrors = true;
         }
 
         /// Constructor
@@ -517,7 +523,12 @@ namespace XSharper.Core
                             {
                                 string a = Utils.QuoteArg(pi.FileName);
                                 if (!string.IsNullOrEmpty(pi.Arguments))
-                                    a += " " + pi.Arguments;
+                                {
+                                    if (!ExtendedErrors)
+                                        a += " ... arguments ...";
+                                    else
+                                        a += " " + pi.Arguments;
+                                }
                                 throw new ScriptRuntimeException(string.Format("Command [{0}] failed with exit code = {1}", a, p.ExitCode));
                             }
                         }
