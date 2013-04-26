@@ -32,12 +32,6 @@ using System.Text;
 
 namespace XSharper.Core
 {
-    static partial class NativeMethods
-    {
-        [DllImport("mscoree.dll")]
-        internal static extern int GetCORSystemDirectory([MarshalAs(UnmanagedType.LPWStr)]StringBuilder pbuffer, int cchBuffer, ref int dwlength);
-    }
-
     public partial class Utils
     {
         private static int s_realConsole = (Environment.OSVersion.Platform==PlatformID.Win32NT)? -1:0;
@@ -71,11 +65,7 @@ namespace XSharper.Core
         /// Get .NET core directory
         public static string GetCORSystemDirectory()
         {
-            // Get current directory
-            int MAX_PATH = 260;
-            StringBuilder curDir = new StringBuilder(MAX_PATH);
-            NativeMethods.GetCORSystemDirectory(curDir, MAX_PATH, ref MAX_PATH);
-            return curDir.ToString();
+            return System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory();
         }
 
         /// Get directory of a given .NET framework version
@@ -101,7 +91,6 @@ namespace XSharper.Core
         public static Version[] GetInstalledNETVersions()
         {
             string core = new DirectoryInfo(GetCORSystemDirectory()).Parent.FullName;
-
             List<Version> ret = new List<Version>();
             foreach (DirectoryInfo d in new DirectoryInfo(core).GetDirectories("v*.*"))
             {
