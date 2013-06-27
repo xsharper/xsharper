@@ -94,6 +94,27 @@ namespace RunScript
                             cbScript.Items.Add(new ListItem(sb.ToString(), name));
                         }
                     }
+
+                    var script = Request.QueryString["id"];
+                    if (script != null)
+                    {
+                        int? selection=null;
+                        for (int i = 0; i < cbScript.Items.Count; ++i)
+                        {
+                            if (script.Equals(cbScript.Items[i].Value, StringComparison.OrdinalIgnoreCase))
+                            {
+                                selection = i;
+                                break;
+                            }
+                            if (selection == null && cbScript.Items[i].Value.StartsWith(script, StringComparison.OrdinalIgnoreCase))
+                                selection = i;
+                        }
+                        if (selection.HasValue)
+                            cbScript.SelectedIndex = selection.Value;
+                    }
+                    var arg = Request.QueryString["args"];
+                    if (arg != null)
+                        tbArguments.Text = arg;
                 }
                 else
                 {

@@ -690,13 +690,14 @@ namespace XSharper.Core
                         CodeOutputDirectory = CodeOutputDirectory,
                         StreamProvider = FindResourceMemoryStream
                     });
-            ;
                 foreach (string d in newCode.Keys)
                     _loadedCode[d] = a;
                 _typeManager.AddAssembly(a,false);
             }
 
         }
+
+        
 
         private static void walkBreadthFirst(IScriptAction start, Action<IScriptAction> action, bool isFind)
         {
@@ -765,8 +766,31 @@ namespace XSharper.Core
                 RunOnStack(ScriptOperation.Compiling, code, delegate { compile(code, true);return null; });
 
             var type=_loadedCode[className].GetType(className);
+            if (type == null)
+            {
+                // It's rare to be here.
+                // When doing things via PowerShell, there are sometimes strange issues
+                // with assembly not being loaded because it can't find the DLL?!
+                AppDomain.CurrentDomain.AssemblyResolve += currentDomain_AssemblyResolve;
+                try
+                {
+                    _loadedCode[className].GetTypes();
+                    type = _loadedCode[className].GetType(className);
+                }
+                finally
+                {
+                    AppDomain.CurrentDomain.AssemblyResolve -= currentDomain_AssemblyResolve;
+                }
+            }
             return type;
 
+        }
+
+        static Assembly currentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            if (args.Name == Assembly.GetExecutingAssembly().FullName)
+                return Assembly.GetExecutingAssembly();
+            return null;
         }
 
 

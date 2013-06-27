@@ -1,7 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xsharper xmlns="http://www.xsharper.com/schemas/1.0">
 
-    <reference from="${%programfiles%}\Reference Assemblies\Microsoft\WindowsPowerShell\v1.0\System.Management.Automation.dll" WithTypes="true" />
+
+
+	<reference name="System.Management.Automation" withTypes="1" />
+	
     <?ht using System.Management.Automation;
         using System.Management.Automation.Host;
         using System.Management.Automation.Runspaces;
@@ -234,4 +237,4 @@
             #endregion
         }
     ?>
-<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#WithComments"><InclusiveNamespaces PrefixList="Sign" xmlns="http://www.w3.org/2001/10/xml-exc-c14n#" /></CanonicalizationMethod><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>T6SyxuaSQpogRdcNct+6iZe/2D0=</DigestValue></Reference></SignedInfo><SignatureValue>kSlksSoXcGgt3y8wd/uHiR7F/E2hLmlHKaa2zk+CmB5KC00wixpyoprOS+i7NOMzVap8SN/c4gzmp6dzsW4zSLSRmqNw9hnZCmPaCMKIbIw3xfOicK15e5gL7exWjRhzZRaA6s4u6q36krCzSBTgr5Mj+/Nxk+5mU/6S70cUFMQ=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>oCKTg0Lq8MruXHnFdhgJA8hS98P5rJSABfUFHicssx0mltfqeuGsgzzpk8gLpNPkmJV+ca+pqPILiyNmMfLnTg4w99zH3FRNd6sIoN1veU87OQ5a0Ren2jmlgAAscHy2wwgjxx8YuP/AIfROTtGVaqVT+PhSvl09ywFEQ+0vlnk=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue></KeyInfo></Signature></xsharper>    
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#WithComments"><InclusiveNamespaces PrefixList="Sign" xmlns="http://www.w3.org/2001/10/xml-exc-c14n#" /></CanonicalizationMethod><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>PY5Aypt++NK2Rn4V0g6UY/oOEQ4=</DigestValue></Reference></SignedInfo><SignatureValue>OJ8gVtIyZUPGOMhtC80rg3ajoAeVnhxOqZ6x8uyFHvfte5VcuYZHoqbfTXVtG/H/lEtSJLzMOM0iHtPiOigguIWOnxgrAqvgcNpSm005642ihOSNdTAEpEqDhSlbxPnbiso5Sl7/WZL9MYPayXaHgMN7Vx1q9An7YHD9tt8vCmw=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>oCKTg0Lq8MruXHnFdhgJA8hS98P5rJSABfUFHicssx0mltfqeuGsgzzpk8gLpNPkmJV+ca+pqPILiyNmMfLnTg4w99zH3FRNd6sIoN1veU87OQ5a0Ren2jmlgAAscHy2wwgjxx8YuP/AIfROTtGVaqVT+PhSvl09ywFEQ+0vlnk=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue></KeyInfo></Signature></xsharper>    

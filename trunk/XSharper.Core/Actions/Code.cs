@@ -40,6 +40,9 @@ namespace XSharper.Core
     public abstract class ExecutableScriptBase : MarshalByRefObject
     {
         /// Script context
+        protected ScriptContext _ { get { return ScriptContextScope.Current; } }
+
+        /// Script context
         protected ScriptContext   c { get { return ScriptContextScope.Current; } }
         
         /// Script context
