@@ -179,14 +179,14 @@ namespace XSharper.Core
                     if (Wipe)
                     {
                         var len = f.Length;
-                        var buf = new byte[16384];
-                        using (var fi = File.OpenWrite(f.FullName))
+                        var buf = new byte[512];
+                        using (var fi = new FileStream(f.FullName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None,  512,FileOptions.WriteThrough))
                         {
                             for (var offset = 0L; offset < len; offset += buf.Length)
                                 fi.Write(buf, 0, buf.Length);
                         }
                     }
-                    f.Delete();
+					f.Delete();
                 }
                 return null;
             });
