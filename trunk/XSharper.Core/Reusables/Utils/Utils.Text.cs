@@ -387,6 +387,10 @@ namespace XSharper.Core
         /// Convert a wildcard using * and ? characters to a regular expression pattern
         public static string WildcardToPattern(string wildcard)
         {
+            if (wildcard == null)
+                throw new ArgumentNullException("wildcard");
+            while (wildcard.Contains("**"))
+                wildcard.Replace("**", "*");
             StringBuilder s = new StringBuilder(wildcard.Length);
             s.Append('^');
             foreach (char c in wildcard)

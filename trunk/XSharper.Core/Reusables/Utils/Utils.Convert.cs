@@ -189,8 +189,16 @@ namespace XSharper.Core
             }
             if (pt == typeof(Guid))
                 return new Guid(ot.ToString());
-
-            
+            if (pt == typeof(TimeSpan))
+            {
+                var v = Utils.ToTimeSpan(ot.ToString());
+                if (v.HasValue)
+                    return v.Value;
+            }
+            if (pt == typeof(TimeSpan?))
+            {
+                return Utils.ToTimeSpan(ot.ToString());
+            }
             throw new InvalidCastException("Cannot convert " + ot + " to " + pt);
         }
 
@@ -248,6 +256,14 @@ namespace XSharper.Core
             }
             if (pt == typeof(DateTime))
                 return DateTime.Parse(text);
+            if (pt == typeof(TimeSpan))
+            {
+                var v = Utils.ToTimeSpan(text);
+                if (v.HasValue)
+                    return v.Value;
+            }
+            if (pt == typeof(TimeSpan?))
+                return Utils.ToTimeSpan(text);
             if (pt == typeof(Guid))
                 return new Guid(text);
             if (pt == typeof(string))

@@ -373,6 +373,11 @@ namespace XSharper.Core
 
                 var safeRegistryHandleType = typeof(SafeHandleZeroOrMinusOneIsInvalid).Assembly.GetType("Microsoft.Win32.SafeHandles.SafeRegistryHandle");
                 var ctr = safeRegistryHandleType.GetConstructor(priv, null, new[] { typeof(IntPtr), typeof(bool) }, null);
+                if (ctr == null)
+                {
+                    // In .NET4 it's public
+                    ctr = safeRegistryHandleType.GetConstructor(BindingFlags.Instance | BindingFlags.Public, null, new[] { typeof(IntPtr), typeof(bool) }, null);
+                }
                 var instance = ctr.Invoke(new object[] { key, true });
 
                 var ctr1 = typeof(RegistryKey).GetConstructor(priv, null, new[] { safeRegistryHandleType, typeof(bool) }, null);
@@ -381,9 +386,13 @@ namespace XSharper.Core
                 object r;
                 if (ctr2 != null)
                     r = ctr2.Invoke(new object[] { key, writable, false, _machineName != null, _hiveKey == NativeMethods.HKEY_PERFORMANCE_DATA });
-                else
+                else if (ctr1!=null)
                     r = ctr1.Invoke(new object[] { instance, writable });
-
+                else
+                {
+                    var mth=typeof(RegistryKey).GetMethod("FromHandle",BindingFlags.Static | BindingFlags.Public, null, new[] { safeRegistryHandleType}, null);
+                    r=mth.Invoke(null,new object[] { instance});
+                }
                 var f = typeof(RegistryKey).GetField("keyName", BindingFlags.Instance | BindingFlags.NonPublic);
                 if (f != null)
                     f.SetValue(r, kv);
