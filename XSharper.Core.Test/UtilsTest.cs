@@ -72,6 +72,14 @@ namespace XSharper.Core.Test
 
 
         /// <summary>
+        ///RegistryTest
+        ///</summary>
+        [TestMethod()]
+        public void RegistryTest()
+        {
+            Utils.RegistrySet(@"HKLM:64\Software\XSharper\Test\Value",new[] { "AAA" });
+        }
+        /// <summary>
         ///A test for WildcardToRegex
         ///</summary>
         [TestMethod()]
@@ -82,7 +90,6 @@ namespace XSharper.Core.Test
 
             Assert.IsTrue(Regex.IsMatch("a-b", Utils.WildcardToPattern("a*b")));
             Assert.IsFalse(Regex.IsMatch("cadabra", Utils.WildcardToPattern("a*")));
-
         }
 
         ///// <summary>
