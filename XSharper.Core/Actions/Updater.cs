@@ -289,6 +289,7 @@ namespace XSharper.Core
 
             List<Package> toUpdate = new List<Package>();
             var filter = new StringFilter(Syntax, Context.TransformStr(Filter, Transform));
+            //VerboseMessage("Filter: {0} {1}", Syntax, Dump.ToDump( Context.TransformStr(Filter, Transform)));
             foreach (var c in Items)
             {
                 var rv=c.CheckVersion();
@@ -306,8 +307,13 @@ namespace XSharper.Core
                     {"Available",(newVersion == null) ? "n/a" : newVersion.ToString()}}
                 );
 
-                if (currentVersion!=null && ((newVersion > currentVersion) || ForceUpdate) && filter.IsMatch(c.Name))
+                bool update = false;
+                if (currentVersion != null && ((newVersion > currentVersion) || ForceUpdate) && filter.IsMatch(c.Name))
+                {
                     toUpdate.Add(c);
+                    update = true;
+                }
+                VerboseMessage("{0}: {1}=>{2}. Update={3}",c.Name,currentVersion,newVersion,update);
             }
 
             Context.Out.WriteLine(string.Empty);

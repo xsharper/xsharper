@@ -589,6 +589,7 @@ namespace XSharper.Core
         {
             var par = new object[pi.Length];
             int pptr = 0;
+            bool f = false; 
             if (a != null)
                 for (int i = 0; i < a.Length; ++i)
                 {
@@ -597,14 +598,19 @@ namespace XSharper.Core
                     Type pt = p.ParameterType;
                     if (isParams(p))
                     {
-                        if (arg != null && (pt == arg.GetType() || pt.IsAssignableFrom(arg.GetType())))
-                            par[i - pptr] = arg;
+                        if (!f && arg != null && (pt == arg.GetType() || pt.IsAssignableFrom(arg.GetType())))
+                            par[pptr++] = Utils.To(pt, arg);
+                        else if (!f && arg != null && arg.GetType().IsArray)
+                        {
+                            par[pptr++] = Utils.To(pt, arg);
+                        }
                         else
                         {
                             if (par[pptr] == null)
                                 par[pptr] = Array.CreateInstance(pt.GetElementType(), a.Length - i);
                             var converted = Utils.To(pt.GetElementType(), arg);
                             ((Array)par[pptr]).SetValue(converted, i - pptr);
+                            f = true;
                         }
                     }
                     else if (pt.ContainsGenericParameters)
