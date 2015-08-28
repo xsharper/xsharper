@@ -237,10 +237,10 @@ namespace XSharper.Core
         /// Generate C# file header
         public string GenerateFileHeader()        
 		{
-			return GenerateFileHeader(true,true);
+			return GenerateFileHeader(true,true,true);
 		}
         /// Generate C# file header
-        public string GenerateFileHeader(bool addUsing, bool addHeaders)
+        public string GenerateFileHeader(bool addUsing, bool addHeaders, bool addHeaderId)
         {
             StringBuilder sb = new StringBuilder();
 			if (addUsing)
@@ -251,13 +251,16 @@ namespace XSharper.Core
 	                sb.AppendLine();
 	            }
 	            sb.AppendLine();
+                addHeaderId = false;
+                if (addHeaderId)
+                {
+                    string currentId = GetFileHeaderCodeId();
 
-	            string currentId = GetFileHeaderCodeId();
-	            
-	            sb.AppendFormat("// This attribute is required to prevent unnecessary compilations");
-	            sb.AppendLine();
-	            sb.AppendFormat("[assembly: {0}(\"{1}\")]", typeof(XsHeadersIdentifierAttribute).FullName,currentId);
-	            sb.AppendLine();
+                    sb.AppendFormat("// This attribute is required to prevent unnecessary compilations");
+                    sb.AppendLine();
+                    sb.AppendFormat("[assembly: {0}(\"{1}\")]", typeof(XsHeadersIdentifierAttribute).FullName, currentId);
+                    sb.AppendLine();
+                }
 			}
 
 			if (addHeaders)
