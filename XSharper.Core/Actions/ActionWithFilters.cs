@@ -60,21 +60,13 @@ namespace XSharper.Core
             Context.CheckAbort();
             string pref = Context.TransformStr(Name, Transform);
             Vars sv = new Vars();
-            sv[""] = sv["from"] = from;
+            sv[""] = sv["from"] = from; 
             if (to != null)
                 sv["to"] = to;
 
             return Context.ExecuteWithVars(delegate()
                 {
-                    object ret = null;
-                    try
-                    {
-                        ret = func();
-                    }
-                    catch (Exception ex)
-                    {
-                        ret = OnError(ex);
-                    }
+                    object ret = func();
                     return ret;
                 },sv,pref);
         }

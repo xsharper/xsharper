@@ -44,11 +44,11 @@ namespace XSharper.Core
         public bool Recursive { get; set; }
 
         /// true, if files should be included
-        [Description("true, if directories should be scanned recursively")]
+        [Description("true, if files should be listed")]
         public bool Files { get; set; }
 
         /// true, if directories should be included
-        [Description("true, if directories should be scanned recursively")]
+        [Description("true, if directories should be listed")]
         public bool Directories { get; set; }
 
         /// <summary>
