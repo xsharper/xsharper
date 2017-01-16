@@ -81,7 +81,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Embedded\Manifests\asInvoker.res.gz" />
     <EmbeddedResource Include="Embedded\Manifests\requireAdministrator.res.gz" />
-    <None Include="app.config" />
     <None Include="Manifests\asInvoker.manifest" />
     <None Include="Manifests\requireAdministrator.manifest" />
     <None Include="NotCompiled\GeneratedProgram.cs" />

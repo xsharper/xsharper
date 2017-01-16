@@ -30,7 +30,7 @@ using System.Runtime.CompilerServices;
 
 namespace XSharper.Core
 {
-    public partial class ScriptContext : IEvaluationContext
+    public partial class ScriptContext 
     {
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace XSharper.Core
         /// <param name="name">name of the property or method</param>
         /// <param name="args">arguments</param>
         /// <returns>call return value</returns>
-        public virtual object CallExternal(string name, object[] args)
+        public override object CallExternal(string name, object[] args)
         {
             return Call(name, args);
         }
@@ -49,18 +49,22 @@ namespace XSharper.Core
         /// </summary>
         /// <param name="typeName">Type to find by name</param>
         /// <returns>found type, or null if not found</returns>
-        public virtual Type FindType(string typeName)
+        public override Type FindType(string typeName)
         {
-            Type t = Utils.FindType(typeName);
-            if (t==null)
+            Type t = base.FindType(typeName);
+            if (t == null)
             {
-                t = Compiler.TryResolveTypeNameWithUsing(typeName, _typeManager.AllAssemblies);
+                t = Utils.FindType(typeName);
+                if (t == null)
+                {
+                    t = Compiler.TryResolveTypeNameWithUsing(typeName, _typeManager.AllAssemblies);
+                }
             }
             return t;
         }
-        
+
         /// Returns token characters, in addition to ASCII letters and digits. 
-        protected virtual string TokenSpecialCharacters
+        protected override string TokenSpecialCharacters
         {
             get
             {
@@ -86,28 +90,8 @@ namespace XSharper.Core
             return target;
         }
 
-        /// <summary>
-        /// Determines whether the specified variable is calculated.
-        /// </summary>
-        /// <param name="key">Name of the variable.</param>
-        /// <returns>
-        /// 	<c>true</c> if the specified variable name is calculated, i.e. not stored in the collection; otherwise, <c>false</c>.
-        /// </returns>
-        public virtual bool IsCalculated(string key)
-        {
-            if (!string.IsNullOrEmpty(key))
-            {
-                char ch = key[0];
-                if (ch=='%' || ch=='~')
-                    return true;
-            }
-            if (!string.IsNullOrEmpty(key) && (key[0] == '=' || key.IndexOf('|') != -1 || char.IsDigit(key[0])))
-                return true;
-            return false;
-        }
-
         /// Override this method to resolve calculated variables to object
-        public virtual bool TryGetExternal(string s, out object o)
+        public override bool TryGetExternal(string s, out object o)
         {
             switch (s.ToLowerInvariant())
             {
@@ -115,18 +99,8 @@ namespace XSharper.Core
                 case "c":
                     o = this;
                     return true;
-                case "null":
-                    o = null;
-                    return true;
-                case "true":
-                    o = true;
-                    return true;
-                case "false":
-                    o = false;
-                    return true;
             }
-            o = null;
-            return false;
+            return base.TryGetExternal(s, out o);
         }
 
 
@@ -174,6 +148,26 @@ namespace XSharper.Core
         }
 
 
+
+        /// <summary>
+        /// Determines whether the specified variable is calculated.
+        /// </summary>
+        /// <param name="key">Name of the variable.</param>
+        /// <returns>
+        /// 	<c>true</c> if the specified variable name is calculated, i.e. not stored in the collection; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool IsCalculated(string key)
+        {
+            if (!string.IsNullOrEmpty(key))
+            {
+                char ch = key[0];
+                if (ch == '%' || ch == '~')
+                    return true;
+            }
+            return base.IsCalculated(key);
+        }
+
+
         /// <summary>
         /// Try to get variable value
         /// </summary>
@@ -213,72 +207,11 @@ namespace XSharper.Core
             value = EvalMulti(key);
             return true;
         }
-
-        /// Read expression from string, evaluate it and return the value
-        public object Eval(string expression)
-        {
-            if (expression == null)
-                return null;
-            
-            IOperation ex = _exprCache[expression];
-            if (ex == null)
-            {
-                using (var sr = new ParsingReader(new StringReader(expression)))
-                {
-                    ex = new Parser(TokenSpecialCharacters).Parse(sr);
-                    sr.SkipWhiteSpace();
-                    sr.ReadAndThrowIfNot(-1);
-                    _exprCache[expression] = ex;
-                }
-            }
-            if (ex == null)
-                return null;
-            return Eval(ex);
-        }
-
-        /// Read expression from stream, evaluate it and return the value
-        public object Eval(ParsingReader expressionReader)
-        {
-            return Eval(new Parser(TokenSpecialCharacters).Parse(expressionReader));
-        }
-
-        /// Read multi-expression (like ${a|b|=3+5}) from the string, evaluate it and return the value
-        public object EvalMulti(string multiExpression)
-        {
-            if (multiExpression==null)
-                return null;
-            IOperation o = _exprCache[multiExpression];
-            if (o == null)
-            {
-                using (var sr = new ParsingReader(new StringReader(multiExpression)))
-                {
-                    o = new Parser(TokenSpecialCharacters).ParseMulti(sr);
-                    sr.SkipWhiteSpace();
-                    sr.ReadAndThrowIfNot(-1);
-                    _exprCache[multiExpression] = o;
-                }
-            }
-            return Eval(o);
-        }
-
-        /// Read multi-expression (like ${a|b|=3+5}) from the stream and evaluate it
-        public object EvalMulti(ParsingReader expressionReader)
-        {
-            return Eval(new Parser(TokenSpecialCharacters).ParseMulti(expressionReader));
-        }
-
-        /// Evaluate expression
-        public object Eval(IOperation operation)
-        {
-            if (operation == null)
-                return null;
-
-            var stack = new Stack<object>();
-            operation.Eval(this, stack);
-            return stack.Pop();
-        }
+        
+        
+        
         /// Get list of no-name objects or type to try methods that start with .
-        public IEnumerable<TypeObjectPair> GetNonameObjects()
+        public override IEnumerable<TypeObjectPair> GetNonameObjects()
         {
             yield return new TypeObjectPair(GetType(), this);
             yield return new TypeObjectPair(GetType(), null);
@@ -286,10 +219,6 @@ namespace XSharper.Core
             yield return new TypeObjectPair(typeof(Dump), null);
         }
 
-        /// Returns true if private members may be accessed
-        public virtual bool AccessPrivate
-        {
-            get; set;
-        }
+        
     }
 }

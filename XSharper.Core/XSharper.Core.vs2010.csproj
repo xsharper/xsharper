@@ -102,6 +102,7 @@
     <Compile Include="Reusables\Eval\Operations\OperationVariableAccess.cs" />
     <Compile Include="Reusables\Eval\Parser.cs" />
     <Compile Include="Reusables\Eval\ParsingException.cs" />
+    <Compile Include="Reusables\VarsWithExpand.cs" />
     <Compile Include="Reusables\Xml\XsXsdGenerator.cs" />
     <Compile Include="Reusables\CtrlCInterceptor.cs" />
     <Compile Include="ScriptContext.Signature.cs" />
