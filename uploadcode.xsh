@@ -4,6 +4,7 @@
 
 
 	<set upload="${=.Script.DirectoryName}Upload" />
+	<path from='${upload}' existence='createDirectory' />
 	<delete from='${upload}' deleteRoot='false' recursive='true' />
 	
 	

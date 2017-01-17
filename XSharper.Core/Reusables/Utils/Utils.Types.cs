@@ -25,6 +25,7 @@
 #endregion
 using System;
 using System.Reflection;
+using System.Collections.Generic;
 
 namespace XSharper.Core
 {
@@ -35,63 +36,57 @@ namespace XSharper.Core
         {
             return FindType(ts, true);
         }
+
+        static readonly Dictionary<string, Type> s_simpleTypes = new Dictionary<string, Type>
+        {
+                {"int",typeof(int)},
+                {"uint", typeof(uint)},
+                {"long",typeof(long)},
+                {"ulong",typeof(ulong)},
+                {"sbyte",typeof(sbyte)},
+                {"byte",typeof(byte)},
+                {"short",typeof(short)},
+                {"ushort",typeof(ushort)},
+                {"float",typeof(float)},
+                {"double",typeof(double)},
+                {"decimal",typeof(decimal)},
+                {"bool",typeof(bool)},
+                {"char",typeof(char)},
+                {"string",typeof(string)},
+                {"DateTime", typeof(DateTime)},
+                {"TimeSpan", typeof(TimeSpan)},
+                {"DateTimeKind", typeof(DateTimeKind)},
+        };
+
         /// Find type given a type name, and return the found type or null if not found
         public static Type FindType(string ts, bool all)
         {
+            if (ts == null)
+                return null;
+
             if (ts.EndsWith("?", StringComparison.Ordinal))
             {
                 var f = FindType(ts.Substring(0, ts.Length - 1));
-                if (f==null)
+                if (f == null)
                     return f;
-                return typeof (Nullable<>).MakeGenericType(f);
+                return typeof(Nullable<>).MakeGenericType(f);
             }
 
-            switch (ts)
-            {
-                case "int":
-                    return typeof(int);
-                case "uint":
-                    return typeof(uint);
-                case "long":
-                    return typeof(long);
-                case "ulong":
-                    return typeof(ulong);
-                case "sbyte":
-                    return typeof(sbyte);
-                case "byte":
-                    return typeof(byte);
-                case "short":
-                    return typeof(short);
-                case "ushort":
-                    return typeof(ushort);
-                case "float":
-                    return typeof(float);
-                case "double":
-                    return typeof(double);
-                case "decimal":
-                    return typeof(decimal);
-                case "bool":
-                    return typeof(bool);
-                case "char":
-                    return typeof(char);
-                case "string":
-                    return typeof(string);
-            }
+            Type t;
+            if (s_simpleTypes.TryGetValue(ts, out t))
+                return t;
 
-            if (all)
+            t = Type.GetType(ts, false);
+            if (t != null && (all || t.IsEnum))
+                return t;
+
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
-                var t = Type.GetType(ts, false);
-                if (t != null)
-                    return t;
-                foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+                if (assembly != Assembly.GetExecutingAssembly())
                 {
-                    if (assembly != Assembly.GetExecutingAssembly())
-                    {
-                        t = assembly.GetType(ts, false);
-                        if (t != null)
-                            return t;
-                    }
-
+                    t = assembly.GetType(ts, false);
+                    if (t != null && (all || t.IsEnum))
+                        return t;
                 }
             }
             
