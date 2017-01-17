@@ -51,15 +51,9 @@ namespace XSharper.Core
         /// <returns>found type, or null if not found</returns>
         public override Type FindType(string typeName)
         {
-            Type t = base.FindType(typeName);
+            Type t = Utils.FindType(typeName, true);
             if (t == null)
-            {
-                t = Utils.FindType(typeName);
-                if (t == null)
-                {
-                    t = Compiler.TryResolveTypeNameWithUsing(typeName, _typeManager.AllAssemblies);
-                }
-            }
+                t = Compiler.TryResolveTypeNameWithUsing(typeName, _typeManager.AllAssemblies);
             return t;
         }
 

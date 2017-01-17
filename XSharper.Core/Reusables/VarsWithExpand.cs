@@ -393,7 +393,7 @@ namespace XSharper.Core
         /// <returns>found type, or null if not found</returns>
         public virtual Type FindType(string typeName)
         {
-            return null;
+            return Utils.FindType(typeName, false);
         }
 
         /// <summary>

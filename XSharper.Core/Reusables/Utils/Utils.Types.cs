@@ -31,8 +31,12 @@ namespace XSharper.Core
     /// Utilities
     public partial class Utils
     {
-        /// Find type given a type name, and return the found type or null if not found
         public static Type FindType(string ts)
+        {
+            return FindType(ts, true);
+        }
+        /// Find type given a type name, and return the found type or null if not found
+        public static Type FindType(string ts, bool all)
         {
             if (ts.EndsWith("?", StringComparison.Ordinal))
             {
@@ -73,20 +77,24 @@ namespace XSharper.Core
                 case "string":
                     return typeof(string);
             }
-            
-            var t=Type.GetType(ts, false);
-            if (t!=null)
-                return t;
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                if (assembly != Assembly.GetExecutingAssembly())
-                {
-                    t = assembly.GetType(ts, false);
-                    if (t != null)
-                        return t;
-                }
 
+            if (all)
+            {
+                var t = Type.GetType(ts, false);
+                if (t != null)
+                    return t;
+                foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+                {
+                    if (assembly != Assembly.GetExecutingAssembly())
+                    {
+                        t = assembly.GetType(ts, false);
+                        if (t != null)
+                            return t;
+                    }
+
+                }
             }
+            
             return null;
         }
 
