@@ -41,6 +41,11 @@ namespace XSharper.Core
             _map = new Dictionary<string, IOperation>(cacheSize);
         }
 
+        public int Capacity
+        {
+            get { return _expressions.Length; }
+        }
+
         /// Clear cache
         public void Clear()
         {

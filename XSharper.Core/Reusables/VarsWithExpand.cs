@@ -35,13 +35,19 @@ namespace XSharper.Core
     /// </summary>
     public partial class VarsWithExpand : Vars, IEvaluationContext
     {
-        private readonly PrecompiledCache _exprCache = new PrecompiledCache(100);
+        private PrecompiledCache _exprCache;
 
         /// <summary>
         /// Constructor
         /// </summary>
         public VarsWithExpand()
         {
+        }
+
+        public PrecompiledCache Cache
+        {
+            get { return _exprCache; }
+            set { _exprCache = value; }
         }
 
         /// <summary>
@@ -63,6 +69,8 @@ namespace XSharper.Core
         public VarsWithExpand(IEnumerable<KeyValuePair<string, object>> setOfVariables) : base(setOfVariables)
         {
         }
+
+        
 
         #region -- Variable expansion --
         ///<summary>Transform variable</summary>
@@ -315,6 +323,9 @@ namespace XSharper.Core
             if (expression == null)
                 return null;
 
+            if (_exprCache == null)
+                _exprCache = new PrecompiledCache(128);
+
             IOperation ex = _exprCache[expression];
             if (ex == null)
             {
@@ -343,6 +354,8 @@ namespace XSharper.Core
         {
             if (multiExpression == null)
                 return null;
+            if (_exprCache == null)
+                _exprCache = new PrecompiledCache(128);
             IOperation o = _exprCache[multiExpression];
             if (o == null)
             {

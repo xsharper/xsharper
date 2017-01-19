@@ -173,9 +173,15 @@ namespace XSharper.Core.Operations
                             stack.Push(o1 != o2);
                             return;
                         }
+                        if (_operator == OperatorType.Not)
+                        {
+                            stack.Push(true);
+                            return;
+                        }
                         throw new NullReferenceException();
                     }
 
+                    
                     if (o1 is decimal || o2 is decimal)
                         stack.Push(decimalMath(Utils.To<decimal>(o1), Utils.To<decimal>(o2)));
                     else  if (o1 is double || o2 is double || o1 is float || o2 is float)
@@ -219,6 +225,9 @@ namespace XSharper.Core.Operations
                 case OperatorType.Greater: return r > 0;
                 case OperatorType.GreaterOrEqual: return r >= 0;
                 default:
+                    if (_operator == OperatorType.Not)
+                        return string.IsNullOrEmpty(d1) || !Utils.To<bool>(d1);
+
                     var v1=ParsingReader.TryParseNumber(d1);
                     var v2 = ParsingReader.TryParseNumber(d2);
                     if (v1!=null && v2!=null)
@@ -230,6 +239,7 @@ namespace XSharper.Core.Operations
                             return Utils.To<int>(x);
                         return x;
                     }
+                    
                     throw new InvalidOperationException("Cannot process operator " + _operator);
             }
         }

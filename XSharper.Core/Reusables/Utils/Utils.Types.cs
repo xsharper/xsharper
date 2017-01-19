@@ -53,6 +53,7 @@ namespace XSharper.Core
                 {"bool",typeof(bool)},
                 {"char",typeof(char)},
                 {"string",typeof(string)},
+                {"object",typeof(object)},
                 {"DateTime", typeof(DateTime)},
                 {"TimeSpan", typeof(TimeSpan)},
                 {"DateTimeKind", typeof(DateTimeKind)},

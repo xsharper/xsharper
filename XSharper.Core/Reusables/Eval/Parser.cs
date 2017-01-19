@@ -382,7 +382,7 @@ namespace XSharper.Core
                                     argumentExpected = dotIsProperty = false;
                                 }
                                 break;
-
+                            
                             case Operators.Comma:
                                 while (stack.Count > 0 && !stack.Peek().IsOpenBrace)
                                     queue.Enqueue(operationFromToken(stack.Pop()));
