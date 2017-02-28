@@ -64,6 +64,21 @@ namespace XSharper.Core
         
         /// Returns true if private members may be accessed
         public virtual bool AccessPrivate { get { return false; } }
+
+        /// Returns true if private members may be accessed
+        public virtual bool AllowComInterop { get { return true; } }
+
+        /// Returns true if dump operator ## is allowed
+        public virtual bool AllowDumpOperator { get { return true; } }
+
+        /// Make a call to a method or property
+        public virtual bool TryGetOrCall(object obj, Type objType, bool isProperty, string propertyOrMethod, Array args, out object retVal)
+        {
+            if (isProperty)
+                return Utils.TryGetProperty(obj, objType, propertyOrMethod, args, AccessPrivate, out retVal);
+            else
+                return Utils.TryCallMethod(obj, objType, propertyOrMethod, args, AccessPrivate, out retVal); ;
+        }
         
         /// Call external method
         public virtual object CallExternal(string name, object[] parameters)

@@ -110,10 +110,8 @@ namespace XSharper.Core.Operations
                     success = false;
                     foreach (var to in typeAndObjects)
                     {
-                        if (_isProperty || i != parts.Length - 1)
-                            success = Utils.TryGetProperty(to.Object, to.Type, currentPart, (i == parts.Length - 1) ? p : null, context.AccessPrivate,out sub);
-                        else
-                            success = Utils.TryCallMethod(to.Object, to.Type, currentPart, (i == parts.Length - 1) ? p : null, context.AccessPrivate, out sub);
+                        var prop=(_isProperty || i != parts.Length - 1);
+                        success = context.TryGetOrCall(to.Object, to.Type, prop, currentPart, (i == parts.Length - 1) ? p : null, out sub);
                         if (success)
                         {
                             typeAndObjects = null;
@@ -122,7 +120,7 @@ namespace XSharper.Core.Operations
                             break;
                         }
                     }
-                    if (!success)
+                    if (!success && context.AllowComInterop)
                     {
                         // Last possible chance for COM objects where reflection does not work, but calling might! 
                         if (i==parts.Length-1)

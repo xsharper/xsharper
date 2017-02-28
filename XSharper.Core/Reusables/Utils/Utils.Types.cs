@@ -37,27 +37,54 @@ namespace XSharper.Core
             return FindType(ts, true);
         }
 
-        static readonly Dictionary<string, Type> s_simpleTypes = new Dictionary<string, Type>
+        static readonly Dictionary<string, Type> s_simpleTypes;
+        static readonly Dictionary<string, Type> s_safeTypes;
+
+        static Utils()
         {
-                {"int",typeof(int)},
-                {"uint", typeof(uint)},
-                {"long",typeof(long)},
-                {"ulong",typeof(ulong)},
-                {"sbyte",typeof(sbyte)},
-                {"byte",typeof(byte)},
-                {"short",typeof(short)},
-                {"ushort",typeof(ushort)},
-                {"float",typeof(float)},
-                {"double",typeof(double)},
-                {"decimal",typeof(decimal)},
-                {"bool",typeof(bool)},
-                {"char",typeof(char)},
-                {"string",typeof(string)},
-                {"object",typeof(object)},
-                {"DateTime", typeof(DateTime)},
-                {"TimeSpan", typeof(TimeSpan)},
-                {"DateTimeKind", typeof(DateTimeKind)},
-        };
+            s_simpleTypes = new Dictionary<string, Type>() { 
+                { "int",typeof(int)},
+                { "uint", typeof(uint)},
+                { "long",typeof(long)},
+                { "ulong",typeof(ulong)},
+                { "sbyte",typeof(sbyte)},
+                { "byte",typeof(byte)},
+                { "short",typeof(short)},
+                { "ushort",typeof(ushort)},
+                { "float",typeof(float)},
+                { "double",typeof(double)},
+                { "decimal",typeof(decimal)},
+                { "bool",typeof(bool)},
+                { "char",typeof(char)},
+                { "string",typeof(string)},
+                { "object",typeof(object)},
+                { "DateTime", typeof(DateTime)},
+                { "TimeSpan", typeof(TimeSpan)},
+                { "DateTimeKind", typeof(DateTimeKind)}
+            };
+
+            s_safeTypes = new Dictionary<string, Type>();
+            
+            foreach (var t in s_simpleTypes.Values)
+            {
+                s_safeTypes.Add(t.Name, t);
+                s_safeTypes.Add(t.FullName, t);
+            }
+        }
+
+        public static void AddSafeType(Type type, string alias)
+        {
+            if (type != null)
+            {
+                s_safeTypes.Add(type.FullName, type);
+                if(alias!=null)
+                    s_safeTypes.Add(alias, type);
+            }
+        }
+        public static void AddSafeType(Type type)
+        {
+            AddSafeType(type, null);
+        }
 
         /// Find type given a type name, and return the found type or null if not found
         public static Type FindType(string ts, bool all)
@@ -74,7 +101,7 @@ namespace XSharper.Core
             }
 
             Type t;
-            if (s_simpleTypes.TryGetValue(ts, out t))
+            if (s_simpleTypes.TryGetValue(ts, out t) || s_safeTypes.TryGetValue(ts, out t))
                 return t;
 
             t = Type.GetType(ts, false);

@@ -68,8 +68,17 @@ namespace XSharper.Core
         /// Get list of no-name objects or type to try methods that start with .
         IEnumerable<TypeObjectPair> GetNonameObjects();
 
-        /// Returns true if private members may be accessed
-        bool    AccessPrivate { get; }
+        /// Access private methods
+        bool AccessPrivate { get;  }
+
+        /// Returns true if COM interop is allowed
+        bool AllowComInterop { get; }
+
+        /// Returns true if dump operator ## is allowed
+        bool AllowDumpOperator { get; }
+
+        /// Make a call to a method or property
+        bool TryGetOrCall(object obj, Type objType, bool isProperty, string propertyOrMethod, Array args, out object retVal);
     }
 
     /// Compiled script expression

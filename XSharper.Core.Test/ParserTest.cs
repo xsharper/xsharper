@@ -85,6 +85,15 @@ namespace XSharper.Core.Test
         }
 
         [TestMethod]
+        public void CommonArray()
+        {
+            var ve = new VarsWithExpand();
+            var res = ve.Eval("new [] { 1,2}");
+            Assert.IsInstanceOfType(res, typeof(int[]));
+            Assert.IsTrue(((int[])res)[1]==2);
+
+        }
+        [TestMethod]
         public void ExpressionParsing()
         {
             Assert.AreEqual(2, _ev.Eval("((int[]){'1','2','3'})[1]"));

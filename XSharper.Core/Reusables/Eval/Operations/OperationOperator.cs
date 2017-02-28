@@ -196,7 +196,10 @@ namespace XSharper.Core.Operations
                     return;
 
                 case OperatorType.Dump:
-                    stack.Push(Dump.ToDump(o1));
+                    if (context.AllowDumpOperator)
+                        stack.Push(Dump.ToDump(o1));
+                    else
+                        stack.Push((o1??"<null>").ToString());
                     break;
                 case OperatorType.Throw:
                     if (o1 is Exception)

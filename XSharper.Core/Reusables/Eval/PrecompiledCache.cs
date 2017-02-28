@@ -27,18 +27,32 @@ using System.Collections.Generic;
 
 namespace XSharper.Core
 {
+    public interface IPrecompiledCache
+    {
+        int Capacity { get; }
+        void Clear();
+        IOperation this[string expression] { get; set; }
+    }
+
     /// Cache for precompiled expressions
-    public class PrecompiledCache
+    public class PrecompiledCache : IPrecompiledCache
     {
         private readonly string[] _expressions;
         private readonly Dictionary<string, IOperation> _map;
         private int _nextptr = 0;
+        private object _lock = null;
+        
+        /// Create cache with the specified number of entries
+        public PrecompiledCache(int cacheSize) : this(cacheSize, false)
+        {
+        }
 
         /// Create cache with the specified number of entries
-        public PrecompiledCache(int cacheSize)
+        public PrecompiledCache(int cacheSize, bool useLocking)
         {
             _expressions = new string[cacheSize];
             _map = new Dictionary<string, IOperation>(cacheSize);
+            _lock = useLocking?new object():null;
         }
 
         public int Capacity
@@ -50,23 +64,49 @@ namespace XSharper.Core
         public void Clear()
         {
             _expressions.Initialize();
-            _map.Clear();
+            if (_lock!=null)
+            {
+                lock (_lock)
+                    _map.Clear();
+            }
+            else
+                _map.Clear();
         }
 
         /// Access cache
         public IOperation this[string expression]
         {
+            // if (_lock != null) logic is a bit over the top, but there isn't much of it
             get
             {
                 IOperation v;
-                return _map.TryGetValue(expression, out v) ? v : null;
+                if (_lock != null)
+                {
+                    lock (_lock)
+                        return _map.TryGetValue(expression, out v) ? v : null;
+                }
+                else
+                    return _map.TryGetValue(expression, out v) ? v : null;
             }
             set
             {
-                if (_expressions[_nextptr] != null)
-                    _map.Remove(_expressions[_nextptr]);
-                _expressions[_nextptr++] = expression;
-                _map[expression] = value;
+                if (_lock!=null)
+                {
+                    lock (_lock)
+                    {
+                        if (_expressions[_nextptr] != null)
+                            _map.Remove(_expressions[_nextptr]);
+                        _expressions[_nextptr++] = expression;
+                        _map[expression] = value;
+                    }
+                }
+                else
+                {
+                    if (_expressions[_nextptr] != null)
+                        _map.Remove(_expressions[_nextptr]);
+                    _expressions[_nextptr++] = expression;
+                    _map[expression] = value;
+                }
             }
         }
 
