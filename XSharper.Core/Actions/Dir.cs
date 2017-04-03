@@ -253,6 +253,11 @@ namespace XSharper.Core
                 if (!Files)
                     return null;
 
+                if (ctx.DirFilter != null && !ctx.DirFilter.IsMatch(fsi.FullName))
+                {
+                    VerboseMessage("{0} did not pass directory filter", fsi.FullName);
+                    return null;
+                }
                 if (ctx.NameFilter != null && !ctx.NameFilter.IsMatch(fsi.FullName))
                 {
                     return null;
@@ -266,6 +271,7 @@ namespace XSharper.Core
                 {
                     return null;
                 }
+                
             }
             
             ctx.Entries++;
