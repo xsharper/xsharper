@@ -52,7 +52,10 @@
                 r = parseInt(received.innerHTML, 10) + result.HtmlUpdate.length;
             else
                 r = result.HtmlUpdate.length;
-            received.innerHTML = r + " characters received in " + (++callCount) + " calls.";
+            received.innerHTML = r + " characters received in " + (++callCount) + " calls. Last update: "+("0" + time.getHours()).slice(-2)   + ":" + 
+			    ("0" + time.getMinutes()).slice(-2) + ":" + 
+			    ("0" + time.getSeconds()).slice(-2);
+
             
             output.scrollTop = output.scrollHeight;
             if (timer)

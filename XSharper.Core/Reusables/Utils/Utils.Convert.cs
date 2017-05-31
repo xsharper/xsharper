@@ -97,10 +97,6 @@ namespace XSharper.Core
             if (pt == ot || ot.IsSubclassOf(pt) || pt.IsAssignableFrom(ot))
                 return obj;
             
-            if (pt.IsGenericType && pt.GetGenericTypeDefinition() == typeof(Nullable<>))
-            {
-                return To(pt.GetGenericArguments()[0], obj);
-            }
             if (pt == typeof(string))
             {
                 if (obj is double)
