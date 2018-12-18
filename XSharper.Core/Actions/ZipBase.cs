@@ -49,12 +49,7 @@ namespace XSharper.Core
         {
             ZipTime = ZipTime.FileTime;
         }
-        /// Initialize action
-        public override void Initialize()
-        {
-            ZipConstants.DefaultCodePage = Console.InputEncoding.WindowsCodePage;
-            base.Initialize();
-        }
+       
     }
 }
 

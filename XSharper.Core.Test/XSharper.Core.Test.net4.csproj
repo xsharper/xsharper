@@ -62,13 +62,13 @@
     <Content Include="AuthoringTests.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Shadow Include="Test References\XSharper.Core.accessor" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\XSharper.Core\XSharper.Core.net4.csproj">
       <Project>{b5b48bb6-87b2-4065-a327-96745d1b688d}</Project>
       <Name>XSharper.Core.net4</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Test References\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
