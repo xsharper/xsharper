@@ -105,7 +105,7 @@ namespace XSharper.Core
             string factory = Context.TransformStr(Factory, Transform);
             DbProviderFactory dbFactory = DbProviderFactories.GetFactory(factory);
 
-
+			string csLog=cs;
 			if (Context.Verbose)
 			{
 				var cb=dbFactory.CreateConnectionStringBuilder();
@@ -114,7 +114,8 @@ namespace XSharper.Core
 					cb["Password"]="<removed>";
 				if (cb.ContainsKey("pwd"))
 					cb["pwd"]="<removed>";
-	            VerboseMessage("Opening a DB connection {0} with cs='{1}'", factory, cb.ConnectionString);
+				csLog=cb.ConnectionString;
+	            VerboseMessage("Opening a DB connection {0} with cs='{1}'", factory, csLog);
 			}
             var conn = dbFactory.CreateConnection();
             try {
@@ -122,7 +123,7 @@ namespace XSharper.Core
 
                 if (ClearPool)
                 {
-                    VerboseMessage("Cleaning DB connection pool for cs='{0}'", cs);
+                    VerboseMessage("Cleaning DB connection pool for cs='{0}'", csLog);
                 
                     if (conn is SqlConnection)
                         SqlConnection.ClearPool((SqlConnection)conn);
