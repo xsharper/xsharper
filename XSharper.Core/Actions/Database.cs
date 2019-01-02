@@ -103,9 +103,19 @@ namespace XSharper.Core
         {
             string cs = Context.TransformStr(ConnectionString, Transform);
             string factory = Context.TransformStr(Factory, Transform);
-            VerboseMessage("Opening a DB connection {0} with cs='{1}'", factory, cs);
             DbProviderFactory dbFactory = DbProviderFactories.GetFactory(factory);
 
+
+			if (Context.Verbose)
+			{
+				var cb=dbFactory.CreateConnectionStringBuilder();
+				cb.ConnectionString=cs;
+				if (cb.ContainsKey("Password"))
+					cb["Password"]="<removed>";
+				if (cb.ContainsKey("pwd"))
+					cb["pwd"]="<removed>";
+	            VerboseMessage("Opening a DB connection {0} with cs='{1}'", factory, cb.ConnectionString);
+			}
             var conn = dbFactory.CreateConnection();
             try {
                 conn.ConnectionString = cs;
