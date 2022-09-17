@@ -2,6 +2,7 @@
 <xsharper xmlns="http://www.xsharper.com/schemas/1.0">
 	<param switch="fromBuildBat" required="true" count="none" />
  	<param switch="upload" count="none" default="false" />
+ 	<param switch="increaseVersion" count="none" default="false" />
     
   <include id="ftp" from="${=.script.DirectoryName}Lib\ftpUpload.xsh" />
       
@@ -15,11 +16,12 @@
   <!-- Increment build -->
   <code>c.Set("build",c.GetInt("build")+1)</code>
   <set name="version">${major}.${minor}.${build}.${revision}</set>
+  <print>Version=${version}</print>
   <set name="versionComma">${major}, ${minor}, ${build}, ${revision}</set>
 
     
   <!-- Updating files -->
-	<if istrue="${upload|=false}">
+	<if istrue="${increaseVersion|=false}">
   <rowset id="files" tr="expand">
   	<row >${=.script.DirectoryName}xsharper\properties\AssemblyInfo.cs</row>  
   	<row >${=.script.DirectoryName}xsharper.core\properties\AssemblyInfo.cs</row>
@@ -53,6 +55,9 @@
 	</forEach>
 	</if>
 
+    <set outDir='${=.script.DirectoryName}\Output' />
+    <eval>Directory.CreateDirectory($outDir)</eval>
+
 	<call subId='build'>
 		<param>0</param>
 	</call>
@@ -60,7 +65,8 @@
 	<call subId='build'>
 		<param>1</param>
 	</call>
-	
+
+    	
   <sub id='build'>  
 		<param name='net4'  required='1' />
 
@@ -127,6 +133,14 @@
 			<param value="${tempFile}" />
 		  </shell>
 		  <print />
+
+          <copy from='${exe}' to='${outDir}\xsharper${suff}.exe' />
+          <copy from='${tempFile}' to='${outDir}\xsharper${suff}.zip' />
+	      <if isFalse='${net4}'>
+               <copy from='${coreDll}' to='${outDir}\XSharper.Core.dll' />
+               <copy from='${tempfile}' to='${outDir}\schema.xsd' />
+			  <writetext value="${version}" to="${outDir}\xsharper-version.txt" encoding="ascii" />
+          </if>
 
 		  <if istrue="${upload|0}">
 			  <zip from="${=Path.GetDirectoryName($exe)}" to="${tempFile2}" filter="xsharper.exe"/>

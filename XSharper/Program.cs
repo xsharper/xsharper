@@ -28,6 +28,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -134,7 +135,16 @@ namespace XSharper
         {
             CommandLineParameters xsParams = getXsParams();
             int exitCode = 0;
-            
+
+            // Upgrade TLS
+            var sp = ServicePointManager.SecurityProtocol;
+            if (sp!= 0 && 
+                ((sp & SecurityProtocolType.Ssl3) != 0 ||
+                 (ServicePointManager.SecurityProtocol & (SecurityProtocolType)3072)==0))
+            {
+                ServicePointManager.SecurityProtocol = (SecurityProtocolType)(192 | 768 | 3072 | 12288);
+            }
+                
             ConsoleRedirector redir = null;
             AppDomainLoader.progress("MainWithContext: Entering --------------------");
             bool utf8 = false;

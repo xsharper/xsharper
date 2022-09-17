@@ -1,0 +1,10 @@
+.vs
+Output/**
+**/bin/**
+**/obj/**
+**/Debug/**
+*.user
+XSharper/Embedded/**
+Xsharper/Resources/*.res
+*.cache
+Xsharper.exe
