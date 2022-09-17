@@ -86,6 +86,7 @@
     <Compile Include="Reusables\Eval\PrecompiledCache.cs" />
     <Compile Include="Reusables\Utils\CustomAttributeHelper.cs" />
     <Compile Include="Reusables\Utils\Utils.Csv.cs" />
+    <Compile Include="Reusables\Utils\Utils.RestartManager.cs" />
     <Compile Include="Reusables\Utils\Utils.Registry.cs" />
     <Compile Include="Reusables\Utils\Utils.Environment.cs" />
     <Compile Include="Reusables\Utils\Utils.Hex.cs" />

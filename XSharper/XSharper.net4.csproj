@@ -158,19 +158,24 @@
   <PropertyGroup>
     <PostBuildEvent>"$(TargetPath)" "$(ProjectDir)PostBuild.xsh" //debug 
 </PostBuildEvent>
-    <PreBuildEvent>"$(SolutionDir)\3rdparty\rc.exe" /fo "$(ProjectDir)\Embedded\Manifests\asInvoker.res" "$(ProjectDir)\Manifests\asInvoker.rc"
-"$(SolutionDir)\3rdparty\rc.exe" /fo "$(ProjectDir)\Embedded\Manifests\requireAdministrator.res" "$(ProjectDir)\Manifests\requireAdministrator.rc"
-"$(SolutionDir)\3rdparty\rc.exe" /fo "$(ProjectDir)\Resources\xsharper.res" "$(ProjectDir)\Resources\xsharper.rc"
-echo 0 &gt; "$(ProjectDir)Embedded\Assemblies\AllStrongNames.flag"
-("$(DevEnvDir)..\..\..\Microsoft SDKs\Windows\v7.0A\Bin\sn" -q -vf "$(SolutionDir)XSharper.Core\bin\$(ConfigurationName)\XSharper.Core.dll") &amp;&amp; ("$(DevEnvDir)..\..\..\Microsoft SDKs\Windows\v7.0A\Bin\sn" -q -vf "$(SolutionDir)3rdParty\ICSharpCode.SharpZipLib.dll") &amp;&amp; (echo 1 &gt; "$(ProjectDir)Embedded\Assemblies\AllStrongNames.flag")
+    <PreBuildEvent>
+mkdir "$(ProjectDir)Embedded"
+mkdir "$(ProjectDir)Embedded\Manifests"
+mkdir "$(ProjectDir)Embedded\Assemblies"
+mkdir "$(ProjectDir)Embedded\Source"
+"$(SolutionDir)3rdparty\rc.exe" /fo "$(ProjectDir)Embedded\Manifests\asInvoker.res" "$(ProjectDir)Manifests\asInvoker.rc"
+"$(SolutionDir)3rdparty\rc.exe" /fo "$(ProjectDir)Embedded\Manifests\requireAdministrator.res" "$(ProjectDir)Manifests\requireAdministrator.rc"
+"$(SolutionDir)3rdparty\rc.exe" /fo "$(ProjectDir)Resources\xsharper.res" "$(ProjectDir)Resources\xsharper.rc"
+
+("$(SolutionDir)3rdparty\sn.exe" -q -vf "$(SolutionDir)XSharper.Core\bin\$(ConfigurationName)\XSharper.Core.dll") &amp;&amp; ("$(SolutionDir)3rdparty\sn.exe" -q -vf "$(SolutionDir)3rdParty\ICSharpCode.SharpZipLib.dll") &amp;&amp; (echo 1 &gt; "$(ProjectDir)Embedded\Assemblies\AllStrongNames.flag")
 "$(SolutionDir)Tools\Gzip\bin\gzip.exe"  &lt; "$(SolutionDir)XSharper.Core\bin\$(ConfigurationName)\XSharper.Core.dll" &gt; "$(ProjectDir)Embedded\Assemblies\XSharper.Core.dll.gz"
 "$(SolutionDir)Tools\Gzip\bin\gzip.exe" &lt; "$(SolutionDir)3rdParty\ICSharpCode.SharpZipLib.dll"  &gt; "$(ProjectDir)Embedded\Assemblies\ICSharpCode.SharpZipLib.dll.gz"
 
-"$(SolutionDir)Tools\Gzip\bin\gzip.exe" &lt; "$(ProjectDir)\Resources\xsh.ico" &gt; "$(ProjectDir)\Embedded\Source\xsh.ico.gz"
-"$(SolutionDir)Tools\Gzip\bin\gzip.exe" &lt; "$(ProjectDir)\Embedded\Manifests\requireAdministrator.res" &gt; "$(ProjectDir)\Embedded\Manifests\requireAdministrator.res.gz"
-"$(SolutionDir)Tools\Gzip\bin\gzip.exe" &lt; "$(ProjectDir)\Embedded\Manifests\asInvoker.res" &gt; "$(ProjectDir)\Embedded\Manifests\asInvoker.res.gz"
-"$(SolutionDir)Tools\Gzip\bin\gzip.exe" &lt; "$(ProjectDir)\Manifests\requireAdministrator.manifest" &gt; "$(ProjectDir)\Embedded\Manifests\requireAdministrator.manifest.gz"
-"$(SolutionDir)Tools\Gzip\bin\gzip.exe" &lt; "$(ProjectDir)\Manifests\asInvoker.manifest" &gt; "$(ProjectDir)\Embedded\Manifests\asInvoker.manifest.gz"
+"$(SolutionDir)Tools\Gzip\bin\gzip.exe" &lt; "$(ProjectDir)Resources\xsh.ico" &gt; "$(ProjectDir)Embedded\Source\xsh.ico.gz"
+"$(SolutionDir)Tools\Gzip\bin\gzip.exe" &lt; "$(ProjectDir)Embedded\Manifests\requireAdministrator.res" &gt; "$(ProjectDir)Embedded\Manifests\requireAdministrator.res.gz"
+"$(SolutionDir)Tools\Gzip\bin\gzip.exe" &lt; "$(ProjectDir)Embedded\Manifests\asInvoker.res" &gt; "$(ProjectDir)Embedded\Manifests\asInvoker.res.gz"
+"$(SolutionDir)Tools\Gzip\bin\gzip.exe" &lt; "$(ProjectDir)Manifests\requireAdministrator.manifest" &gt; "$(ProjectDir)Embedded\Manifests\requireAdministrator.manifest.gz"
+"$(SolutionDir)Tools\Gzip\bin\gzip.exe" &lt; "$(ProjectDir)Manifests\asInvoker.manifest" &gt; "$(ProjectDir)Embedded\Manifests\asInvoker.manifest.gz"
 "$(SolutionDir)Tools\Gzip\bin\gzip.exe" &lt; "$(ProjectDir)NotCompiled\GeneratedProgram.cs" &gt; "$(ProjectDir)Embedded\Source\GeneratedProgram.gz"
 "$(SolutionDir)Tools\Gzip\bin\gzip.exe" &lt; "$(ProjectDir)NotCompiled\SourceTemplate.cs" &gt; "$(ProjectDir)Embedded\Source\SourceTemplate.gz"
 "$(SolutionDir)Tools\Gzip\bin\gzip.exe" &lt; "$(ProjectDir)AppDomainLoader.cs" &gt; "$(ProjectDir)Embedded\Source\AppDomainLoader.gz"

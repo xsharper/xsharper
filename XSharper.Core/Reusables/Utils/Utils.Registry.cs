@@ -262,11 +262,6 @@ namespace XSharper.Core
                         _hiveKey = NativeMethods.HKEY_CURRENT_CONFIG;
                         _baseKey = Registry.CurrentConfig;
                         break;
-                    case "HKEY_DYN_DATA":
-                        _hive = RegistryHive.DynData;
-                        _hiveKey = NativeMethods.HKEY_DYN_DATA;
-                        _baseKey = Registry.DynData;
-                        break;
                     default:
                         throw new ArgumentOutOfRangeException("keyAndValue", "Invalid key name '" + parts[0] + "'");
                 }

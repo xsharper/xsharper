@@ -83,6 +83,7 @@
     <Compile Include="Reusables\Utils\Utils.Csv.cs" />
     <Compile Include="Reusables\Utils\Utils.Registry.cs" />
     <Compile Include="Reusables\Utils\Utils.Environment.cs" />
+    <Compile Include="Reusables\Utils\Utils.RestartManager.cs" />
     <Compile Include="Reusables\Utils\Utils.Hex.cs" />
     <Compile Include="Reusables\Utils\Utils.Types.cs" />
     <Compile Include="Reusables\Eval\BasicEvaluationContext.cs" />

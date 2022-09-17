@@ -124,7 +124,7 @@ namespace XSharper.Core
     {
         /// Get the list of process using files
         /// Courtesy of https://learn.microsoft.com/en-us/archive/msdn-magazine/2007/april/net-matters-restart-manager-and-generic-method-compilation
-        public static List<RmProcessInfo> GetProcessesUsingFiles(IList<string> filePaths)
+        public static List<RmProcessInfo> GetProcessesUsingFiles(string[] filePaths)
         {
             uint sessionHandle;
             List<RmProcessInfo> processes = new List<RmProcessInfo>();
@@ -135,9 +135,7 @@ namespace XSharper.Core
             try
             {
                 // Let the restart manager know what files we’re interested in
-                string[] pathStrings = new string[filePaths.Count];
-                filePaths.CopyTo(pathStrings, 0);
-                rv = NativeMethods.RmRegisterResources(sessionHandle, (uint)pathStrings.Length, pathStrings, 0, null, 0, null);
+                rv = NativeMethods.RmRegisterResources(sessionHandle, (uint)filePaths.Length, filePaths, 0, null, 0, null);
                 if (rv != 0) throw new Win32Exception(rv);
 
                 // Ask the restart manager what other applications 

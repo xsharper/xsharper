@@ -158,14 +158,18 @@
   <PropertyGroup>
     <PostBuildEvent>"$(TargetPath)" "$(ProjectDir)PostBuild.xsh" //debug 
 </PostBuildEvent>
-    <PreBuildEvent>"$(SolutionDir)\3rdparty\rc.exe" /fo "$(ProjectDir)\Embedded\Manifests\asInvoker.res" "$(ProjectDir)\Manifests\asInvoker.rc"
+    <PreBuildEvent>
+mkdir "$(ProjectDir)Embedded"
+mkdir "$(ProjectDir)Embedded\Manifests"
+mkdir "$(ProjectDir)Embedded\Assemblies"
+mkdir "$(ProjectDir)Embedded\Source"
+"$(SolutionDir)\3rdparty\rc.exe" /fo "$(ProjectDir)\Embedded\Manifests\asInvoker.res" "$(ProjectDir)\Manifests\asInvoker.rc"
 "$(SolutionDir)\3rdparty\rc.exe" /fo "$(ProjectDir)\Embedded\Manifests\requireAdministrator.res" "$(ProjectDir)\Manifests\requireAdministrator.rc"
 "$(SolutionDir)\3rdparty\rc.exe" /fo "$(ProjectDir)\Resources\xsharper.res" "$(ProjectDir)\Resources\xsharper.rc"
 echo 0 &gt; "$(ProjectDir)Embedded\Assemblies\AllStrongNames.flag"
-("C:\Program Files\Microsoft SDKs\Windows\v6.0A\Bin\sn" -q -vf "$(SolutionDir)XSharper.Core\bin\$(ConfigurationName)\XSharper.Core.dll") &amp;&amp; (sn -q -vf "$(SolutionDir)3rdParty\ICSharpCode.SharpZipLib.dll") &amp;&amp; (echo 1 &gt; "$(ProjectDir)Embedded\Assemblies\AllStrongNames.flag")
+("$(SolutionDir)3rdparty\sn.exe" -vf "$(SolutionDir)XSharper.Core\bin\$(ConfigurationName)\XSharper.Core.dll") &amp;&amp; ("$(SolutionDir)3rdparty\sn.exe" -vf "$(SolutionDir)3rdParty\ICSharpCode.SharpZipLib.dll") &amp;&amp; (echo 1 &gt; "$(ProjectDir)Embedded\Assemblies\AllStrongNames.flag")
 "$(SolutionDir)Tools\Gzip\bin\gzip.exe"  &lt; "$(SolutionDir)XSharper.Core\bin\$(ConfigurationName)\XSharper.Core.dll" &gt; "$(ProjectDir)Embedded\Assemblies\XSharper.Core.dll.gz"
 "$(SolutionDir)Tools\Gzip\bin\gzip.exe" &lt; "$(SolutionDir)3rdParty\ICSharpCode.SharpZipLib.dll"  &gt; "$(ProjectDir)Embedded\Assemblies\ICSharpCode.SharpZipLib.dll.gz"
-
 "$(SolutionDir)Tools\Gzip\bin\gzip.exe" &lt; "$(ProjectDir)\Resources\xsh.ico" &gt; "$(ProjectDir)\Embedded\Source\xsh.ico.gz"
 "$(SolutionDir)Tools\Gzip\bin\gzip.exe" &lt; "$(ProjectDir)\Embedded\Manifests\requireAdministrator.res" &gt; "$(ProjectDir)\Embedded\Manifests\requireAdministrator.res.gz"
 "$(SolutionDir)Tools\Gzip\bin\gzip.exe" &lt; "$(ProjectDir)\Embedded\Manifests\asInvoker.res" &gt; "$(ProjectDir)\Embedded\Manifests\asInvoker.res.gz"
