@@ -109,13 +109,19 @@ namespace XSharper.Core
 			if (Context.Verbose)
 			{
 				var cb=dbFactory.CreateConnectionStringBuilder();
-				cb.ConnectionString=cs;
-				if (cb.ContainsKey("Password"))
-					cb["Password"]="<removed>";
-				if (cb.ContainsKey("pwd"))
-					cb["pwd"]="<removed>";
-				csLog=cb.ConnectionString;
-	            VerboseMessage("Opening a DB connection {0} with cs='{1}'", factory, csLog);
+				// SQLCE 3.5 + .NET4.8 = no builder
+				if (cb!=null)
+				{
+					cb.ConnectionString=cs;
+					if (cb.ContainsKey("Password"))
+						cb["Password"]="<removed>";
+					if (cb.ContainsKey("pwd"))
+						cb["pwd"]="<removed>";
+					csLog=cb.ConnectionString;
+		            VerboseMessage("Opening a DB connection {0} with cs='{1}'...", factory, csLog);
+				}
+				else
+					VerboseMessage("Opening a DB connection {0}...", factory);
 			}
             var conn = dbFactory.CreateConnection();
             try {
