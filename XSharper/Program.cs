@@ -142,7 +142,15 @@ namespace XSharper
                 ((sp & SecurityProtocolType.Ssl3) != 0 ||
                  (ServicePointManager.SecurityProtocol & (SecurityProtocolType)3072)==0))
             {
-                ServicePointManager.SecurityProtocol = (SecurityProtocolType)(192 | 768 | 3072 | 12288);
+				try {
+					// Try with TLS 1.3
+	                ServicePointManager.SecurityProtocol = (SecurityProtocolType)(192 | 768 | 3072 | 12288);
+				}
+				catch (NotSupportedException)
+				{
+					// No TLS 1.3
+					ServicePointManager.SecurityProtocol = (SecurityProtocolType)(192 | 768 | 3072);
+				}
             }
                 
             ConsoleRedirector redir = null;
