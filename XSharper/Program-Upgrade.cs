@@ -151,7 +151,7 @@ namespace XSharper
                 {
                     wc.CachePolicy = new RequestCachePolicy(RequestCacheLevel.Revalidate);
 
-                    var verBytes = wc.DownloadData("http://www.xsharper.com/xsharper-version.txt");
+                    var verBytes = wc.DownloadData("https://www.xsharper.com/xsharper-version.txt");
                     var latest = new Version(Encoding.ASCII.GetString(verBytes));
                     cout.WriteLine(OutputType.Info, string.Empty);
                     cout.WriteLine(OutputType.Info, "The latest available version is " + latest);
@@ -163,8 +163,8 @@ namespace XSharper
 
                     cout.WriteLine(OutputType.Info, "Downloading the latest XSharper binary...");
                     byte[] exe = wc.DownloadData(Environment.Version.Major>=4?
-                        "http://www.xsharper.com/xsharper4.exe" :
-                        "http://www.xsharper.com/xsharper.exe");
+                        "https://www.xsharper.com/xsharper4.exe" :
+                        "https://www.xsharper.com/xsharper.exe");
                     Assembly a=Assembly.Load(exe);
 
 
@@ -172,8 +172,9 @@ namespace XSharper
                     File.WriteAllBytes(tmp, exe);
                     
 
+                    // TODO: This really need to be thrown away and replaced with WinTrust
                     // Verify signature
-                    cout.WriteLine(OutputType.Info, "Verifying digital signature...");
+                    cout.Write(OutputType.Info, "Verifying digital signature...");
                     
                     if (BitConverter.ToString(a.GetName().GetPublicKeyToken()) != BitConverter.ToString(Assembly.GetExecutingAssembly().GetName().GetPublicKeyToken()))
                     {
@@ -181,15 +182,20 @@ namespace XSharper
                         return -1;
                     }
                     cout.WriteLine(OutputType.Info, "Done.");
-
+                    
                     byte wasVerified = 0;
-                    if (!StrongNameSignatureVerificationEx(tmp, 1, ref wasVerified))
+                    // If 
+                    if (!StrongNameSignatureVerificationEx(Process.GetCurrentProcess().MainModule.FileName, 1, ref wasVerified))
+                        cout.WriteLine(OutputType.Error, "Warning: StrongNameSignatureVerificationEx failed, likely because .NET 3.5 isn't installed");
+                    else
                     {
-                        cout.Write(OutputType.Error, "Downloaded XSharper binary has invalid signature. Upgrade is aborted.");
-                        return -1;
+                        if (!StrongNameSignatureVerificationEx(tmp, 1, ref wasVerified))
+                        {
+                            cout.WriteLine(OutputType.Error, "Error: Downloaded XSharper binary has invalid signature. Upgrade is aborted.");
+                            return -1;
+                        }
                     }
 
-                    cout.WriteLine(OutputType.Info, string.Empty);
                 }
 
                 // Run it
